@@ -85,7 +85,7 @@ type Mem struct {
 }
 
 // MetricsPage represents metrics page
-func MetricsPage(fsys fs.FS) string {
+func MetricsPage(fsys fs.FS) TmplRecord {
 	// get cpu and mem profiles
 	m, _ := mem.VirtualMemory()
 	s, _ := mem.SwapMemory()
@@ -117,5 +117,5 @@ func MetricsPage(fsys fs.FS) string {
 	tmpl["Uptime"] = time.Since(Time0).Seconds()
 	tmpl["GetRequests"] = TotalGetRequests
 	tmpl["PostRequests"] = TotalPostRequests
-	return TmplPage(fsys, "metrics.tmpl", tmpl)
+	return tmpl
 }
