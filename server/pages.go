@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	utils "github.com/CHESSComputing/golib/utils"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
@@ -26,27 +25,25 @@ func ErrorPage(fsys fs.FS, msg string, err error) string {
 	log.Printf("ERROR: %v\n", err)
 	tmpl := MakeTmpl(fsys, "Error")
 	tmpl["Message"] = strings.ToTitle(msg)
-	return utils.TmplPage(fsys, "error.tmpl", tmpl)
+	return TmplPage(fsys, "error.tmpl", tmpl)
 }
 
 // HeaderPage returns header page
 func HeaderPage(fsys fs.FS) string {
 	tmpl := MakeTmpl(fsys, "Header")
-	return utils.TmplPage(fsys, "header.tmpl", tmpl)
+	return TmplPage(fsys, "header.tmpl", tmpl)
 }
 
 // FooterPage returns footer page
 func FooterPage(fsys fs.FS) string {
 	tmpl := MakeTmpl(fsys, "Footer")
-	return utils.TmplPage(fsys, "footer.tmpl", tmpl)
+	return TmplPage(fsys, "footer.tmpl", tmpl)
 }
 
 // helper function to make initial template struct
-func MakeTmpl(fsys fs.FS, title string) utils.TmplRecord {
-	tmpl := make(utils.TmplRecord)
+func MakeTmpl(fsys fs.FS, title string) TmplRecord {
+	tmpl := make(TmplRecord)
 	tmpl["Title"] = title
-	tmpl["Top"] = HeaderPage(fsys)
-	tmpl["Bottom"] = FooterPage(fsys)
 	tmpl["StartTime"] = time.Now().Unix()
 	return tmpl
 }
@@ -55,7 +52,7 @@ func MakeTmpl(fsys fs.FS, title string) utils.TmplRecord {
 func ErrorTmpl(fsys fs.FS, msg string, err error) string {
 	tmpl := MakeTmpl(fsys, "Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<div>%s</div>\n<br/><h3>ERROR</h3>%v", msg, err))
-	content := utils.TmplPage(fsys, "error.tmpl", tmpl)
+	content := TmplPage(fsys, "error.tmpl", tmpl)
 	return content
 }
 
@@ -63,14 +60,14 @@ func ErrorTmpl(fsys fs.FS, msg string, err error) string {
 func SuccessTmpl(fsys fs.FS, msg string) string {
 	tmpl := MakeTmpl(fsys, "Status")
 	tmpl["Content"] = template.HTML(fmt.Sprintf("<h3>SUCCESS</h3><div>%s</div>", msg))
-	content := utils.TmplPage(fsys, "success.tmpl", tmpl)
+	content := TmplPage(fsys, "success.tmpl", tmpl)
 	return content
 }
 
 // FAQPage provides FAQ page
 func FAQPage(fsys fs.FS) string {
 	tmpl := MakeTmpl(fsys, "FAQ")
-	return utils.TmplPage(fsys, "faq.tmpl", tmpl)
+	return TmplPage(fsys, "faq.tmpl", tmpl)
 }
 
 // Memory structure keeps track of server memory
@@ -120,5 +117,5 @@ func MetricsPage(fsys fs.FS) string {
 	tmpl["Uptime"] = time.Since(Time0).Seconds()
 	tmpl["GetRequests"] = TotalGetRequests
 	tmpl["PostRequests"] = TotalPostRequests
-	return utils.TmplPage(fsys, "metrics.tmpl", tmpl)
+	return TmplPage(fsys, "metrics.tmpl", tmpl)
 }
