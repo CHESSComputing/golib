@@ -68,7 +68,7 @@ func SuccessTmpl(fsys fs.FS, msg string) string {
 }
 
 // FAQPage provides FAQ page
-func FAQFAQPage(fsys fs.FS) string {
+func FAQPage(fsys fs.FS) string {
 	tmpl := MakeTmpl(fsys, "FAQ")
 	return utils.TmplPage(fsys, "faq.tmpl", tmpl)
 }
