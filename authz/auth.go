@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 )
 
@@ -138,6 +139,24 @@ func InspectToken(provider Provider, token string, verbose int) (TokenAttributes
 		log.Printf("token attributes %+v\n", attrs)
 	}
 	return attrs, err
+}
+
+// UserCredentials inspect http request and return user credentials from its token
+func UserCredentials(r *http.Request) (string, error) {
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	purl := "" // TODO: I need to decide how to handle multiple providers
+	verbose := 1
+	provider := Provider{}
+	err := provider.Init(purl, verbose)
+	if err != nil {
+		log.Fatalf("fail to initialize %s error %v", provider.URL, err)
+	}
+	attrs, err := InspectToken(provider, token, verbose)
+	if err != nil {
+		log.Println("ERROR: unable to get user credentials from token", token, err)
+		return "", err
+	}
+	return attrs.UserName, nil
 }
 
 /*
