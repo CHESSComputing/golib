@@ -72,6 +72,9 @@ type Frontend struct {
 
 	// cookies parts
 	UserCookieExpires int64 `mapstructure:"UserCookieExpires"` // expiration of user cookie
+
+	// other options
+	TestMode bool `mapstructure:TestMode` // test mode
 }
 
 // Encryption represents encryption configuration parameters
