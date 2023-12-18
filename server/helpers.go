@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,17 +27,18 @@ type Token struct {
 // HttpRequest manage http requests
 type HttpRequest struct {
 	Token   string
+	Scope   string
 	Expires time.Time
 	Verbose int
 }
 
 // NewHttpRequest initilizes and returns new HttpRequest object
-func NewHttpRequest(verbose int) *HttpRequest {
-	return &HttpRequest{Verbose: verbose}
+func NewHttpRequest(scope string, verbose int) *HttpRequest {
+	return &HttpRequest{Scope: scope, Verbose: verbose}
 }
 
 // GetToken obtains token from OAuth server
-func (h *HttpRequest) GetToken(scope string) {
+func (h *HttpRequest) GetToken() {
 	if h.Token == "" || h.Expires.Before(time.Now()) {
 		// make a call to Authz service to obtain access token
 		rurl := fmt.Sprintf(
@@ -43,7 +46,7 @@ func (h *HttpRequest) GetToken(scope string) {
 			srvConfig.Config.Services.AuthzURL,
 			srvConfig.Config.Authz.ClientID,
 			srvConfig.Config.Authz.ClientSecret,
-			scope)
+			h.Scope)
 		resp, err := h.Get(rurl)
 		if err != nil {
 			log.Println("ERROR", err)
@@ -133,4 +136,33 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 		log.Println("response", string(dump), err)
 	}
 	return resp, err
+}
+
+// helper function to return full path of given file name wrt to current location
+func fullPath(fname string) string {
+	if !strings.HasPrefix(fname, "/") {
+		// we got relative path (e.g. server_test.json)
+		if wdir, err := os.Getwd(); err == nil {
+			fname = filepath.Join(wdir, fname)
+		}
+	}
+	return fname
+}
+
+// SchemaFileName obtains schema file name from schema name
+func SchemaFileName(sname string) string {
+	var fname string
+	for _, f := range srvConfig.Config.CHESSMetaData.SchemaFiles {
+		if strings.Contains(f, sname) {
+			fname = f
+			break
+		}
+	}
+	return fullPath(fname)
+}
+
+// SchemaName extracts schema name from schema file name
+func SchemaName(fname string) string {
+	arr := strings.Split(fname, "/")
+	return strings.Split(arr[len(arr)-1], ".")[0]
 }
