@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -136,33 +134,4 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 		log.Println("response", string(dump), err)
 	}
 	return resp, err
-}
-
-// helper function to return full path of given file name wrt to current location
-func fullPath(fname string) string {
-	if !strings.HasPrefix(fname, "/") {
-		// we got relative path (e.g. server_test.json)
-		if wdir, err := os.Getwd(); err == nil {
-			fname = filepath.Join(wdir, fname)
-		}
-	}
-	return fname
-}
-
-// SchemaFileName obtains schema file name from schema name
-func SchemaFileName(sname string) string {
-	var fname string
-	for _, f := range srvConfig.Config.CHESSMetaData.SchemaFiles {
-		if strings.Contains(f, sname) {
-			fname = f
-			break
-		}
-	}
-	return fullPath(fname)
-}
-
-// SchemaName extracts schema name from schema file name
-func SchemaName(fname string) string {
-	arr := strings.Split(fname, "/")
-	return strings.Split(arr[len(arr)-1], ".")[0]
 }
