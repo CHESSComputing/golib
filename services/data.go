@@ -35,3 +35,12 @@ type DiscoveryResponse struct {
 	DBSResponse  `json:"dbs"`
 	MetaResponse `json:"meta"`
 }
+
+// StatusStatus represents status record
+type ServiceStatus struct {
+	HttpCode int
+	Code     int
+	Service  string
+	Status   string
+	Error    error
+}
