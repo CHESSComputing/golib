@@ -1,6 +1,7 @@
 package server
 
 const (
+	OK                    = 0
 	GenericError          = iota + 100 // generic error
 	DatabaseError                      // 101 database error
 	TransactionError                   // 102 transaction error
