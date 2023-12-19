@@ -23,10 +23,11 @@ type ServiceResponse struct {
 
 // StatusStatus represents status record
 type ServiceStatus struct {
-	HttpCode int `json:"http_code"`
-	SrvCode  int `json:"service_code"`
-	Service  string
-	Status   string
-	Error    error
-	Response ServiceResponse
+	HttpCode  int `json:"http_code"`
+	SrvCode   int `json:"service_code"`
+	Service   string
+	Status    string
+	Error     error
+	Response  ServiceResponse
+	Timestamp string
 }

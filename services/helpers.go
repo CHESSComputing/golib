@@ -42,11 +42,12 @@ func Response(srv string, httpCode, srvCode int, err error) ServiceStatus {
 		status = "ok"
 	}
 	return ServiceStatus{
-		HttpCode: httpCode,
-		Service:  srv,
-		Status:   status,
-		Error:    err,
-		SrvCode:  srvCode,
+		HttpCode:  httpCode,
+		Service:   srv,
+		Status:    status,
+		Error:     err,
+		SrvCode:   srvCode,
+		Timestamp: time.Now().String(),
 	}
 }
 

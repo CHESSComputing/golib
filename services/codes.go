@@ -30,4 +30,5 @@ const (
 	RemoveError                        // 125 remove error
 	BindError                          // 126 bind error
 	SchemaError                        // 127 schema error
+	ServiceError                       // 128 service error
 )
