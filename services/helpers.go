@@ -77,14 +77,14 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 	}
 	req.Header.Add("Accept-Encoding", "")
 	client := &http.Client{}
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
-		log.Println("request", string(dump), err)
+		log.Println("HttpRequest: GET request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("response", string(dump), err)
+		log.Println("HttpRequest: GET response", string(dump), err)
 	}
 	return resp, err
 }
@@ -101,14 +101,14 @@ func (h *HttpRequest) Post(rurl, contentType string, buffer *bytes.Buffer) (*htt
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("Accept", contentType)
 	client := &http.Client{}
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
-		log.Println("request", string(dump), err)
+		log.Println("HttpRequest: POST request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("response", string(dump), err)
+		log.Println("HttpRequest: POST response", string(dump), err)
 	}
 	return resp, err
 }
@@ -124,14 +124,14 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	client := &http.Client{}
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
-		log.Println("request", string(dump), err)
+		log.Println("HttpRequest: POST form request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 1 {
+	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("response", string(dump), err)
+		log.Println("HttpRequest: POST form response", string(dump), err)
 	}
 	return resp, err
 }
