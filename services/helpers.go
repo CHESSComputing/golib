@@ -35,6 +35,21 @@ func NewHttpRequest(scope string, verbose int) *HttpRequest {
 	return &HttpRequest{Scope: scope, Verbose: verbose}
 }
 
+// Response returns service status record
+func Response(srv string, httpCode, srvCode int, err error) ServiceStatus {
+	status := "fail"
+	if err == nil {
+		status = "ok"
+	}
+	return ServiceStatus{
+		HttpCode: httpCode,
+		Service:  srv,
+		Status:   status,
+		Error:    err,
+		SrvCode:  srvCode,
+	}
+}
+
 // GetToken obtains token from OAuth server
 func (h *HttpRequest) GetToken() {
 	if h.Token == "" || h.Expires.Before(time.Now()) {
