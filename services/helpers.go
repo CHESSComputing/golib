@@ -13,6 +13,7 @@ import (
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	utils "github.com/CHESSComputing/golib/utils"
 )
 
 // Token represents response from OAuth server call
@@ -37,9 +38,12 @@ func NewHttpRequest(scope string, verbose int) *HttpRequest {
 
 // Response returns service status record
 func Response(srv string, httpCode, srvCode int, err error) ServiceStatus {
-	status := "fail"
+	status := "error"
 	if err == nil {
 		status = "ok"
+	}
+	if status == "error" {
+		log.Printf("ERROR: http code %d srv code %d error %v\n %v", httpCode, srvCode, err, utils.Stack())
 	}
 	return ServiceStatus{
 		HttpCode:  httpCode,

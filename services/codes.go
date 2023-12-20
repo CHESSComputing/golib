@@ -31,4 +31,6 @@ const (
 	BindError                          // 126 bind error
 	SchemaError                        // 127 schema error
 	ServiceError                       // 128 service error
+	CredentialsError                   // 129 credentials error
+	TokenError                         // 130 token error
 )
