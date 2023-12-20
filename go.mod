@@ -11,7 +11,8 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/vkuznet/cryptoutils v0.0.2
 	go.mongodb.org/mongo-driver v1.13.1
-	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
+	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
+	gopkg.in/jcmturner/gokrb5.v7 v7.5.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -69,7 +70,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/jcmturner/aescts.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
-	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
+	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
