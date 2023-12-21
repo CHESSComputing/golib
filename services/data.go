@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/json"
+
 	"github.com/CHESSComputing/golib/mongo"
 )
 
@@ -12,34 +14,39 @@ type MetaRecord struct {
 
 // ServiceQuery represents service query along with its results
 type ServiceQuery struct {
-	Query string
-	Spec  any
-	SQL   string
-	Idx   int
-	Limit int
+	Query string `json:"query"`
+	Spec  any    `json:"spec"`
+	SQL   string `json:"sql"`
+	Idx   int    `json:"idx"`
+	Limit int    `json:"limit"`
 }
 
 // ServiceResults represents service results
 type ServiceResults struct {
-	NRecords int
-	Records  []mongo.Record
+	NRecords int            `json:"nrecords"`
+	Records  []mongo.Record `json:"records"`
 }
 
 // ServiceRequest represents service request structure
 type ServiceRequest struct {
-	Client string
-	User   string
-	Query  ServiceQuery
+	Client       string       `json:"client"`
+	ServiceQuery ServiceQuery `json:"service_query"`
+}
+
+// String converts ServiceRequest into string representation
+func (s *ServiceRequest) String() string {
+	data, _ := json.Marshal(s)
+	return string(data)
 }
 
 // ServiceResponse represents service response structure
 type ServiceResponse struct {
-	HttpCode  int `json:"http_code"`
-	SrvCode   int `json:"service_code"`
-	Service   string
-	Status    string
-	Error     error
-	Query     ServiceQuery
-	Results   ServiceResults
-	Timestamp string
+	HttpCode     int            `json:"http_code"`
+	SrvCode      int            `json:"service_code"`
+	Service      string         `json:"service"`
+	Status       string         `json:"status"`
+	Error        error          `json:"error"`
+	ServiceQuery ServiceQuery   `json:"service_query"`
+	Results      ServiceResults `json:"results"`
+	Timestamp    string         `json:"timestamp"`
 }
