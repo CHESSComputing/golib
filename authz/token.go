@@ -45,3 +45,22 @@ func (t *Token) Validate(clientId string) error {
 	}
 	return nil
 }
+
+// TokenClaims returns token claims
+func TokenClaims(accessToken, clientId string) *Claims {
+	var jwtKey = []byte(clientId)
+	claims := &Claims{}
+	tkn, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			log.Println("ERROR", err)
+		}
+	}
+	if !tkn.Valid {
+		err := errors.New("invalid token")
+		log.Println("ERROR", err)
+	}
+	return claims
+}
