@@ -37,7 +37,7 @@ func NewHttpRequest(scope string, verbose int) *HttpRequest {
 }
 
 // Response returns service status record
-func Response(srv string, httpCode, srvCode int, err error) ServiceStatus {
+func Response(srv string, httpCode, srvCode int, err error) ServiceResponse {
 	status := "error"
 	if err == nil {
 		status = "ok"
@@ -45,7 +45,7 @@ func Response(srv string, httpCode, srvCode int, err error) ServiceStatus {
 	if status == "error" {
 		log.Printf("ERROR: http code %d srv code %d error %v\n %v", httpCode, srvCode, err, utils.Stack())
 	}
-	return ServiceStatus{
+	return ServiceResponse{
 		HttpCode:  httpCode,
 		Service:   srv,
 		Status:    status,
