@@ -1,6 +1,7 @@
 package server
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/dchest/captcha"
@@ -25,4 +26,20 @@ func CaptchaHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		hdlr.ServeHTTP(c.Writer, c.Request)
 	}
+}
+
+// GinRoute represents git route info
+type GinRoute struct {
+	Method string `json:"method"`
+	Path   string `json:"path"`
+}
+
+// ApisHandler provides JSON output for server routes
+func ApisHandler(c *gin.Context, routes gin.RoutesInfo) {
+	var ginRoutes []GinRoute
+	for _, r := range routes {
+		route := GinRoute{Method: r.Method, Path: r.Path}
+		ginRoutes = append(ginRoutes, route)
+	}
+	c.JSON(http.StatusOK, ginRoutes)
 }
