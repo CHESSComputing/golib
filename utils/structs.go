@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strings"
 
 	constraints "golang.org/x/exp/constraints"
 )
@@ -298,4 +299,20 @@ func UpdateOrderedDict(omap, nmap map[int][]string) map[int][]string {
 		}
 	}
 	return omap
+}
+
+// UniqueFormValues returns unique list of values from http.Request.FormValue
+func UniqueFormValues(vals []string) []string {
+	vals = List2Set(vals)
+	// the url forms provide values in []string form
+	// loop below remote duplicates and separate possible item values by empty space
+	var items []string
+	for _, v := range vals {
+		sarr := strings.Split(v, " ")
+		sarr = List2Set(sarr)
+		for _, s := range sarr {
+			items = append(items, s)
+		}
+	}
+	return items
 }
