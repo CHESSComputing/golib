@@ -24,7 +24,7 @@ import (
 func ErrorPage(fsys fs.FS, msg string, err error) string {
 	log.Printf("ERROR: %v\n", err)
 	tmpl := MakeTmpl(fsys, "Error")
-	tmpl["Message"] = strings.ToTitle(msg)
+	tmpl["Content"] = strings.ToTitle(msg)
 	return TmplPage(fsys, "error.tmpl", tmpl)
 }
 
