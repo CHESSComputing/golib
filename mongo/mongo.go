@@ -47,15 +47,15 @@ const (
 // Record define Mongo record
 type Record map[string]interface{}
 
-// ToJSON provides string representation of Record
-func (r Record) ToJSON() string {
+// JsonStrings provides string representation of Record
+func (r Record) JsonString() string {
 	// create pretty JSON representation of the record
 	data, _ := json.MarshalIndent(r, "", "    ")
 	return string(data)
 }
 
 // ToString provides string representation of Record
-func (r Record) ToString() string {
+func (r Record) String() string {
 	var out []string
 	for _, k := range MapKeys(r) {
 		if k == "_id" {
