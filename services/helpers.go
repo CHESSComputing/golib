@@ -45,11 +45,15 @@ func Response(srv string, httpCode, srvCode int, err error) ServiceResponse {
 	if status == "error" {
 		log.Printf("ERROR: http code %d srv code %d error %v\n %v", httpCode, srvCode, err, utils.Stack())
 	}
+	var strError string
+	if err != nil {
+		strError = err.Error()
+	}
 	return ServiceResponse{
 		HttpCode:  httpCode,
 		Service:   srv,
 		Status:    status,
-		Error:     err,
+		Error:     strError,
 		SrvCode:   srvCode,
 		Timestamp: time.Now().String(),
 	}

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/CHESSComputing/golib/mongo"
 )
@@ -10,6 +11,12 @@ import (
 type MetaRecord struct {
 	Schema string
 	Record mongo.Record
+}
+
+// String converts ServiceResponse into string representation
+func (s *MetaRecord) JsonString() string {
+	data, _ := json.MarshalIndent(s, "", "  ")
+	return string(data)
 }
 
 // ServiceQuery represents service query along with its results
@@ -35,7 +42,7 @@ type ServiceRequest struct {
 
 // String converts ServiceRequest into string representation
 func (s *ServiceRequest) String() string {
-	data, _ := json.Marshal(s)
+	data, _ := json.MarshalIndent(s, "", "  ")
 	return string(data)
 }
 
@@ -45,8 +52,25 @@ type ServiceResponse struct {
 	SrvCode      int            `json:"service_code"`
 	Service      string         `json:"service"`
 	Status       string         `json:"status"`
-	Error        error          `json:"error"`
+	Error        string         `json:"error"`
 	ServiceQuery ServiceQuery   `json:"service_query"`
 	Results      ServiceResults `json:"results"`
 	Timestamp    string         `json:"timestamp"`
+}
+
+// String converts ServiceResponse into string representation
+func (s *ServiceResponse) String() string {
+	var out string
+	out += fmt.Sprintf("Service     : %s\n", s.Service)
+	out += fmt.Sprintf("Code        : %d\n", s.SrvCode)
+	out += fmt.Sprintf("Status      : %s\n", s.Status)
+	out += fmt.Sprintf("Error       : %s\n", s.Error)
+	out += fmt.Sprintf("Timestamp   : %s\n", s.Timestamp)
+	return out
+}
+
+// String converts ServiceResponse into string representation
+func (s *ServiceResponse) JsonString() string {
+	data, _ := json.MarshalIndent(s, "", "  ")
+	return string(data)
 }
