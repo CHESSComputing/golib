@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -23,5 +24,15 @@ func TestUtilsSet(t *testing.T) {
 	res := List2Set(vals)
 	if len(res) != 3 {
 		t.Error("Fail TestUtilsSet")
+	}
+}
+
+// TestUniqueFormValues
+func TestUniqueFormValues(t *testing.T) {
+	vals := []string{"a", "b", "a", "b", "a b", "b a"}
+	res := UniqueFormValues(vals)
+	if len(res) != 2 {
+		fmt.Printf("input %+v results %+v", vals, res)
+		t.Error("Fail TestUniqueFormValues")
 	}
 }

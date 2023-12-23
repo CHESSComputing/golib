@@ -314,5 +314,5 @@ func UniqueFormValues(vals []string) []string {
 			items = append(items, s)
 		}
 	}
-	return items
+	return OrderedSet[string](items)
 }
