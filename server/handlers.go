@@ -35,9 +35,9 @@ type GinRoute struct {
 }
 
 // ApisHandler provides JSON output for server routes
-func ApisHandler(c *gin.Context, routes gin.RoutesInfo) {
+func ApisHandler(c *gin.Context) {
 	var ginRoutes []GinRoute
-	for _, r := range routes {
+	for _, r := range _routes {
 		route := GinRoute{Method: r.Method, Path: r.Path}
 		ginRoutes = append(ginRoutes, route)
 	}

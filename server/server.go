@@ -30,7 +30,7 @@ func Router(routes []Route, fsys fs.FS, static, base string, verbose int) *gin.E
 	r := gin.Default()
 
 	// GET routes
-	r.GET("/apis", APIsHandler)
+	r.GET("/apis", ApisHandler)
 
 	// loop over routes and creates necessary router structure
 	var authGroup bool
