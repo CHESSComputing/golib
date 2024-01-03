@@ -27,7 +27,7 @@ func TokenMiddleware(clientId string, verbose int) gin.HandlerFunc {
 		tokenStr := RequestToken(c.Request)
 		token := &Token{AccessToken: tokenStr}
 		if err := token.Validate(clientId); err != nil {
-			msg := fmt.Sprintf("invalid token %s, error %v", tokenStr, err)
+			msg := fmt.Sprintf("TokenMiddleware: invalid token %s, error %v", tokenStr, err)
 			log.Println("WARNING:", msg)
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized, gin.H{"status": "fail", "error": err.Error()})
