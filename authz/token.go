@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"log"
+	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
 )
@@ -14,8 +15,9 @@ type Response struct {
 }
 
 type Claims struct {
-	Login string `json:"login"`
+	//     Login string `json:"login"`
 	jwt.RegisteredClaims
+	CustomClaims CustomClaims `json:"custom_claims"`
 }
 
 // Token represents access token structure
@@ -63,4 +65,61 @@ func TokenClaims(accessToken, clientId string) *Claims {
 		log.Println("ERROR", err)
 	}
 	return claims
+}
+
+// CustomClaims defines application specific claims
+type CustomClaims struct {
+	User        string `json:"user"`
+	Scope       string `json:"scope"`
+	Kind        string `json:"kind"`
+	Application string `json:"application"`
+}
+
+// JWTData defines jwt data
+type JWTData struct {
+	jwt.RegisteredClaims
+	//     jwt.StandardClaims
+	CustomClaims CustomClaims `json:"custom_claims"`
+}
+
+// JWTAccessToken generates JWT access token with custom claims
+func JWTAccessToken(secretKey string, expiresAt int64, customClaims CustomClaims) (string, error) {
+	// prepare claims for token
+	//     claims := JWTData{
+	//         StandardClaims: jwt.StandardClaims{
+	//             ExpiresAt: time.Now().Add(time.Duration(expiresAt)).Unix(),
+	//         },
+	claims := Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer: "CHESS Authz server",
+			// the `sub` (Subject) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+			//             Subject: "subject"
+
+			// the `aud` (Audience) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
+			//             Audience ClaimStrings `json:"aud,omitempty"`
+
+			// the `exp` (Expiration Time) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresAt) * time.Second)),
+
+			// the `nbf` (Not Before) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
+			//             NotBefore *NumericDate `json:"nbf,omitempty"`
+
+			// the `iat` (Issued At) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
+			IssuedAt: jwt.NewNumericDate(time.Now()),
+
+			// the `jti` (JWT ID) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
+			//             ID string `json:"jti,omitempty"`
+		},
+		CustomClaims: customClaims,
+	}
+
+	// generate a string using claims and HS256 algorithm
+	tokenString := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// sign the generated key using secretKey
+	// SignedString declared as interface{} but should accept []byte
+	// see https://github.com/dgrijalva/jwt-go/issues/65
+	token, err := tokenString.SignedString([]byte(secretKey))
+
+	return token, err
 }

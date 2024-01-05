@@ -47,7 +47,7 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 		tokenStr := RequestToken(c.Request)
 		token := &Token{AccessToken: tokenStr}
 		if err := token.Validate(clientId); err != nil {
-			msg := fmt.Sprintf("TokenMiddleware: invalid token %s, error %v", tokenStr, err)
+			msg := fmt.Sprintf("ScopeTokenMiddleware: invalid token %s, error %v", tokenStr, err)
 			log.Println("ERROR:", msg)
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized, gin.H{"status": "fail", "error": err.Error()})
@@ -57,11 +57,13 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 			log.Println("INFO: write token is validated")
 		}
 		// check if token has proper write scope
-		if token.Scope != scope {
+		claims := TokenClaims(tokenStr, srvConfig.Config.Authz.ClientID)
+		if claims.CustomClaims.Scope != scope {
 			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope '%s' does not match with scope '%s'", token.Scope, scope)
 			log.Println("ERROR:", msg)
+			log.Println("token", tokenStr)
 			c.AbortWithStatusJSON(
-				http.StatusUnauthorized, gin.H{"status": "fail", "error": errors.New(msg)})
+				http.StatusUnauthorized, gin.H{"status": "fail", "error": msg})
 			return
 		}
 		c.Next()

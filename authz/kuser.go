@@ -17,6 +17,7 @@ import (
 // Kerberos defines kerberos structure we use
 type Kerberos struct {
 	User   string
+	Scope  string
 	Ticket []byte
 }
 
