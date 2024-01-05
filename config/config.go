@@ -66,7 +66,7 @@ type WebServer struct {
 func (w *WebServer) String() string {
 	data, err := json.MarshalIndent(w, "", "  ")
 	if err != nil {
-		return fmt.Sprintf("%+v", w)
+		return fmt.Sprintf("ERROR: unable to parse web server configuration, error %v", err)
 	}
 	return string(data)
 }
