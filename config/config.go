@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,9 +11,7 @@ import (
 	"runtime"
 	"time"
 
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/spf13/viper"
-	logging "github.com/vkuznet/http-logging"
 )
 
 // OAuthRecord defines OAuth provider's credentials
@@ -31,7 +30,9 @@ type Kerberos struct {
 
 // GinOptions controls go-gin specific options
 type GinOptions struct {
-	ColorConsole bool `mapstructure:"ColorConsole"` // control  gin.DisableConsoleColor()
+	DisableConsoleColor bool   `mapstructure:"DisableConsoleColor"` // gin console color mode
+	Production          bool   `mapstructure:"Production"`          // production mode
+	Mode                string `mapstructure:"Mode"`                // gin mode: test, debug, release
 }
 
 // WebServer represents common web server configuration
@@ -59,6 +60,15 @@ type WebServer struct {
 	ServerCrt   string   `mapstructure:"ServerCert"`  // server certificate
 	ServerKey   string   `mapstructure:"ServerKey"`   // server certificate
 	DomainNames []string `mapstructure:"DomainNames"` // LetsEncrypt domain names
+}
+
+// String provides string representation of WebServer structure
+func (w *WebServer) String() string {
+	data, err := json.MarshalIndent(w, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("%+v", w)
+	}
+	return string(data)
 }
 
 // Frontend stores frontend configuration parameters
@@ -252,63 +262,4 @@ func Init() {
 		log.Fatal("ERROR", err)
 	}
 	Config = &oConfig
-
-	// log settings for web servers
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	if Config.Frontend.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.Discovery.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.MetaData.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.DataManagement.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.DataBookkeeping.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.Authz.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.CHESSMetaData.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	} else if Config.OreCastMetaData.WebServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
-	}
-
-	// setup log rotate if necessary for all web servers
-	rotateLogs(Config.Frontend.WebServer.LogFile)
-	rotateLogs(Config.Discovery.WebServer.LogFile)
-	rotateLogs(Config.MetaData.WebServer.LogFile)
-	rotateLogs(Config.DataManagement.WebServer.LogFile)
-	rotateLogs(Config.DataBookkeeping.WebServer.LogFile)
-	rotateLogs(Config.Authz.WebServer.LogFile)
-	rotateLogs(Config.CHESSMetaData.WebServer.LogFile)
-	rotateLogs(Config.OreCastMetaData.WebServer.LogFile)
-}
-
-// helper function to rotate logs
-func rotateLogs(srvLogName string) {
-	if srvLogName != "" {
-		log.SetOutput(new(logging.LogWriter))
-		rl, err := rotatelogs.New(logName(srvLogName))
-		if err == nil {
-			rotlogs := logging.RotateLogWriter{RotateLogs: rl}
-			log.SetOutput(rotlogs)
-		}
-	}
-}
-
-// logName returns proper log name based on Config LogFile and either
-// hostname or pod name (used in k8s environment).
-func logName(srvLogName string) string {
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Println("unable to get hostname", err)
-	}
-	if os.Getenv("MY_POD_NAME") != "" {
-		hostname = os.Getenv("MY_POD_NAME")
-	}
-	logName := srvLogName + "_%Y%m%d"
-	if hostname != "" {
-		logName = fmt.Sprintf("%s_%s", srvLogName, hostname) + "_%Y%m%d"
-	}
-	return logName
 }
