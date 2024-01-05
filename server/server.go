@@ -21,8 +21,9 @@ var _routes gin.RoutesInfo
 type Route struct {
 	Method     string
 	Path       string
-	Handler    gin.HandlerFunc
+	Scope      string
 	Authorized bool
+	Handler    gin.HandlerFunc
 }
 
 // InitServer provides server initialization
@@ -75,11 +76,18 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 
 	// loop over routes and creates necessary router structure
 	var authGroup bool
+	var readRoutes, writeRoutes []Route
 	for _, route := range routes {
 		if route.Authorized {
 			authGroup = true
+			if route.Scope == "write" {
+				writeRoutes = append(writeRoutes, route)
+			} else {
+				readRoutes = append(readRoutes, route)
+			}
 			continue
 		}
+		log.Printf("method %s path %s auth %v scope '%s'", route.Method, route.Path, route.Authorized, route.Scope)
 		if route.Method == "GET" {
 			r.GET(route.Path, route.Handler)
 		} else if route.Method == "POST" {
@@ -93,21 +101,41 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 
 	// all authorized routes
 	if authGroup {
-		authorized := r.Group("/")
-		authorized.Use(authz.TokenMiddleware(srvConfig.Config.Authz.ClientID, verbose))
+		authorizedRead := r.Group("/")
+		authorizedRead.Use(authz.TokenMiddleware(srvConfig.Config.Authz.ClientID, verbose))
 		{
-			for _, route := range routes {
+			for _, route := range readRoutes {
 				if !route.Authorized {
 					continue
 				}
+				log.Printf("method %s path %s auth %v scope '%s'", route.Method, route.Path, route.Authorized, route.Scope)
 				if route.Method == "GET" {
-					authorized.GET(route.Path, route.Handler)
+					authorizedRead.GET(route.Path, route.Handler)
 				} else if route.Method == "POST" {
-					authorized.POST(route.Path, route.Handler)
+					authorizedRead.POST(route.Path, route.Handler)
 				} else if route.Method == "PUT" {
-					authorized.PUT(route.Path, route.Handler)
+					authorizedRead.PUT(route.Path, route.Handler)
 				} else if route.Method == "DELETE" {
-					authorized.DELETE(route.Path, route.Handler)
+					authorizedRead.DELETE(route.Path, route.Handler)
+				}
+			}
+		}
+		authorizedWrite := r.Group("/")
+		authorizedWrite.Use(authz.ScopeTokenMiddleware("write", srvConfig.Config.Authz.ClientID, verbose))
+		{
+			for _, route := range writeRoutes {
+				if !route.Authorized {
+					continue
+				}
+				log.Printf("method %s path %s auth %v scope '%s'", route.Method, route.Path, route.Authorized, route.Scope)
+				if route.Method == "GET" {
+					authorizedWrite.GET(route.Path, route.Handler)
+				} else if route.Method == "POST" {
+					authorizedWrite.POST(route.Path, route.Handler)
+				} else if route.Method == "PUT" {
+					authorizedWrite.PUT(route.Path, route.Handler)
+				} else if route.Method == "DELETE" {
+					authorizedWrite.DELETE(route.Path, route.Handler)
 				}
 			}
 		}
