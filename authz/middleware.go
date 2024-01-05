@@ -58,7 +58,7 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 		}
 		// check if token has proper write scope
 		if token.Scope != scope {
-			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope %s does not match with scope %s", token.Scope, scope)
+			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope '%s' does not match with scope '%s'", token.Scope, scope)
 			log.Println("ERROR:", msg)
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized, gin.H{"status": "fail", "error": errors.New(msg)})
