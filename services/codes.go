@@ -33,4 +33,5 @@ const (
 	ServiceError                       // 128 service error
 	CredentialsError                   // 129 credentials error
 	TokenError                         // 130 token error
+	ScopeError                         // 131 token scope error
 )
