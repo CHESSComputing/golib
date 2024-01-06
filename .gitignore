@@ -21,3 +21,5 @@
 go.work
 
 coverage.txt
+dist
+TODO.md
