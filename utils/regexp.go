@@ -2,7 +2,7 @@ package utils
 
 // regexp module
 //
-// Copyright (c) 2019 - Valentin Kuznetsov <vkuznet@gmail.com>
+// Copyright (c) 2019-2024 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 
 import (

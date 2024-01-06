@@ -17,9 +17,9 @@ func TestMongoInsert(t *testing.T) {
 	Remove(dbname, collname, bson.M{})
 
 	// insert one record
-	var records []Record
+	var records []map[string]any
 	dataset := "/a/b/c"
-	rec := Record{"dataset": dataset}
+	rec := map[string]any{"dataset": dataset}
 	records = append(records, rec)
 	Insert(dbname, collname, records)
 
@@ -33,8 +33,8 @@ func TestMongoInsert(t *testing.T) {
 	}
 
 	// modify our record
-	rec = Record{"dataset": dataset, "test": 1}
-	records = []Record{}
+	rec = map[string]any{"dataset": dataset, "test": 1}
+	records = []map[string]any{}
 	records = append(records, rec)
 	err := Upsert(dbname, collname, "dataset", records)
 	if err != nil {

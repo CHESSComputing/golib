@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
-	mongo "github.com/CHESSComputing/golib/mongo"
 )
 
 // TestSchemaYaml tests schema yaml file
@@ -45,7 +43,7 @@ func TestSchemaYaml(t *testing.T) {
 	}
 	fmt.Println("Schema optional keys", okeys)
 
-	rec := make(mongo.Record)
+	rec := make(map[string]any)
 	rec["Pi"] = "person"
 	rec["BeamEnergy"] = 123
 	err = s.Validate(rec)
@@ -87,7 +85,7 @@ func TestSchemaJson(t *testing.T) {
 	}
 	fmt.Println("Schema optional keys", okeys)
 
-	rec := make(mongo.Record)
+	rec := make(map[string]any)
 	rec["Pi"] = "person"
 	rec["BeamEnergy"] = 123
 	err = s.Validate(rec)

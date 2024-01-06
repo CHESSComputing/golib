@@ -2,7 +2,7 @@ package mongo
 
 // mongo module
 //
-// Copyright (c) 2019 - Valentin Kuznetsov <vkuznet AT gmail dot com>
+// Copyright (c) 2019-2024 - Valentin Kuznetsov <vkuznet AT gmail dot com>
 //
 // References :
 // using mgo driver:
@@ -14,7 +14,6 @@ package mongo
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"html"
 	"log"
@@ -44,6 +43,7 @@ const (
 	ValidationErrorName = "Server validation error"
 )
 
+/*
 // Record define Mongo record
 type Record map[string]interface{}
 
@@ -87,10 +87,11 @@ func (r Record) String() string {
 	}
 	return strings.Join(out, "\n")
 }
+*/
 
 // ErrorRecord provides error record
-func ErrorRecord(msg, etype string, ecode int) Record {
-	erec := make(Record)
+func ErrorRecord(msg, etype string, ecode int) map[string]any {
+	erec := make(map[string]any)
 	erec["error"] = html.EscapeString(msg)
 	erec["type"] = html.EscapeString(etype)
 	erec["code"] = ecode
@@ -98,8 +99,8 @@ func ErrorRecord(msg, etype string, ecode int) Record {
 }
 
 // GetValue function to get int value from record for given key
-func GetValue(rec Record, key string) interface{} {
-	var val Record
+func GetValue(rec map[string]any, key string) interface{} {
+	var val map[string]any
 	keys := strings.Split(key, ".")
 	if len(keys) > 1 {
 		value, ok := rec[keys[0]]
@@ -108,9 +109,9 @@ func GetValue(rec Record, key string) interface{} {
 			return ""
 		}
 		switch v := value.(type) {
-		case Record:
+		case map[string]any:
 			val = v
-		case []Record:
+		case []map[string]any:
 			if len(v) > 0 {
 				val = v[0]
 			} else {
@@ -119,7 +120,7 @@ func GetValue(rec Record, key string) interface{} {
 		case []interface{}:
 			vvv := v[0]
 			if vvv != nil {
-				val = vvv.(Record)
+				val = vvv.(map[string]any)
 			} else {
 				return ""
 			}
@@ -147,21 +148,21 @@ func singleEntry(data interface{}) interface{} {
 }
 
 // GetStringValue function to get string value from record for given key
-func GetStringValue(rec Record, key string) (string, error) {
+func GetStringValue(rec map[string]any, key string) (string, error) {
 	value := GetValue(rec, key)
 	val := fmt.Sprintf("%v", value)
 	return val, nil
 }
 
 // GetSingleStringValue function to get string value from record for given key
-func GetSingleStringValue(rec Record, key string) (string, error) {
+func GetSingleStringValue(rec map[string]any, key string) (string, error) {
 	value := singleEntry(GetValue(rec, key))
 	val := fmt.Sprintf("%v", value)
 	return val, nil
 }
 
 // GetIntValue function to get int value from record for given key
-func GetIntValue(rec Record, key string) (int, error) {
+func GetIntValue(rec map[string]any, key string) (int, error) {
 	value := GetValue(rec, key)
 	val, ok := value.(int)
 	if ok {
@@ -171,7 +172,7 @@ func GetIntValue(rec Record, key string) (int, error) {
 }
 
 // GetInt64Value function to get int value from record for given key
-func GetInt64Value(rec Record, key string) (int64, error) {
+func GetInt64Value(rec map[string]any, key string) (int64, error) {
 	value := GetValue(rec, key)
 	out, ok := value.(int64)
 	if ok {
@@ -214,7 +215,7 @@ func (m *Connection) Connect() *mongo.Client {
 var Mongo Connection
 
 // Insert records into MongoDB
-func Insert(dbname, collname string, records []Record) {
+func Insert(dbname, collname string, records []map[string]any) {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -226,7 +227,7 @@ func Insert(dbname, collname string, records []Record) {
 }
 
 // Upsert records into MongoDB
-func Upsert(dbname, collname, attr string, records []Record) error {
+func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -247,8 +248,8 @@ func Upsert(dbname, collname, attr string, records []Record) error {
 }
 
 // Get records from MongoDB
-func Get(dbname, collname string, spec bson.M, idx, limit int) []Record {
-	out := []Record{}
+func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any {
+	out := []map[string]any{}
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -275,8 +276,8 @@ func Get(dbname, collname string, spec bson.M, idx, limit int) []Record {
 }
 
 // GetSorted records from MongoDB sorted by given key
-func GetSorted(dbname, collname string, spec bson.M, skeys []string) []Record {
-	out := []Record{}
+func GetSorted(dbname, collname string, spec bson.M, skeys []string) []map[string]any {
+	out := []map[string]any{}
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)

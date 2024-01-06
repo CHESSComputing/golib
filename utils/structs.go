@@ -2,7 +2,7 @@ package utils
 
 // utils module
 //
-// Copyright (c) 2019 - Valentin Kuznetsov <vkuznet AT gmail dot com>
+// Copyright (c) 2024 - Valentin Kuznetsov <vkuznet AT gmail dot com>
 //
 
 import (

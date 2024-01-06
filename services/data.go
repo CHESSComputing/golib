@@ -3,14 +3,15 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/CHESSComputing/golib/mongo"
 )
+
+// Record define Mongo record
+// type Record map[string]interface{}
 
 // MetaRecord represents meta-data record used for injection
 type MetaRecord struct {
 	Schema string
-	Record mongo.Record
+	Record map[string]any
 }
 
 // String converts ServiceResponse into string representation
@@ -30,8 +31,8 @@ type ServiceQuery struct {
 
 // ServiceResults represents service results
 type ServiceResults struct {
-	NRecords int            `json:"nrecords"`
-	Records  []mongo.Record `json:"records"`
+	NRecords int              `json:"nrecords"`
+	Records  []map[string]any `json:"records"`
 }
 
 // ServiceRequest represents service request structure
@@ -69,8 +70,14 @@ func (s *ServiceResponse) String() string {
 	return out
 }
 
-// String converts ServiceResponse into string representation
+// JsonString converts ServiceResponse into string representation
 func (s *ServiceResponse) JsonString() string {
 	data, _ := json.MarshalIndent(s, "", "  ")
 	return string(data)
+}
+
+// JsonBytes converts ServiceResponse into bytes representation
+func (s *ServiceResponse) JsonBytes() []byte {
+	data, _ := json.MarshalIndent(s, "", "  ")
+	return data
 }

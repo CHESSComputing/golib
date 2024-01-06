@@ -1,9 +1,20 @@
 package auth
 
+// auth module
+//
+// Copyright (c) 2024 - Valentin Kuznetsov <vkuznet AT gmail dot com>
+//
+// Useful materials:
+// https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+// https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims
+// https://fusionauth.io/articles/tokens/jwt-components-explained
+
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
@@ -23,6 +34,27 @@ type CustomClaims struct {
 	Kind        string   `json:"kind"`
 	Roles       []string `json:"roles"`
 	Application string   `json:"application"`
+}
+
+// String provides string representations of Custom claims
+func (c *CustomClaims) String() string {
+	var out []string
+	if c.User != "" {
+		out = append(out, fmt.Sprintf("User:%s", c.User))
+	}
+	if c.Scope != "" {
+		out = append(out, fmt.Sprintf("Scope:%s", c.Scope))
+	}
+	if c.Kind != "" {
+		out = append(out, fmt.Sprintf("Kind:%s", c.Kind))
+	}
+	if len(c.Roles) != 0 {
+		out = append(out, fmt.Sprintf("Roles:%sv", c.Roles))
+	}
+	if c.Application != "" {
+		out = append(out, fmt.Sprintf("Application:%s", c.Application))
+	}
+	return strings.Join(out, ", ")
 }
 
 // Claims defines our JWT claims

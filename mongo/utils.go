@@ -7,7 +7,7 @@ import (
 )
 
 // MapKeys helper function to return keys from a map
-func MapKeys(rec Record) []string {
+func MapKeys(rec map[string]any) []string {
 	keys := make([]string, 0, len(rec))
 	for k := range rec {
 		keys = append(keys, k)
