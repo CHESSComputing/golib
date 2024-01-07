@@ -8,5 +8,5 @@ for d in $(go list ./... | grep -v vendor); do
     echo "cd $bdir"
     cd $bdir
     go build
-    cd -
+    cd - 2>&1 1>& /dev/null
 done
