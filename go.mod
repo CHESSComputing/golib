@@ -1,6 +1,6 @@
 module github.com/CHESSComputing/golib
 
-go 1.21.6
+go 1.21
 
 require (
 	github.com/dchest/captcha v1.0.0
