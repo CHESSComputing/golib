@@ -19,6 +19,7 @@ type OAuthRecord struct {
 	Provider     string `mapstructure:"Provider"`     // name of the provider
 	ClientID     string `mapstructure:"ClientId"`     // client id
 	ClientSecret string `mapstructure:"ClientSecret"` // client secret
+	RedirectURL  string `mapstructure:"RedirectUrl"`  // redirect url
 }
 
 // Kerberos defines kerberos optinos
