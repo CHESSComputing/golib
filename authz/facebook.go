@@ -1,5 +1,8 @@
 package auth
 
+// facebook oauth
+// based on https://github.com/davidleitw/gin-oauth2-example/tree/master
+
 import (
 	"context"
 	"encoding/json"
