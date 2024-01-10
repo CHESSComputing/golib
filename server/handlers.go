@@ -43,3 +43,11 @@ func ApisHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, ginRoutes)
 }
+
+// GinHandlerFunc converts given http.Handler to gin.HandlerFunc
+func GinHandlerFunc(hdlr http.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		hdlr(c.Writer, c.Request)
+		c.Next()
+	}
+}
