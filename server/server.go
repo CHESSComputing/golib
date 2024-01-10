@@ -10,6 +10,8 @@ import (
 
 	authz "github.com/CHESSComputing/golib/authz"
 	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	logging "github.com/vkuznet/http-logging"
@@ -70,6 +72,10 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	// setup gin router
 	//     r := gin.Default()
 	r := gin.New()
+
+	// initialize cookie store (used by authz module and oauth)
+	store := cookie.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("server_session", store))
 
 	// GET routes
 	r.GET("/apis", ApisHandler)
