@@ -59,7 +59,7 @@ func getGoogleOauthURL() (*oauth2.Config, string) {
 func GoogleOauthLogin(ctx *gin.Context, verbose int) {
 	config, state := getGoogleOauthURL()
 	if verbose > 0 {
-		log.Printf("GithubOauthLogin config %+v", config)
+		log.Printf("GoogleOauthLogin config %+v", config)
 	}
 	redirectURL := config.AuthCodeURL(state)
 	session := sessions.Default(ctx)
@@ -74,10 +74,14 @@ func GoogleOauthLogin(ctx *gin.Context, verbose int) {
 
 // GoogleCallBack provides gin handler for google callback to given endpoint
 func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
+	if verbose > 0 {
+		log.Printf("GoogleCallBack %s", endpoint)
+	}
 	session := sessions.Default(ctx)
 	state := session.Get("state")
 	if state != ctx.Query("state") {
 		msg := "GoogleCallBack state error"
+		log.Printf("GoogleCallBack state error %s", msg)
 		_ = ctx.AbortWithError(http.StatusUnauthorized, errors.New(msg))
 		return
 	}
@@ -85,6 +89,7 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	code := ctx.Query("code")
 	token, err := google_config.Exchange(ctx, code)
 	if err != nil {
+		log.Printf("GoogleCallBack exchange %s", err)
 		_ = ctx.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
@@ -92,6 +97,7 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	client := google_config.Client(context.TODO(), token)
 	userInfo, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if err != nil {
+		log.Printf("GoogleCallBack userinfo %s", err)
 		_ = ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -99,6 +105,7 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 
 	info, err := ioutil.ReadAll(userInfo.Body)
 	if err != nil {
+		log.Printf("GoogleCallBack read body %s", err)
 		_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -106,6 +113,7 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	var user googleUser
 	err = json.Unmarshal(info, &user)
 	if err != nil {
+		log.Printf("GoogleCallBack unmarshal%s", err)
 		_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

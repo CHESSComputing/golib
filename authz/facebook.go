@@ -52,7 +52,7 @@ func getFacebookOauthURL() (*oauth2.Config, string) {
 func FacebookOauthLogin(ctx *gin.Context, verbose int) {
 	config, state := getFacebookOauthURL()
 	if verbose > 0 {
-		log.Printf("GithubOauthLogin config %+v", config)
+		log.Printf("FacebookOauthLogin config %+v", config)
 	}
 	redirectURL := config.AuthCodeURL(state)
 	session := sessions.Default(ctx)
