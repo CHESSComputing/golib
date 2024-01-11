@@ -186,6 +186,15 @@ type SrvConfig struct {
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 }
 
+func (c *SrvConfig) String() string {
+	data, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		log.Println("ERROR:", err)
+		return fmt.Sprintf("%s", string(data))
+	}
+	return string(data)
+}
+
 func ParseConfig(cfile string) (SrvConfig, error) {
 	var config SrvConfig
 	if cfile != "" {
