@@ -55,7 +55,15 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 			log.Println("INFO: write token is validated")
 		}
 		// check if token has proper write scope
-		claims := TokenClaims(tokenStr, srvConfig.Config.Authz.ClientID)
+		claims, err := TokenClaims(tokenStr, srvConfig.Config.Authz.ClientID)
+		if err != nil {
+			msg := fmt.Sprintf("ScopeTokenMiddleware: token '%s' error '%s'", tokenStr, err)
+			log.Println("ERROR:", msg)
+			log.Println("token", tokenStr)
+			rec := services.Response("authz", http.StatusUnauthorized, services.ScopeError, errors.New(msg))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, rec)
+			return
+		}
 		if claims.CustomClaims.Scope != scope {
 			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope '%s' does not match with scope '%s'", token.Scope, scope)
 			log.Println("ERROR:", msg)

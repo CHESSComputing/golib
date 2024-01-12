@@ -93,7 +93,7 @@ func (t *Token) Validate(clientId string) error {
 }
 
 // TokenClaims returns token claims
-func TokenClaims(accessToken, clientId string) *Claims {
+func TokenClaims(accessToken, clientId string) (*Claims, error) {
 	var jwtKey = []byte(clientId)
 	claims := &Claims{}
 	tkn, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
@@ -101,14 +101,16 @@ func TokenClaims(accessToken, clientId string) *Claims {
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			log.Println("ERROR", err)
+			return claims, err
+			//             log.Println("ERROR", err)
 		}
 	}
 	if !tkn.Valid {
 		err := errors.New("invalid token")
-		log.Println("ERROR", err)
+		return claims, err
+		//         log.Println("ERROR", err)
 	}
-	return claims
+	return claims, nil
 }
 
 // JWTAccessToken generates JWT access token with custom claims

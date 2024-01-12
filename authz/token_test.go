@@ -18,8 +18,11 @@ func TestToken(t *testing.T) {
 	if err := token.Validate(secretKey); err != nil {
 		t.Errorf("invalid token")
 	}
-	claims := TokenClaims(tokenStr, secretKey)
+	claims, err := TokenClaims(tokenStr, secretKey)
 	if claims.CustomClaims.Scope != scope {
 		t.Errorf("invalid scope")
+	}
+	if err != nil {
+		t.Errorf(err.Error())
 	}
 }
