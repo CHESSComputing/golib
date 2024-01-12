@@ -14,10 +14,11 @@ require (
 	github.com/rs/xid v1.5.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/viper v1.18.2
+	github.com/ulule/limiter/v3 v3.11.2
 	github.com/vkuznet/cryptoutils v0.0.2
 	github.com/vkuznet/http-logging v0.0.0-20210729230351-fc50acd79868
 	go.mongodb.org/mongo-driver v1.13.1
-	golang.org/x/exp v0.0.0-20240110193028-0dcbfd608b1e
+	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3
 	golang.org/x/oauth2 v0.16.0
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0
 	gopkg.in/yaml.v2 v2.4.0
