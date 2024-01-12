@@ -213,10 +213,10 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 			fmt.Println("ERROR", err)
 			os.Exit(1)
 		}
-		// Search config in home directory with name ".srv" (without extension).
+		// Search config in home directory with name ".foxden" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".srv")
+		viper.SetConfigName(".foxden")
 		// setup cfile to $HOME/.foxden.yaml
 		cfile = filepath.Join(home, ".foxden.yaml")
 	}
