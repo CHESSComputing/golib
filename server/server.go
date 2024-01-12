@@ -39,6 +39,13 @@ func InitServer(webServer srvConfig.WebServer) {
 		log.SetFlags(log.LstdFlags | log.Llongfile)
 	}
 
+	// setup limiter
+	if webServer.LimiterPeriod == "" {
+		// default 100 request per second
+		webServer.LimiterPeriod = "100-S"
+	}
+	initLimiter(webServer.LimiterPeriod, webServer.LimiterHeader)
+
 	// setup gin options
 	if webServer.GinOptions.DisableConsoleColor {
 		// Disable Console Color
@@ -162,6 +169,11 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 		}
 	}
 	_routes = r.Routes()
+
+	// use common middlewares
+	r.Use(CounterMiddleware())
+	r.Use(LimiterMiddleware)
+	r.Use(HeaderMiddleware(webServer))
 
 	return r
 }
