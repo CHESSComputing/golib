@@ -50,7 +50,13 @@ type WebServer struct {
 	LogLongFile bool   `mapstructure:"LogLongFile"` // server log structure
 
 	// middleware server parts
-	LimiterPeriod string `mapstructure:"Rate"` // limiter rate value
+	LimiterPeriod   string   `mapstructure:"Rate"`      // limiter rate value
+	LimiterHeader   string   `json:"limiter_header"`    // limiter header to use
+	LimiterSkipList []string `json:"limiter_skip_list"` // limiter skip list
+
+	// etag options
+	Etag         string `json:"etag"`          // etag value to use for ETag generation
+	CacheControl string `json:"cache_control"` // Cache-Control value, e.g. max-age=300
 
 	// proxy parts
 	XForwardedHost      string `mapstructure:"X-Forwarded-Host"`       // X-Forwarded-Host field of HTTP request
