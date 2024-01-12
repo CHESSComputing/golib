@@ -211,8 +211,8 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".srv")
-		// setup cfile to $HOME/.srv.yaml
-		cfile = filepath.Join(home, ".srv.yaml")
+		// setup cfile to $HOME/.foxden.yaml
+		cfile = filepath.Join(home, ".foxden.yaml")
 	}
 
 	viper.AutomaticEnv()
