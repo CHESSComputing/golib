@@ -28,6 +28,20 @@ type Route struct {
 	Handler    gin.HandlerFunc
 }
 
+// StartServer starts HTTP(s) server
+func StartServer(r *gin.Engine, webServer srvConfig.WebServer) {
+	sport := fmt.Sprintf(":%d", webServer.Port)
+	if webServer.ServerKey != "" {
+		certFile := webServer.ServerCrt
+		ckeyFile := webServer.ServerKey
+		log.Println("Start HTTPs server on port", sport)
+		r.RunTLS(sport, certFile, ckeyFile)
+	} else {
+		log.Println("Start HTTP server on port", sport)
+		r.Run(sport)
+	}
+}
+
 // InitServer provides server initialization
 func InitServer(webServer srvConfig.WebServer) {
 	// setup log options
