@@ -53,6 +53,7 @@ type WebServer struct {
 	LimiterPeriod   string   `mapstructure:"Rate"`      // limiter rate value
 	LimiterHeader   string   `json:"limiter_header"`    // limiter header to use
 	LimiterSkipList []string `json:"limiter_skip_list"` // limiter skip list
+	MetricsPrefix   string   `json:"metrics_prefix"`    // metrics prefix used for prometheus
 
 	// etag options
 	Etag         string `json:"etag"`          // etag value to use for ETag generation

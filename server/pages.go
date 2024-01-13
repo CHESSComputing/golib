@@ -70,6 +70,7 @@ func FAQPage(fsys fs.FS) string {
 	return TmplPage(fsys, "faq.tmpl", tmpl)
 }
 
+/*
 // Memory structure keeps track of server memory
 type Memory struct {
 	Total       uint64  `json:"total"`
@@ -83,6 +84,7 @@ type Mem struct {
 	Virtual Memory
 	Swap    Memory
 }
+*/
 
 // MetricsPage represents metrics page
 func MetricsPage(fsys fs.FS) TmplRecord {

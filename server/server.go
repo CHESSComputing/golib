@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	authz "github.com/CHESSComputing/golib/authz"
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -18,6 +19,10 @@ import (
 )
 
 var _routes gin.RoutesInfo
+var metricsPrefix string
+
+// StartTime represents initial time when we started the server
+var StartTime time.Time
 
 // Route represents routes structure
 type Route struct {
@@ -44,6 +49,7 @@ func StartServer(r *gin.Engine, webServer srvConfig.WebServer) {
 
 // InitServer provides server initialization
 func InitServer(webServer srvConfig.WebServer) {
+	StartTime = time.Now()
 	// setup log options
 	rotateLogs(webServer.LogFile)
 
@@ -59,6 +65,7 @@ func InitServer(webServer srvConfig.WebServer) {
 		webServer.LimiterPeriod = "100-S"
 	}
 	initLimiter(webServer.LimiterPeriod, webServer.LimiterHeader)
+	metricsPrefix = webServer.MetricsPrefix
 
 	// setup gin options
 	if webServer.GinOptions.DisableConsoleColor {
@@ -91,7 +98,6 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	InitServer(webServer)
 
 	// setup gin router
-	//     r := gin.Default()
 	r := gin.New()
 
 	// initialize cookie store (used by authz module and oauth)
@@ -100,6 +106,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 
 	// GET routes
 	r.GET("/apis", ApisHandler)
+	r.GET("/metrics", MetricsHandler)
 
 	// loop over routes and creates necessary router structure
 	var authGroup bool

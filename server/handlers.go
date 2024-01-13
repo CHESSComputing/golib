@@ -44,6 +44,11 @@ func ApisHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, ginRoutes)
 }
 
+// MetricsHandler provides metrics JSON for monitoring purposes (Prometheus)
+func MetricsHandler(c *gin.Context) {
+	c.Writer.Write([]byte(promMetrics(metricsPrefix)))
+}
+
 // GinHandlerFunc converts given http.Handler to gin.HandlerFunc
 func GinHandlerFunc(hdlr http.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
