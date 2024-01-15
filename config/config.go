@@ -222,6 +222,12 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		cfile = filepath.Join(home, ".foxden.yaml")
 	}
 
+	// check if we do have configuration file
+	if _, err := os.Stat(cfile); os.IsNotExist(err) {
+		fmt.Printf("Config file '%s' does not exist, error %v", cfile, err)
+		os.Exit(1)
+	}
+
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
