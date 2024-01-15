@@ -1,4 +1,9 @@
 # FOXDEN/CHESS Common GoLang library
+
+![Build Status](https://github.com/CHESSComputing/golib/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/CHESSComputing/golib)](https://goreportcard.com/report/github.com/CHESSComputing/golib)
+[![GoDoc](https://godoc.org/github.com/CHESSComputing/golib?status.svg)](https://godoc.org/github.com/CHESSComputing/golib)
+
 Repository of FOXDEN/CHESS common GoLang library. It covers the following modules:
 - [authz](authz/README.md) is a authentication and authorization library
 - [beamlines](beamlines/README.md) is a common beamlines library
