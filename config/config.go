@@ -212,7 +212,7 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			fmt.Println("ERROR", err)
-			os.Exit(1)
+			return config, err
 		}
 		// Search config in home directory with name ".foxden" (without extension).
 		viper.AddConfigPath(home)
@@ -224,8 +224,8 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 
 	// check if we do have configuration file
 	if _, err := os.Stat(cfile); os.IsNotExist(err) {
-		fmt.Printf("Config file '%s' does not exist, error %v", cfile, err)
-		os.Exit(1)
+		fmt.Printf("Config file '%s' does not exist, error %v\n", cfile, err)
+		return config, err
 	}
 
 	viper.AutomaticEnv()
