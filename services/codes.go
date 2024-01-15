@@ -1,4 +1,4 @@
-package server
+package services
 
 const (
 	OK                    = 0
