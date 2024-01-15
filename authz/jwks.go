@@ -144,36 +144,6 @@ func (p *Provider) Init(purl string, verbose int) error {
 	return nil
 }
 
-/*
-// helper function to check given access token and return its claims
-// it is based on github.com/dgrijalva/jwt-go and github.com/MicahParks/keyfunc go packages
-func tokenClaims(provider Provider, accessToken string) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	// Create the JWKS from the resource at the given URL.
-	jwks, err := keyfunc.New(provider.JWKSBody)
-	if err != nil {
-		return out, err
-	}
-	// Parse the JWT.
-	token, err := jwtgo.Parse(accessToken, jwks.KeyFunc)
-	if err != nil {
-		return out, err
-	}
-
-	// Check if the token is valid.
-	if !token.Valid {
-		msg := "The token is not valid"
-		return out, errors.New(msg)
-	}
-	if claims, ok := token.Claims.(jwtgo.MapClaims); ok {
-		for k, v := range claims {
-			out[k] = v
-		}
-	}
-	return out, nil
-}
-*/
-
 // helper function to get RSA public key from given exponent and modulus
 // it is based on implementation of
 // https://github.com/MicahParks/keyfunc/blob/master/rsa.go
