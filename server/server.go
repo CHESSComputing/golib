@@ -223,7 +223,7 @@ func logName(srvLogName string) string {
 	}
 	logName := srvLogName + "_%Y%m%d"
 	if hostname != "" {
-		logName = fmt.Sprintf("%s_%s", srvLogName, hostname) + "_%Y%m%d"
+		logName = fmt.Sprintf("%s_%s", hostname, srvLogName) + "_%Y%m%d"
 	}
 	return logName
 }
