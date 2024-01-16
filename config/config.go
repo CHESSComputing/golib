@@ -280,6 +280,10 @@ func Init() {
 		fmt.Println("server version:", Info())
 		return
 	}
+	if config == "" {
+		// check env variable
+		config = os.Getenv("CHESS_FOXDEN_CONFIG")
+	}
 	oConfig, err := ParseConfig(config)
 	if err != nil {
 		log.Fatal("ERROR", err)
