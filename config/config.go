@@ -141,8 +141,17 @@ type OreCastMetaData struct {
 	MongoDB   `mapstructure:"MongoDB"`
 }
 
+// S3 defines s3 structure
+type S3 struct {
+	AccessKey    string `mapstructure:"AccessKey"`
+	AccessSecret string `mapstructure:"AccessSecret"`
+	Endpoint     string `mapstructure:"Endpoint"`
+	UseSSL       bool   `mapstructure:"UseSSL"`
+}
+
 // DataManagement represents data-management service configuration
 type DataManagement struct {
+	S3
 	WebServer `mapstructure:"WebServer"`
 }
 
