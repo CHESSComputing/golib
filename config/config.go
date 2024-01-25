@@ -141,6 +141,13 @@ type OreCastMetaData struct {
 	MongoDB   `mapstructure:"MongoDB"`
 }
 
+// SpecScans represents SpecScansService configuration
+type SpecScans struct {
+	WebServer `mapstructure:"WebServer"`
+	MongoDB   `mapstructure:"MongoDB"`
+	DBFile    string `mapstructure:"DBFile"`
+}
+
 // S3 defines s3 structure
 type S3 struct {
 	AccessKey    string `mapstructure:"AccessKey"`
@@ -200,6 +207,7 @@ type SrvConfig struct {
 	Encryption      `mapstructure:"Encryption"`
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
+	SpecScans       `mapstructure:"SpecScansService"`
 }
 
 func (c *SrvConfig) String() string {
