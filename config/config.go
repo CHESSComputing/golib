@@ -22,6 +22,27 @@ type OAuthRecord struct {
 	RedirectURL  string `mapstructure:"RedirectUrl"`  // redirect url
 }
 
+// MLAPI defines ML API structure
+type MLApi struct {
+	Name       string         `json:"name"`
+	HTTPMethod string         `json:"http_method"`
+	Params     map[string]any `json:"params"`
+}
+
+// MLBackend represents ML backend engine
+type MLBackend struct {
+	Name string  `json:"name"` // ML backend name, e.g. TFaaS
+	Type string  `json:"type"` // ML backebd type, e.g. TensorFlow
+	URI  string  `json:"uri"`  // ML backend URI, e.g. http://localhost:port
+	Apis []MLApi // ML APIs
+}
+
+// ML defines ML configuration options
+type ML struct {
+	MLBackends []MLBackend `json:"backends"` // ML backends
+	StorageDir string      `json:"storageDir"`
+}
+
 // Kerberos defines kerberos optinos
 type Kerberos struct {
 	Krb5Conf string `mapstructure:Krb5Conf`
@@ -109,6 +130,14 @@ type MongoDB struct {
 	DBName string `mapstructure:"DBName"` // database name
 	DBColl string `mapstructure:"DBColl"` // database collection
 	DBUri  string `mapstructure:"DBUri"`  // database URI
+}
+
+// MLHub represents ML service configuration
+type MLHub struct {
+	WebServer  `mapstructure:"WebServer"`
+	MongoDB    `mapstructure:"MongoDB"`
+	Encryption `mapstructure:"Encryption"`
+	ML         `mapstructure:"ML"`
 }
 
 // Discovery represents discovery service configuration
@@ -199,6 +228,7 @@ type SrvConfig struct {
 	Frontend        `mapstructure:"Frontend"`
 	Discovery       `mapstructure:"Discovery"`
 	MetaData        `mapstructure:"MetaData"`
+	MLHub           `mapstructure:"MLHub"`
 	DataManagement  `mapstructure:"DataManagement"`
 	DataBookkeeping `mapstructure:"DataBookkeeping"`
 	Authz           `mapstructure:"Authz"`
