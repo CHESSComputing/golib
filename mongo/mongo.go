@@ -214,6 +214,18 @@ func (m *Connection) Connect() *mongo.Client {
 // Mongo holds MongoDB connection
 var Mongo Connection
 
+// InsertAny records into MongoDB
+func InsertAny(dbname, collname string, records []any) {
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	for _, rec := range records {
+		if _, err := c.InsertOne(ctx, &rec); err != nil {
+			log.Printf("Fail to insert record %v, error %v\n", rec, err)
+		}
+	}
+}
+
 // Insert records into MongoDB
 func Insert(dbname, collname string, records []map[string]any) {
 	client := Mongo.Connect()
@@ -224,6 +236,19 @@ func Insert(dbname, collname string, records []map[string]any) {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
 		}
 	}
+}
+
+// UpsertRecord insert record with given spec to MongoDB
+func UpsertRecord(dbname, collname string, spec bson.M, rec bson.M) error {
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	opts := options.Update().SetUpsert(true)
+	if _, err := c.UpdateOne(ctx, spec, rec, opts); err != nil {
+		log.Printf("Fail to insert record %v, error %v\n", rec, err)
+		return err
+	}
+	return nil
 }
 
 // Upsert records into MongoDB
