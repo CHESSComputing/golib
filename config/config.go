@@ -221,6 +221,7 @@ type Services struct {
 	DataManagementURL  string `mapstructure:"DataManagementUrl"`
 	DataBookkeepingURL string `mapstructure:"DataBookkeepingUrl"`
 	AuthzURL           string `mapstructure:"AuthzUrl"`
+	SpecScansURL       string `mapstructure:"SpecScansUrl"`
 }
 
 // SrvConfig represents configuration structure
