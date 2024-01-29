@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -156,4 +157,11 @@ func JWTAccessToken(secretKey string, expiresAt int64, customClaims CustomClaims
 	token, err := tokenString.SignedString([]byte(secretKey))
 
 	return token, err
+}
+
+// Helper function to extract bearer token from http request
+func BearerToken(r *http.Request) string {
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "bearer ")
+	token = strings.TrimPrefix(token, "Bearer ")
+	return token
 }
