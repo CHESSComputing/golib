@@ -24,9 +24,10 @@ type OAuthRecord struct {
 
 // MLAPI defines ML API structure
 type MLApi struct {
-	Name       string         `json:"name"`
-	HTTPMethod string         `json:"http_method"`
-	Params     map[string]any `json:"params"`
+	Name     string `json:"name"`
+	Method   string `json:"method"`
+	Endpoint string `json:"endpoint"`
+	Accept   string `json:"accept"`
 }
 
 // MLBackend represents ML backend engine
