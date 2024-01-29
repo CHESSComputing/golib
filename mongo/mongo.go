@@ -214,7 +214,7 @@ func (m *Connection) Connect() *mongo.Client {
 // Mongo holds MongoDB connection
 var Mongo Connection
 
-// InsertAny records into MongoDB
+// InsertAny insert records into MongoDB
 func InsertAny(dbname, collname string, records []any) {
 	client := Mongo.Connect()
 	ctx := context.TODO()
@@ -224,6 +224,23 @@ func InsertAny(dbname, collname string, records []any) {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
 		}
 	}
+}
+
+// UpsertAny upsert records into MongoDB
+func UpsertAny(dbname, collname string, records []any) error {
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	for _, rec := range records {
+		spec := bson.M{}
+		update := bson.D{{"$set", rec}}
+		opts := options.Update().SetUpsert(true)
+		if _, err := c.UpdateOne(ctx, spec, update, opts); err != nil {
+			log.Printf("Fail to insert record %v, error %v\n", rec, err)
+			return err
+		}
+	}
+	return nil
 }
 
 // Insert records into MongoDB
