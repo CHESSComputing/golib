@@ -49,14 +49,14 @@ func (s *ServiceRequest) String() string {
 
 // ServiceResponse represents service response structure
 type ServiceResponse struct {
-	HttpCode     int            `json:"http_code"`
-	SrvCode      int            `json:"service_code"`
-	Service      string         `json:"service"`
-	Status       string         `json:"status"`
-	Error        string         `json:"error"`
-	ServiceQuery ServiceQuery   `json:"service_query"`
-	Results      ServiceResults `json:"results"`
-	Timestamp    string         `json:"timestamp"`
+	HttpCode     int             `json:"http_code"`
+	SrvCode      int             `json:"service_code"`
+	Service      string          `json:"service"`
+	Status       string          `json:"status"`
+	Error        string          `json:"error"`
+	ServiceQuery *ServiceQuery   `json:"service_query,omitempty"`
+	Results      *ServiceResults `json:"results,omitempty"`
+	Timestamp    string          `json:"timestamp"`
 }
 
 // String converts ServiceResponse into string representation
