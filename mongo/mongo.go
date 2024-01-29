@@ -377,12 +377,15 @@ func Count(dbname, collname string, spec bson.M) int {
 }
 
 // Remove records from MongoDB
-func Remove(dbname, collname string, spec bson.M) {
+func Remove(dbname, collname string, spec bson.M) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
-	_, err := c.DeleteMany(ctx, spec)
+	results, err := c.DeleteMany(ctx, spec)
 	if err != nil {
 		log.Printf("Unable to remove records, spec %v, error %v\n", spec, err)
+	} else {
+		log.Printf("mongo remove results %+v", results)
 	}
+	return err
 }
