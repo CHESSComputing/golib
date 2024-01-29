@@ -34,4 +34,6 @@ const (
 	CredentialsError                   // 129 credentials error
 	TokenError                         // 130 token error
 	ScopeError                         // 131 token scope error
+	NotFoundError                      // 132 not found error
+	AuthError                          // 133 auth error
 )
