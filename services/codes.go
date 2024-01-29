@@ -36,4 +36,6 @@ const (
 	ScopeError                         // 131 token scope error
 	NotFoundError                      // 132 not found error
 	AuthError                          // 133 auth error
+	MetaError                          // 134 meta error
+	StorageError                       // 135 storage error
 )
