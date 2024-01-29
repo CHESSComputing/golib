@@ -39,8 +39,8 @@ type MLBackend struct {
 
 // ML defines ML configuration options
 type ML struct {
-	MLBackends []MLBackend `json:"backends"` // ML backends
-	StorageDir string      `json:"storageDir"`
+	MLBackends []MLBackend `json:"MLBackends"` // ML backends
+	StorageDir string      `json:"StorageDir"`
 }
 
 // Kerberos defines kerberos optinos
@@ -218,6 +218,7 @@ type Services struct {
 	FrontendURL        string `mapstructure:"FrontendUrl"`
 	DiscoveryURL       string `mapstructure:"DiscoveryUrl"`
 	MetaDataURL        string `mapstructure:"MetaDataUrl"`
+	MLHubURL           string `mapstructure:"MLHubUrl"`
 	DataManagementURL  string `mapstructure:"DataManagementUrl"`
 	DataBookkeepingURL string `mapstructure:"DataBookkeepingUrl"`
 	AuthzURL           string `mapstructure:"AuthzUrl"`
