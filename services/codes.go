@@ -38,4 +38,10 @@ const (
 	AuthError                          // 133 auth error
 	MetaError                          // 134 meta error
 	StorageError                       // 135 storage error
+	PredictError                       // 136 predict (inference) error
+	FormDataError                      // 137 form data error
+	UploadError                        // 138 upload error
+	MarkdownError                      // 139 markdown error
+	ZenodoError                        // 140 zenodo error
+	FileError                          // 141 file error
 )
