@@ -14,6 +14,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Zenodo credentials
+type Zenodo struct {
+	URL         string `mapstructure:"Url"`         // zenodo url
+	AccessToken string `mapstructure:"AccessToken"` // access token
+}
+
 // OAuthRecord defines OAuth provider's credentials
 type OAuthRecord struct {
 	Provider     string `mapstructure:"Provider"`     // name of the provider
@@ -171,6 +177,12 @@ type OreCastMetaData struct {
 	MongoDB   `mapstructure:"MongoDB"`
 }
 
+// Publication represents Publication service configuration
+type Publication struct {
+	WebServer `mapstructure:"WebServer"`
+	Zenodo
+}
+
 // SpecScans represents SpecScansService configuration
 type SpecScans struct {
 	WebServer `mapstructure:"WebServer"`
@@ -224,6 +236,7 @@ type Services struct {
 	DataBookkeepingURL string `mapstructure:"DataBookkeepingUrl"`
 	AuthzURL           string `mapstructure:"AuthzUrl"`
 	SpecScansURL       string `mapstructure:"SpecScansUrl"`
+	PublicationURL     string `mapstructure:"PublicationUrl"`
 }
 
 // SrvConfig represents configuration structure
@@ -241,6 +254,7 @@ type SrvConfig struct {
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
+	Publication     `mapstructure:"PublicationService"`
 }
 
 func (c *SrvConfig) String() string {
