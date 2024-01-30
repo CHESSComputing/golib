@@ -159,3 +159,27 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 	}
 	return resp, err
 }
+
+// Delete performs HTTP DELETE request
+func (h *HttpRequest) Delete(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", rurl, buffer)
+	if err != nil {
+		return nil, err
+	}
+	if h.Token != "" {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
+	}
+	req.Header.Add("Content-Type", contentType)
+	req.Header.Add("Accept", contentType)
+	client := &http.Client{}
+	if h.Verbose > 2 {
+		dump, err := httputil.DumpRequestOut(req, true)
+		log.Println("HttpRequest: DELETE request", string(dump), err)
+	}
+	resp, err := client.Do(req)
+	if h.Verbose > 2 {
+		dump, err := httputil.DumpResponse(resp, true)
+		log.Println("HttpRequest: DELETE response", string(dump), err)
+	}
+	return resp, err
+}
