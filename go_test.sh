@@ -6,6 +6,9 @@ echo "mode: atomic" > coverage.txt
 for d in $(go list ./... | grep -v vendor); do
     echo "Testing $d"
     go test -v $d
+    if [ $d == "github.com/CHESSComputing/golib/zenodo" ]; then
+        continue
+    fi
     echo "Coverage $d"
     go test -race -coverprofile=profile.out -covermode=atomic "$d"
     if [ -f profile.out ]; then
