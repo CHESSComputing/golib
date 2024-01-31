@@ -99,7 +99,8 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 	if h.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
 	}
-	req.Header.Add("Accept-Encoding", "")
+	req.Header.Add("Accept", "application/json")
+	//     req.Header.Add("Accept-Encoding", "")
 	client := &http.Client{}
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
@@ -115,7 +116,22 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 
 // Post performs HTTP POST request
 func (h *HttpRequest) Post(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
-	req, err := http.NewRequest("POST", rurl, buffer)
+	return h.Request("POST", rurl, contentType, buffer)
+}
+
+// Put performs HTTP PUT request
+func (h *HttpRequest) Put(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
+	return h.Request("PUT", rurl, contentType, buffer)
+}
+
+// Delete performs HTTP PUT request
+func (h *HttpRequest) Delete(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
+	return h.Request("DELETE", rurl, contentType, buffer)
+}
+
+// Request performs HTTP request for given method
+func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
+	req, err := http.NewRequest(method, rurl, buffer)
 	if err != nil {
 		return nil, err
 	}
@@ -127,12 +143,12 @@ func (h *HttpRequest) Post(rurl, contentType string, buffer *bytes.Buffer) (*htt
 	client := &http.Client{}
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
-		log.Println("HttpRequest: POST request", string(dump), err)
+		log.Printf("HttpRequest: %s request %s, error %v", method, string(dump), err)
 	}
 	resp, err := client.Do(req)
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("HttpRequest: POST response", string(dump), err)
+		log.Println("HttpRequest: method response %s, error %v", method, string(dump), err)
 	}
 	return resp, err
 }
@@ -156,30 +172,6 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("HttpRequest: POST form response", string(dump), err)
-	}
-	return resp, err
-}
-
-// Delete performs HTTP DELETE request
-func (h *HttpRequest) Delete(rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
-	req, err := http.NewRequest("DELETE", rurl, buffer)
-	if err != nil {
-		return nil, err
-	}
-	if h.Token != "" {
-		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
-	}
-	req.Header.Add("Content-Type", contentType)
-	req.Header.Add("Accept", contentType)
-	client := &http.Client{}
-	if h.Verbose > 2 {
-		dump, err := httputil.DumpRequestOut(req, true)
-		log.Println("HttpRequest: DELETE request", string(dump), err)
-	}
-	resp, err := client.Do(req)
-	if h.Verbose > 2 {
-		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("HttpRequest: DELETE response", string(dump), err)
 	}
 	return resp, err
 }
