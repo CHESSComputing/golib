@@ -148,7 +148,7 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 	resp, err := client.Do(req)
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
-		log.Println("HttpRequest: method response %s, error %v", method, string(dump), err)
+		log.Printf("HttpRequest: method %s response %s, error %v", method, string(dump), err)
 	}
 	return resp, err
 }
