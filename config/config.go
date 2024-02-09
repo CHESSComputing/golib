@@ -289,8 +289,19 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 
 	// check if we do have configuration file
 	if _, err := os.Stat(cfile); os.IsNotExist(err) {
-		fmt.Printf("Config file '%s' does not exist, error %v\n", cfile, err)
-		return config, err
+		if _, err := os.Stat(os.Getenv("FOXDEN_CONFIG")); os.IsNotExist(err) {
+			// default on CHESS lab Linux nodes
+			fname := "/nfs/chess/user/chess_chapaas/.foxden.yaml"
+			if _, err := os.Stat(fname); os.IsNotExist(err) {
+				// default on CHESS lab Windows nodes
+				fname := `\\chesssamba.classe.cornell.edu\user\chess_chapaas\.foxden.yaml`
+				if _, err := os.Stat(fname); os.IsNotExist(err) {
+					msg := "FOXDEN configuration file is not found"
+					fmt.Println(msg)
+					return config, errors.New(msg)
+				}
+			}
+		}
 	}
 
 	viper.AutomaticEnv()
