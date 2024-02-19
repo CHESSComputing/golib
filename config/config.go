@@ -269,33 +269,32 @@ func (c *SrvConfig) String() string {
 
 func ParseConfig(cfile string) (SrvConfig, error) {
 	var config SrvConfig
-	if cfile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfile)
-	} else {
+	if cfile == "" {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		if err != nil {
 			fmt.Println("ERROR", err)
 			return config, err
 		}
-		// Search config in home directory with name ".foxden" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".foxden")
 		// setup cfile to $HOME/.foxden.yaml
 		cfile = filepath.Join(home, ".foxden.yaml")
 	}
 
 	// check if we do have configuration file
-	if _, err := os.Stat(cfile); os.IsNotExist(err) {
-		if _, err := os.Stat(os.Getenv("FOXDEN_CONFIG")); os.IsNotExist(err) {
-			// default on CHESS lab Linux nodes
-			fname := "/nfs/chess/user/chess_chapaas/.foxden.yaml"
-			if _, err := os.Stat(fname); os.IsNotExist(err) {
-				// default on CHESS lab Windows nodes
-				fname := `\\chesssamba.classe.cornell.edu\user\chess_chapaas\.foxden.yaml`
-				if _, err := os.Stat(fname); os.IsNotExist(err) {
+	if _, err := os.Stat(cfile); err == nil {
+		viper.SetConfigFile(cfile)
+	} else {
+		if _, err := os.Stat(os.Getenv("FOXDEN_CONFIG")); err == nil {
+			viper.SetConfigFile(os.Getenv("FOXDEN_CONFIG"))
+		} else {
+			cfile = "/nfs/chess/user/chess_chapaas/.foxden.yaml"
+			if _, err := os.Stat(cfile); err == nil {
+				viper.SetConfigFile(cfile)
+			} else {
+				cfile = `\\chesssamba.classe.cornell.edu\user\chess_chapaas\.foxden.yaml`
+				if _, err := os.Stat(cfile); err == nil {
+					viper.SetConfigFile(cfile)
+				} else {
 					msg := "FOXDEN configuration file is not found"
 					fmt.Println(msg)
 					return config, errors.New(msg)
