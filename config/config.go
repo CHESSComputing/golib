@@ -20,6 +20,13 @@ type Zenodo struct {
 	AccessToken string `mapstructure:"AccessToken"` // access token
 }
 
+// DID structure
+type DID struct {
+	Attributes string `mapstructure:attributes` // did attributes, comma separated, default beamline,btr,cycle,sample
+	Separator  string `mapstructure:separator`  // did separator, default "/"
+	Divider    string `mapstructure:divider`    // did key-value divider, default ":"
+}
+
 // OAuthRecord defines OAuth provider's credentials
 type OAuthRecord struct {
 	Provider     string `mapstructure:"Provider"`     // name of the provider
@@ -162,6 +169,7 @@ type MetaData struct {
 
 // CHESSMetaData represents CHESS MetaData configuration
 type CHESSMetaData struct {
+	DID                 `mapstructure:"DID"`
 	WebServer           `mapstructure:"WebServer"`
 	MongoDB             `mapstructure:"MongoDB"`
 	TestMode            bool                `mapstructure:TestMode`      // test mode
