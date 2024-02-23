@@ -25,11 +25,8 @@ func DIDKeys(attrs string) []string {
 func CreateDID(rec map[string]any, attrs, sep, div string) string {
 	didKeys := DIDKeys(attrs)
 	var did string
-	for _, k := range didKeys {
-		v, ok := rec[k]
-		if !ok {
-			continue
-		}
+	mrec := make(map[string]string)
+	for k, v := range rec {
 		key := strings.ToLower(k)
 		var val string
 		switch vvv := v.(type) {
@@ -57,6 +54,11 @@ func CreateDID(rec map[string]any, attrs, sep, div string) string {
 			val = strings.ToLower(fmt.Sprintf("%v", vvv))
 		}
 		if InList(key, didKeys) {
+			mrec[key] = val
+		}
+	}
+	for _, key := range didKeys {
+		if val, ok := mrec[key]; ok {
 			did = fmt.Sprintf("%s%s%s%s%v", did, sep, key, div, val)
 		}
 	}
