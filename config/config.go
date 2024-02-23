@@ -24,7 +24,7 @@ type Zenodo struct {
 type DID struct {
 	Attributes string `mapstructure:attributes` // did attributes, comma separated, default beamline,btr,cycle,sample
 	Separator  string `mapstructure:separator`  // did separator, default "/"
-	Divider    string `mapstructure:divider`    // did key-value divider, default ":"
+	Divider    string `mapstructure:divider`    // did key-value divider, default "="
 }
 
 // OAuthRecord defines OAuth provider's credentials
