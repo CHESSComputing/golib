@@ -18,11 +18,11 @@ func TestCreateDID(t *testing.T) {
 	rec["foo"] = 1
 	rec["bla"] = "value"
 	rec["arr"] = []int{1, 2, 3}
-	attrs := "bla,foo"
+	attrs := "bla,foo,arr"
 	sep := "/"
 	div := ":"
 	did := CreateDID(rec, attrs, sep, div)
-	expect := "/bla:value/foo:1"
+	expect := "/arr:1,2,3/bla:value/foo:1"
 	if did != expect {
 		t.Errorf("Fail TestCreateDID did=%s, expect=%s\n", did, expect)
 	}

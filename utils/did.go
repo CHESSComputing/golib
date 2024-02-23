@@ -35,6 +35,18 @@ func CreateDID(rec map[string]any, attrs, sep, div string) string {
 		switch vvv := v.(type) {
 		case []string:
 			val = strings.ToLower(fmt.Sprintf("%v", strings.Join(vvv, ",")))
+		case []int:
+			var arr []string
+			for _, i := range vvv {
+				arr = append(arr, fmt.Sprintf("%d", i))
+			}
+			val = strings.ToLower(fmt.Sprintf("%s", strings.Join(arr, ",")))
+		case []int64:
+			var arr []string
+			for _, i := range vvv {
+				arr = append(arr, fmt.Sprintf("%d", i))
+			}
+			val = strings.ToLower(fmt.Sprintf("%s", strings.Join(arr, ",")))
 		case []any:
 			var arr []string
 			for _, i := range vvv {
