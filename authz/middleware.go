@@ -64,8 +64,9 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, rec)
 			return
 		}
-		if claims.CustomClaims.Scope != scope {
-			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope '%s' does not match with scope '%s'", token.Scope, scope)
+		tscope := claims.CustomClaims.Scope
+		if !strings.Contains(tscope, scope) {
+			msg := fmt.Sprintf("ScopeTokenMiddleware: token scope '%s' does not match with scope '%s'", tscope, scope)
 			log.Println("ERROR:", msg)
 			log.Println("token", tokenStr)
 			rec := services.Response("authz", http.StatusUnauthorized, services.ScopeError, errors.New(msg))
