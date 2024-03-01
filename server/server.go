@@ -136,7 +136,8 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	// all authorized routes
 	if authGroup {
 		authorizedRead := r.Group("/")
-		authorizedRead.Use(authz.TokenMiddleware(srvConfig.Config.Authz.ClientID, verbose))
+		//         authorizedRead.Use(authz.TokenMiddleware(srvConfig.Config.Authz.ClientID, verbose))
+		authorizedRead.Use(authz.ScopeTokenMiddleware("read", srvConfig.Config.Authz.ClientID, verbose))
 		{
 			for _, route := range readRoutes {
 				if !route.Authorized {
