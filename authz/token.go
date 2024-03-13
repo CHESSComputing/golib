@@ -106,10 +106,13 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 			//             log.Println("ERROR", err)
 		}
 	}
+	if tkn == nil {
+		err := errors.New("invalid or empty token")
+		return claims, err
+	}
 	if !tkn.Valid {
 		err := errors.New("invalid token")
 		return claims, err
-		//         log.Println("ERROR", err)
 	}
 	return claims, nil
 }
