@@ -209,3 +209,20 @@ func FullPath(fname string) string {
 	}
 	return fname
 }
+
+// Domain return domain string
+func Domain() string {
+	domain := "localhost"
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Println("ERROR: unable to get hostname, error:", err)
+	}
+	if !strings.Contains(hostname, ".") {
+		hostname = "localhost"
+	} else {
+		arr := strings.Split(hostname, ".")
+		domain = strings.Join(arr[len(arr)-2:], ".")
+	}
+	log.Println("Domain", domain)
+	return domain
+}

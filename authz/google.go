@@ -12,6 +12,7 @@ import (
 	"net/http"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	utils "github.com/CHESSComputing/golib/utils"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -123,6 +124,6 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	}
 	// set necessary cookie for our web server
 	ctx.Set("user", user.Name)
-	ctx.SetCookie("user", user.Name, 7200, "/", domain(), false, true)
+	ctx.SetCookie("user", user.Name, 7200, "/", utils.Domain(), false, true)
 	ctx.Redirect(http.StatusSeeOther, endpoint)
 }

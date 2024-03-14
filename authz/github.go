@@ -10,10 +10,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	utils "github.com/CHESSComputing/golib/utils"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -139,22 +138,6 @@ func GithubCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	//     cookie := http.Cookie{Name: "user", Value: user.Login, Expires: expiration}
 	//     http.SetCookie(ctx.Writer, &cookie)
 	ctx.Set("user", user.Login)
-	ctx.SetCookie("user", user.Login, 7200, "/", domain(), false, true)
+	ctx.SetCookie("user", user.Login, 7200, "/", utils.Domain(), false, true)
 	ctx.Redirect(http.StatusSeeOther, endpoint)
-}
-
-// helper function to get host domain
-func domain() string {
-	domain := "localhost"
-	hostname, err := os.Hostname()
-	if err != nil {
-		log.Println("ERROR: unable to get hostname, error:", err)
-	}
-	if !strings.Contains(hostname, ".") {
-		hostname = "localhost"
-	} else {
-		arr := strings.Split(hostname, ".")
-		domain = strings.Join(arr[len(arr)-2:], ".")
-	}
-	return domain
 }
