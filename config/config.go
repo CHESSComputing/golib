@@ -217,6 +217,7 @@ type DataBookkeeping struct {
 	WebServer `mapstructure:"WebServer"`
 
 	DBFile             string `mapstructure:"DBFile"`             // dbs db file with secrets
+	LexiconFile        string `mapstructure:"LexiconFile"`        // dbs lexicon file
 	MaxDBConnections   int    `mapstructure:"MaxDbConnections"`   // maximum number of DB connections
 	MaxIdleConnections int    `mapstructure:"MaxIdleConnections"` // maximum number of idle connections
 }
