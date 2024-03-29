@@ -163,8 +163,9 @@ type Discovery struct {
 
 // MetaData represents metadata service configuration
 type MetaData struct {
-	WebServer `mapstructure:"WebServer"`
-	MongoDB   `mapstructure:"MongoDB"`
+	WebServer   `mapstructure:"WebServer"`
+	MongoDB     `mapstructure:"MongoDB"`
+	LexiconFile string `mapstructure:"LexiconFile"` // lexicon file
 }
 
 // CHESSMetaData represents CHESS MetaData configuration
@@ -172,6 +173,7 @@ type CHESSMetaData struct {
 	DID                 `mapstructure:"DID"`
 	WebServer           `mapstructure:"WebServer"`
 	MongoDB             `mapstructure:"MongoDB"`
+	LexiconFile         string              `mapstructure:"LexiconFile"` // lexicon file
 	TestMode            bool                `mapstructure:TestMode`      // test mode
 	SchemaFiles         []string            `json:"SchemaFiles"`         // schema files
 	SchemaRenewInterval int                 `json:"SchemaRenewInterval"` // schema renew interval
