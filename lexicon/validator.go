@@ -20,23 +20,18 @@ var Verbose int
 
 // string parameters
 var strParameters = []string{
+	"did",
+	"BTR",
+	"cycle",
+	"sample",
 	"dataset",
-	"block_name",
-	"parent_dataset",
-	"release_version",
-	"pset_hash",
-	"app_name",
-	"output_module_label",
-	"global_tag",
-	"processing_version",
-	"acquisition_era_name",
-	"physics_group_name",
+	"parent",
+	"release",
+	"application",
+	"tag",
+	"processing",
 	"file",
-	"primary_ds_name",
-	"primary_ds_type",
-	"processed_ds_name",
-	"data_tier_name",
-	"dataset_access_type",
+	"tier",
 	"create_by",
 	"user",
 	"modify_by",
@@ -51,7 +46,6 @@ var intParameters = []string{
 	"min_ldate",
 	"max_ldate",
 	"dataset_id",
-	"prep_id",
 }
 
 // mix type parameters
@@ -225,25 +219,21 @@ func strType(key string, val interface{}) error {
 		return Error(InvalidParamErr, PatternErrorCode, msg, "lexicon.validator.strType")
 	}
 	mapKeys := make(map[string]string)
+	mapKeys["did"] = "did"
 	mapKeys["dataset"] = "dataset"
-	mapKeys["block_name"] = "block_name"
 	mapKeys["file"] = "file"
 	mapKeys["create_by"] = "user"
 	mapKeys["modify_by"] = "user"
-	mapKeys["primary_ds_name"] = "primary_dataset"
-	mapKeys["processed_ds_name"] = "processed_dataset"
-	mapKeys["processing_version"] = "processing_version"
-	mapKeys["app_name"] = "application"
-	mapKeys["data_tier_name"] = "data_tier_name"
+	mapKeys["processing"] = "processing"
+	mapKeys["application"] = "application"
+	mapKeys["tier"] = "tier"
 	mapKeys["dataset"] = "dataset"
-	mapKeys["release_version"] = "cmssw_version"
+	mapKeys["release"] = "cmssw_version"
 	var allowedWildCardKeys = []string{
-		"primary_ds_name",
-		"processed_ds_name",
-		"processing_version",
-		"app_name",
-		"data_tier_name",
-		"release_version",
+		"processing",
+		"application",
+		"tier",
+		"release",
 	}
 
 	var patterns []*regexp.Regexp
@@ -327,6 +317,18 @@ func intType(k string, v interface{}) error {
 // helper function to validate mix parameters
 func mixType(k string, v interface{}) error {
 	// to be implemented
+	return nil
+}
+
+// ValidateRecord validates given JSON record
+func ValidateRecord(rec map[string]any) error {
+	for key, val := range rec {
+		if utils.InList(key, strParameters) {
+			if err := strType(key, val); err != nil {
+				return Error(err, ValidateErrorCode, "not str type", "lexicon.Validate")
+			}
+		}
+	}
 	return nil
 }
 
