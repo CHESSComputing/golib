@@ -14,6 +14,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+// LDAP attributes
+type LDAP struct {
+	URL    string `mapstructure:"url"`   // ldap url
+	BaseDN string `mapstructure:"baseDN` // ldap baseDN
+}
+
 // Zenodo credentials
 type Zenodo struct {
 	URL         string `mapstructure:"Url"`         // zenodo url
@@ -253,6 +259,7 @@ type Services struct {
 
 // SrvConfig represents configuration structure
 type SrvConfig struct {
+	LDAP            `mapstructure:LDAP`
 	Frontend        `mapstructure:"Frontend"`
 	Discovery       `mapstructure:"Discovery"`
 	MetaData        `mapstructure:"MetaData"`
