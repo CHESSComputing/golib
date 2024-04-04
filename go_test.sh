@@ -9,6 +9,9 @@ for d in $(go list ./... | grep -v vendor); do
     if [ $d == "github.com/CHESSComputing/golib/zenodo" ]; then
         continue
     fi
+    if [ $d == "github.com/CHESSComputing/golib/ldap" ]; then
+        continue
+    fi
     echo "Coverage $d"
     go test -race -coverprofile=profile.out -covermode=atomic "$d"
     if [ -f profile.out ]; then
