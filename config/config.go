@@ -235,8 +235,9 @@ type Authz struct {
 	WebServer  `mapstructure:"WebServer"`
 	Encryption `mapstructure:"Encryption"`
 
-	TestMode     bool   `mapstructure:TestMode` // test mode
-	DBUri        string `mapstructure:"DBUri"`  // database URI
+	TestMode     bool   `mapstructure:TestMode`  // test mode
+	CheckLDAP    bool   `mapstructure:CheckLDAP` // check users scope in LDAP
+	DBUri        string `mapstructure:"DBUri"`   // database URI
 	ClientID     string `mapstructure:"ClientId"`
 	ClientSecret string `mapstructure:"ClientSecret"`
 	Domain       string `mapstructure:"Domain"`
