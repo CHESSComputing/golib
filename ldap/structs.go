@@ -27,8 +27,7 @@ func (e *Entry) Belong(group string) bool {
 
 // Cache represent LDAP cache
 type Cache struct {
-	Map    map[string]Entry
-	Expire string
+	Map map[string]Entry
 }
 
 // Search provides cached search results
