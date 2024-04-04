@@ -16,8 +16,10 @@ import (
 
 // LDAP attributes
 type LDAP struct {
-	URL    string `mapstructure:"url"`   // ldap url
-	BaseDN string `mapstructure:"baseDN` // ldap baseDN
+	URL      string `mapstructure:"url"`      // ldap url
+	BaseDN   string `mapstructure:"baseDN`    // ldap baseDN
+	Login    string `mapstructure:"login"`    // LDAP login to use
+	Password string `mapstructure:"password"` // LDAP password to use
 }
 
 // Zenodo credentials
