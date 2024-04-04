@@ -2,6 +2,7 @@ package ldap
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -12,6 +13,16 @@ type Entry struct {
 	DN     string
 	Groups []string
 	Expire time.Time
+}
+
+// Belong checks if group belongs with LDAP entry
+func (e *Entry) Belong(group string) bool {
+	for _, v := range e.Groups {
+		if strings.Contains(v, group) {
+			return true
+		}
+	}
+	return false
 }
 
 // Cache represent LDAP cache
