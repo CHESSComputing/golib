@@ -44,4 +44,6 @@ const (
 	MarkdownError                      // 139 markdown error
 	ZenodoError                        // 140 zenodo error
 	FileError                          // 141 file error
+	LDAPSearchError                    // 142 LDAP search error
+	LDAPGroupError                     // 143 LDAP group error
 )
