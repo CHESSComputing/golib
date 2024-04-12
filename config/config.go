@@ -178,7 +178,6 @@ type MetaData struct {
 
 // CHESSMetaData represents CHESS MetaData configuration
 type CHESSMetaData struct {
-	DID                 `mapstructure:"DID"`
 	WebServer           `mapstructure:"WebServer"`
 	MongoDB             `mapstructure:"MongoDB"`
 	LexiconFile         string              `mapstructure:"LexiconFile"` // lexicon file
@@ -262,6 +261,7 @@ type Services struct {
 
 // SrvConfig represents configuration structure
 type SrvConfig struct {
+	DID             `mapstructure:"DID"`
 	LDAP            `mapstructure:LDAP`
 	Frontend        `mapstructure:"Frontend"`
 	Discovery       `mapstructure:"Discovery"`
