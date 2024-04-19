@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 
 	utils "github.com/CHESSComputing/golib/utils"
 	bson "go.mongodb.org/mongo-driver/bson"
@@ -46,8 +47,10 @@ func (q *QLManager) Init(fname string) error {
 func (q *QLManager) Keys(srv string) []string {
 	var keys []string
 	if val, ok := q.Map[srv]; ok {
+		sort.Strings(val)
 		return val
 	}
+	sort.Strings(keys)
 	return keys
 }
 
@@ -57,6 +60,7 @@ func (q *QLManager) Services() []string {
 	for k, _ := range q.Map {
 		srv = append(srv, k)
 	}
+	sort.Strings(srv)
 	return srv
 }
 

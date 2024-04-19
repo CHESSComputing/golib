@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -36,6 +37,9 @@ func TestServiceMap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sort.Strings(srvKeys1)
+	sort.Strings(srvKeys2)
+	sort.Strings(services)
 	if !reflect.DeepEqual(qlMgr.Keys(srv1), srvKeys1) {
 		t.Errorf("service %s, wrong keys %v != %v", srv1, qlMgr.Keys(srv1), srvKeys1)
 	}
