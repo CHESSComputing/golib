@@ -35,6 +35,13 @@ type DID struct {
 	Divider    string `mapstructure:divider`    // did key-value divider, default "="
 }
 
+// QL structure
+type QL struct {
+	ServiceMapFile string `mapstructure:ServiceMapFile` // service map file name
+	Separator      string `mapstructure:separator`      // ql separator, default ":"
+	Verbose        int    `mapstructure:verbose`        // verbosity level
+}
+
 // OAuthRecord defines OAuth provider's credentials
 type OAuthRecord struct {
 	Provider     string `mapstructure:"Provider"`     // name of the provider
@@ -261,6 +268,7 @@ type Services struct {
 
 // SrvConfig represents configuration structure
 type SrvConfig struct {
+	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
 	LDAP            `mapstructure:LDAP`
 	Frontend        `mapstructure:"Frontend"`
