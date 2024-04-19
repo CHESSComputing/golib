@@ -32,13 +32,10 @@ func TestServiceMap(t *testing.T) {
 	}
 	file.Close()
 	var qlMgr QLManager
-	err = qlMgr.Load(file.Name())
+	err = qlMgr.Init(file.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
-	//     t.Logf("service map %+v", qlMgr)
-	//     t.Logf("%s keys %v", srv1, qlMgr.Keys(srv1))
-	//     t.Logf("%s keys %v", srv2, qlMgr.Keys(srv2))
 	if !reflect.DeepEqual(qlMgr.Keys(srv1), srvKeys1) {
 		t.Errorf("service %s, wrong keys %v != %v", srv1, qlMgr.Keys(srv1), srvKeys1)
 	}
@@ -49,4 +46,11 @@ func TestServiceMap(t *testing.T) {
 		t.Errorf("wrong services %v != %v", qlMgr.Services(), services)
 	}
 
+	// test services queries
+	query := "foo:1 abc:[1,2,3]"
+	sqMap, err := qlMgr.ServiceQueries(query)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("services queries: %+v", sqMap)
 }

@@ -5,17 +5,21 @@ import (
 	"io"
 	"log"
 	"os"
+
+	utils "github.com/CHESSComputing/golib/utils"
+	bson "go.mongodb.org/mongo-driver/bson"
 )
 
 // ServiceMap defines FOXDEN service QL mapping
 type ServiceMap map[string][]string
 
+// QLManager represents QL manager
 type QLManager struct {
 	Map ServiceMap
 }
 
-// Load function loads service map from given file name
-func (q *QLManager) Load(fname string) error {
+// Init function loads service map from given file name
+func (q *QLManager) Init(fname string) error {
 	if q.Map == nil {
 		q.Map = make(ServiceMap)
 	}
@@ -54,4 +58,26 @@ func (q *QLManager) Services() []string {
 		srv = append(srv, k)
 	}
 	return srv
+}
+
+// ServiceQueries parses given query string into list of service queries
+func (q *QLManager) ServiceQueries(query string) (map[string]bson.M, error) {
+	sqMap := make(map[string]bson.M)
+	spec, err := ParseQuery(query)
+	if err != nil {
+		return nil, err
+	}
+	for key, smap := range spec {
+		for srv, skeys := range q.Map {
+			if utils.InList(key, skeys) {
+				if val, ok := sqMap[srv]; ok {
+					val[key] = smap
+					sqMap[srv] = val
+				} else {
+					sqMap[srv] = bson.M{key: smap}
+				}
+			}
+		}
+	}
+	return sqMap, nil
 }
