@@ -226,3 +226,14 @@ func Domain() string {
 	log.Println("Domain", domain)
 	return domain
 }
+
+// PaddedKey returns padded key up to maxLen
+func PaddedKey(key string, maxLen int) string {
+	if len(key) < maxLen {
+		pad := maxLen - len(key)
+		for i := 0; i < pad; i++ {
+			key += " "
+		}
+	}
+	return key
+}
