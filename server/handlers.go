@@ -1,7 +1,12 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dchest/captcha"
@@ -55,4 +60,34 @@ func GinHandlerFunc(hdlr http.HandlerFunc) gin.HandlerFunc {
 		hdlr(c.Writer, c.Request)
 		c.Next()
 	}
+}
+
+// QLKeysHandler provides list of keys used in QueryLanguage in given service
+func QLKeysHandler(c *gin.Context) {
+	var keys []string
+	fname := fmt.Sprintf("%s/ql_keys.json", _staticDir)
+
+	// read QL keys file
+	file, err := os.Open(fname)
+	if err != nil {
+		log.Println("ERROR", err)
+		c.JSON(http.StatusInternalServerError, keys)
+		return
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Println("ERROR", err)
+		c.JSON(http.StatusInternalServerError, keys)
+		return
+	}
+
+	// unmarshal our data into keys structure
+	err = json.Unmarshal(data, &keys)
+	if err != nil {
+		log.Println("ERROR", err)
+		c.JSON(http.StatusInternalServerError, keys)
+		return
+	}
+	c.JSON(http.StatusOK, keys)
 }

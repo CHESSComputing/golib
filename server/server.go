@@ -20,6 +20,7 @@ import (
 
 var _routes gin.RoutesInfo
 var metricsPrefix string
+var _staticDir string
 
 // StartTime represents initial time when we started the server
 var StartTime time.Time
@@ -95,7 +96,10 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	base := webServer.Base
 	verbose := webServer.Verbose
 
+	// initialize our web server
 	InitServer(webServer)
+	// remember server's static area (to be used in QLKeysHandler)
+	_staticDir = static
 
 	// setup gin router
 	r := gin.New()
@@ -106,6 +110,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 
 	// GET routes
 	r.GET("/apis", ApisHandler)
+	r.GET("/qlkeys", QLKeysHandler)
 	r.GET("/metrics", MetricsHandler)
 
 	// loop over routes and creates necessary router structure
