@@ -134,7 +134,7 @@ type Frontend struct {
 	WebServer `mapstructure:"WebServer"`
 
 	// Aggregate results from all FOXDEN services
-	AggregateResults `mapstructure:"AggregateResults`
+	AggregateResults bool `mapstructure:"AggregateResults`
 
 	// OAuth parts
 	OAuth []OAuthRecord `mapstructure:"OAuth"` // oauth configurations
