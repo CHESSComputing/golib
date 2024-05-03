@@ -29,6 +29,9 @@ func (s *MetaDataManager) initManager() []MetaDataDetails {
 	if _httpReadRequest == nil {
 		_httpReadRequest = services.NewHttpRequest("read", Verbose)
 	}
+	if srvConfig.Config == nil {
+		srvConfig.Init()
+	}
 	if s == nil {
 		s = &MetaDataManager{}
 		// fetch all schema details from upstream MetaData server
