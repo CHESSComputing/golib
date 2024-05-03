@@ -391,7 +391,7 @@ func Init() {
 		// check env variable
 		config = os.Getenv("CHESS_FOXDEN_CONFIG")
 	}
-	log.Println("FOXDEN CONFIG", config)
+	//     log.Println("FOXDEN CONFIG", config)
 	oConfig, err := ParseConfig(config)
 	if err != nil {
 		log.Fatal("ERROR", err)
