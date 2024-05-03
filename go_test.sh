@@ -3,15 +3,16 @@
 set -e
 echo "mode: atomic" > coverage.txt
 
+skipServices="zenodo ldap schema"
+
 for d in $(go list ./... | grep -v vendor); do
     echo "Testing $d"
     go test -v $d
-    if [ $d == "github.com/CHESSComputing/golib/zenodo" ]; then
-        continue
-    fi
-    if [ $d == "github.com/CHESSComputing/golib/ldap" ]; then
-        continue
-    fi
+    for s in $skipServices; do
+        if [ $d == "github.com/CHESSComputing/golib/$s" ]; then
+            continue
+        fi
+    done
     echo "Coverage $d"
     go test -race -coverprofile=profile.out -covermode=atomic "$d"
     if [ -f profile.out ]; then
