@@ -8,11 +8,16 @@ skipServices="zenodo ldap schema"
 for d in $(go list ./... | grep -v vendor); do
     echo "Testing $d"
     go test -v $d
+    skip="false"
     for s in $skipServices; do
         if [ $d == "github.com/CHESSComputing/golib/$s" ]; then
-            continue
+            skip="true"
         fi
     done
+    if [ "$skip" == "true" ]; then
+        echo "Skipping $d, not test files required..."
+        continue
+    fi
     echo "Coverage $d"
     go test -race -coverprofile=profile.out -covermode=atomic "$d"
     if [ -f profile.out ]; then
