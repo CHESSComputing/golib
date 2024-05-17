@@ -190,13 +190,13 @@ type MetaData struct {
 type CHESSMetaData struct {
 	WebServer           `mapstructure:"WebServer"`
 	MongoDB             `mapstructure:"MongoDB"`
-	LexiconFile         string              `mapstructure:"LexiconFile"` // lexicon file
-	TestMode            bool                `mapstructure:TestMode`      // test mode
-	SchemaFiles         []string            `json:"SchemaFiles"`         // schema files
-	SchemaRenewInterval int                 `json:"SchemaRenewInterval"` // schema renew interval
-	SchemaSections      []string            `json:"SchemaSections"`      // logical schema section list
-	WebSectionKeys      map[string][]string `json:"WebSectionKeys"`      // section order dict
-	SkipKeys            []string            `mapstructure:SkipKeys`      // keys to skip for web forms
+	LexiconFile         string   `mapstructure:"LexiconFile"`     // lexicon file
+	TestMode            bool     `mapstructure:TestMode`          // test mode
+	SchemaFiles         []string `json:"SchemaFiles"`             // schema files
+	SchemaRenewInterval int      `json:"SchemaRenewInterval"`     // schema renew interval
+	WebSectionsFile     string   `mapstructure:"WebSectionsFile"` // file for web form sections
+	OrderedSections     []string `mapstructure:OrderedSections`   // ordered sections for web UI
+	SkipKeys            []string `mapstructure:SkipKeys`          // keys to skip for web forms
 }
 
 // OreCastMetaData represents OreCast MetaData configuration
