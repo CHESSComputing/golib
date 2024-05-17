@@ -190,7 +190,13 @@ func (s *Schema) Load() error {
 	}
 
 	// load web section schema file
+	if srvConfig.Config == nil {
+		return nil
+	}
 	filepath := srvConfig.Config.CHESSMetaData.WebSectionsFile
+	if filepath == "" {
+		return nil
+	}
 	if _, err := os.Stat(filepath); err == nil {
 		file, err := os.Open(filepath)
 		if err != nil {

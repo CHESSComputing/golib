@@ -13,10 +13,10 @@ func TestSchemaYaml(t *testing.T) {
 		t.Fatal(err)
 	}
 	yamlData := `
-- key: Pi
+- key: pi
   optional: true
   type: string
-- key: BeamEnergy
+- key: beam_energy
   optional: false
   type: int
 `
@@ -44,8 +44,8 @@ func TestSchemaYaml(t *testing.T) {
 	fmt.Println("Schema optional keys", okeys)
 
 	rec := make(map[string]any)
-	rec["Pi"] = "person"
-	rec["BeamEnergy"] = 123
+	rec["pi"] = "person"
+	rec["beam_energy"] = 123
 	err = s.Validate(rec)
 	if err != nil {
 		t.Fatal(err)
@@ -59,8 +59,8 @@ func TestSchemaJson(t *testing.T) {
 		t.Fatal(err)
 	}
 	jsonData := `[
-    {"key": "Pi", "type": "string", "optional": true},
-    {"key": "BeamEnergy", "type": "int", "optional": false}
+    {"key": "pi", "type": "string", "optional": true},
+    {"key": "beam_energy", "type": "int", "optional": false}
 ]`
 	tmpFile.Write([]byte(jsonData))
 	tmpFile.Close()
@@ -86,8 +86,8 @@ func TestSchemaJson(t *testing.T) {
 	fmt.Println("Schema optional keys", okeys)
 
 	rec := make(map[string]any)
-	rec["Pi"] = "person"
-	rec["BeamEnergy"] = 123
+	rec["pi"] = "person"
+	rec["beam_energy"] = 123
 	err = s.Validate(rec)
 	if err != nil {
 		t.Fatal(err)
