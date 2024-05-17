@@ -9,7 +9,7 @@ import (
 // DIDKeys provide sorted, lower-case list of did keys from comma separated list of attributes
 func DIDKeys(attrs string) []string {
 	if attrs == "" {
-		attrs = "btr,beamline,cycle,sample"
+		attrs = "btr,beamline,cycle,sample_name"
 	}
 	attrs = strings.Replace(attrs, " ", "", -1)
 	var keys []string
