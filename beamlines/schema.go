@@ -189,9 +189,8 @@ func (s *Schema) Load() error {
 		}
 	}
 
-	// either load web section schema file or use default web section keys
-	base := strings.Split(fname, ".")[0]
-	filepath := fmt.Sprintf("%s_web.json", base)
+	// load web section schema file
+	filepath := srvConfig.Config.CHESSMetaData.WebSectionsFile
 	if _, err := os.Stat(filepath); err == nil {
 		file, err := os.Open(filepath)
 		if err != nil {
@@ -210,24 +209,6 @@ func (s *Schema) Load() error {
 			log.Fatal(err)
 		}
 		s.WebSectionKeys = rec
-	} else {
-		webKeys := make(map[string][]string)
-		var skeys []string
-		for k, _ := range s.Map {
-			skeys = append(skeys, k)
-		}
-		if srvConfig.Config != nil {
-			for key, values := range srvConfig.Config.CHESSMetaData.WebSectionKeys {
-				var vals []string
-				for _, v := range values {
-					if utils.InList(v, skeys) {
-						vals = append(vals, v)
-					}
-				}
-				webKeys[key] = vals
-			}
-			s.WebSectionKeys = webKeys
-		}
 	}
 	return nil
 }
@@ -353,6 +334,9 @@ func (s *Schema) MandatoryKeys() ([]string, error) {
 
 // Sections provides list of schema sections
 func (s *Schema) Sections() ([]string, error) {
+	if len(srvConfig.Config.CHESSMetaData.OrderedSections) > 0 {
+		return srvConfig.Config.CHESSMetaData.OrderedSections, nil
+	}
 	var sections []string
 	if err := s.Load(); err != nil {
 		return sections, err
@@ -360,23 +344,13 @@ func (s *Schema) Sections() ([]string, error) {
 	for k, _ := range s.Map {
 		if m, ok := s.Map[k]; ok {
 			if m.Section != "" {
-				sections = append(sections, m.Section)
+				if !utils.InList(m.Section, sections) {
+					sections = append(sections, m.Section)
+				}
 			}
 		}
 	}
-	if len(srvConfig.Config.CHESSMetaData.SchemaSections) > 0 {
-		// we will return sections according to order in SchemaSections
-		var out []string
-		out = srvConfig.Config.CHESSMetaData.SchemaSections
-		// add other section to the output
-		sort.Sort(utils.StringList(sections))
-		for _, s := range sections {
-			if !utils.InList(s, out) {
-				out = append(out, s)
-			}
-		}
-		return out, nil
-	}
+	sort.Sort(utils.StringList(sections))
 	return sections, nil
 }
 
