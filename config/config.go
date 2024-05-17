@@ -196,6 +196,7 @@ type CHESSMetaData struct {
 	SchemaRenewInterval int                 `json:"SchemaRenewInterval"` // schema renew interval
 	SchemaSections      []string            `json:"SchemaSections"`      // logical schema section list
 	WebSectionKeys      map[string][]string `json:"WebSectionKeys"`      // section order dict
+	SkipKeys            []string            `mapstructure:SkipKeys`      // keys to skip for web forms
 }
 
 // OreCastMetaData represents OreCast MetaData configuration
