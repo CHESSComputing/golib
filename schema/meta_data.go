@@ -17,6 +17,7 @@ type MetaDataDetails struct {
 	Schema       string            `json:"schema"`
 	Units        map[string]string `json:"units"`
 	Descriptions map[string]string `json:"descriptions"`
+	DataTypes    map[string]string `json:"types"`
 }
 
 // MetaDataManager holds MetaDataDetails list for all FOXDEN schemas
@@ -50,7 +51,7 @@ func (s *MetaDataManager) initManager() []MetaDataDetails {
 	return records
 }
 
-// Units finds schema units map for given schema name
+// Units provides units map for given schema name
 func (s *MetaDataManager) Units(sname string) map[string]string {
 	records := s.initManager()
 	for _, rec := range records {
@@ -63,7 +64,20 @@ func (s *MetaDataManager) Units(sname string) map[string]string {
 	return empty
 }
 
-// Descriptions finds schema units map for given schema name
+// DataTypes provides data-type map for given schema name
+func (s *MetaDataManager) DataTypes(sname string) map[string]string {
+	records := s.initManager()
+	for _, rec := range records {
+		if rec.Schema != sname {
+			continue
+		}
+		return rec.DataTypes
+	}
+	empty := make(map[string]string)
+	return empty
+}
+
+// Descriptions provides description map for given schema name
 func (s *MetaDataManager) Descriptions(sname string) map[string]string {
 	records := s.initManager()
 	for _, rec := range records {
