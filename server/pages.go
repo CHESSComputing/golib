@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -24,7 +23,7 @@ import (
 func ErrorPage(fsys fs.FS, msg string, err error) string {
 	log.Printf("ERROR: %v\n", err)
 	tmpl := MakeTmpl(fsys, "Error")
-	tmpl["Content"] = strings.ToTitle(msg)
+	tmpl["Content"] = msg
 	return TmplPage(fsys, "error.tmpl", tmpl)
 }
 
