@@ -7,11 +7,10 @@ import (
 	"os"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
-	utils "github.com/CHESSComputing/golib/utils"
 )
 
-// QLKey defines structure of QL key
-type QLKey struct {
+// QLRecord defines structure of QL key
+type QLRecord struct {
 	Key         string `json:"key"`
 	Description string `json:"description,omitempty"`
 	Service     string `json:"service"`
@@ -20,56 +19,72 @@ type QLKey struct {
 	DataType    string `json:"type"`
 }
 
-// String returns string representation of ql key
-func (qlKey *QLKey) String() string {
-	// each qmap here is QLKey structure
-	desc := qlKey.Description
-	if desc == "" {
-		desc = "description not available"
+// FillEmpty assign N/A to empty attributes
+func (q *QLRecord) FillEmpty() {
+	if q.Description == "" {
+		q.Description = "N/A"
 	}
-	srv := fmt.Sprintf("%s:%s", qlKey.Service, qlKey.Schema)
-	if qlKey.Schema == "" {
-		srv = qlKey.Service
+	if q.Schema == "" {
+		q.Schema = "N/A"
 	}
-	key := fmt.Sprintf("%s: (%s) %s", qlKey.Key, srv, desc)
-	if qlKey.Units != "" {
-		key += fmt.Sprintf(", units:%s", qlKey.Units)
+	if q.Units == "" {
+		q.Units = "N/A"
 	}
-	if qlKey.DataType != "" {
-		key += fmt.Sprintf(", data-type:%s", qlKey.DataType)
+	if q.DataType == "" {
+		q.DataType = "N/A"
 	}
-	return key
 }
 
-// QLKeys return list of ql keys
-func QLKeys(qlKey string) ([]string, error) {
-	var keys []string
+// String returns string representation of ql key
+func (q *QLRecord) String() string {
+	q.FillEmpty()
+	out := fmt.Sprintf("Key:%s Description:%s Service:%s Schema:%s Units:%s DataType:%s",
+		q.Key, q.Description, q.Service, q.Schema, q.Units, q.DataType)
+	return out
+}
+
+// Details function provides record representation
+func (q *QLRecord) Details(show string) string {
+	q.FillEmpty()
+	repr := fmt.Sprintf("%s, service: %s, schema: %s, units: %s, data-type: %s",
+		q.Description, q.Service, q.Schema, q.Units, q.DataType)
+	if show == "key" {
+		return q.Key
+	}
+	if show == "description" {
+		return q.Description
+	}
+	if show == "service" {
+		return q.Service
+	}
+	if show == "schema" {
+		return q.Schema
+	}
+	if show == "units" {
+		return q.Units
+	}
+	if show == "data-type" {
+		return q.DataType
+	}
+	return repr
+}
+
+// QLRecords return list of ql keys
+func QLRecords(qlKey string) ([]QLRecord, error) {
+	var records []QLRecord
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	fname := srvConfig.Config.QL.ServiceMapFile
 	file, err := os.Open(fname)
 	if err != nil {
-		return keys, err
+		return records, err
 	}
 	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return keys, err
+		return records, err
 	}
-	var arr []QLKey
-	err = json.Unmarshal(data, &arr)
-	if err != nil {
-		return keys, err
-	}
-	var allKeys []string
-	for _, elem := range arr {
-		if qlKey != "" && elem.Key == qlKey {
-			allKeys = append(allKeys, elem.String())
-		} else {
-			allKeys = append(allKeys, elem.String())
-		}
-	}
-	keys = utils.List2Set[string](allKeys)
-	return keys, nil
+	err = json.Unmarshal(data, &records)
+	return records, err
 }
