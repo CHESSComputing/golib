@@ -390,7 +390,7 @@ func Init() {
 	}
 	if config == "" {
 		// check env variable
-		config = os.Getenv("CHESS_FOXDEN_CONFIG")
+		config = os.Getenv("FOXDEN_CONFIG")
 	}
 	//     log.Println("FOXDEN CONFIG", config)
 	oConfig, err := ParseConfig(config)
