@@ -213,9 +213,11 @@ type Publication struct {
 
 // SpecScans represents SpecScansService configuration
 type SpecScans struct {
-	WebServer `mapstructure:"WebServer"`
-	MongoDB   `mapstructure:"MongoDB"`
-	DBFile    string `mapstructure:"DBFile"`
+	WebServer  `mapstructure:"WebServer"`
+	MongoDB    `mapstructure:"MongoDB"`
+	DBFile     string `mapstructure:"DBFile"`
+	SchemaFile string `mapstructure:"SchemaFile"`
+	QLMFile    string `mapstructure:"QLMFile"`
 }
 
 // S3 defines s3 structure
