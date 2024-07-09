@@ -507,6 +507,8 @@ func validSchemaType(stype string, v interface{}, verbose int) bool {
 		etype = "list_float"
 	case []float32:
 		etype = "list_float"
+	case map[string]interface{}:
+		etype = "dict"
 	}
 	sv := fmt.Sprintf("%v", v)
 	vtype := fmt.Sprintf("%T", v)
