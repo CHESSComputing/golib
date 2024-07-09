@@ -24,7 +24,10 @@ func TestServiceMap(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Remove(file.Name())
-	data, err := json.Marshal(smap)
+	var qlRecords []QLRecord
+	qlRecords = append(qlRecords, QLRecord{Service: "service1", Key: "foo", DataType: "string"})
+	qlRecords = append(qlRecords, QLRecord{Service: "service2", Key: "abc", DataType: "string"})
+	data, err := json.Marshal(qlRecords)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,10 +43,12 @@ func TestServiceMap(t *testing.T) {
 	sort.Strings(srvKeys1)
 	sort.Strings(srvKeys2)
 	sort.Strings(services)
-	if !reflect.DeepEqual(qlMgr.Keys(srv1), srvKeys1) {
+	if !reflect.DeepEqual(qlMgr.Keys(srv1), []string{"foo"}) {
+		//     if !reflect.DeepEqual(qlMgr.Keys(srv1), srvKeys1) {
 		t.Errorf("service %s, wrong keys %v != %v", srv1, qlMgr.Keys(srv1), srvKeys1)
 	}
-	if !reflect.DeepEqual(qlMgr.Keys(srv2), srvKeys2) {
+	if !reflect.DeepEqual(qlMgr.Keys(srv2), []string{"abc"}) {
+		//     if !reflect.DeepEqual(qlMgr.Keys(srv2), srvKeys2) {
 		t.Errorf("service %s, wrong keys %v != %v", srv2, qlMgr.Keys(srv2), srvKeys2)
 	}
 	if !reflect.DeepEqual(qlMgr.Services(), services) {

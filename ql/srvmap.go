@@ -16,7 +16,8 @@ type ServiceMap map[string][]string
 
 // QLManager represents QL manager
 type QLManager struct {
-	Map ServiceMap
+	Map     ServiceMap
+	Records []QLRecord
 }
 
 // Init function loads service map from given file name
@@ -34,10 +35,21 @@ func (q *QLManager) Init(fname string) error {
 		return err
 	}
 
-	var srvMap ServiceMap
-	err = json.Unmarshal(data, &srvMap)
+	// each record in QL.ServiceMapFile has the following form:[QLRecord1, QLRecord2]
+	srvMap := make(ServiceMap)
+	var records []QLRecord
+	err = json.Unmarshal(data, &records)
 	if err != nil {
 		return err
+	}
+	for _, rec := range records {
+		// collect ql kys for each service
+		if qlKeys, ok := srvMap[rec.Service]; ok {
+			qlKeys = append(qlKeys, rec.Key)
+			srvMap[rec.Service] = qlKeys
+		} else {
+			srvMap[rec.Service] = []string{rec.Key}
+		}
 	}
 	q.Map = srvMap
 	return nil
