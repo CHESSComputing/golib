@@ -217,7 +217,7 @@ type SpecScans struct {
 	MongoDB    `mapstructure:"MongoDB"`
 	DBFile     string `mapstructure:"DBFile"`
 	SchemaFile string `mapstructure:"SchemaFile"`
-	QLMFile    string `mapstructure:"QLMFile"`
+	QL         QL     `mapstructure:"QL"`
 }
 
 // S3 defines s3 structure
