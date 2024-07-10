@@ -17,6 +17,7 @@ type QLRecord struct {
 	Units       string `json:"units,omitempty"`
 	Schema      string `json:"schema,omitempty"`
 	DataType    string `json:"type"`
+	DBType      string `json:"db,omitempty"`
 }
 
 // FillEmpty assign N/A to empty attributes
@@ -33,21 +34,24 @@ func (q *QLRecord) FillEmpty() {
 	if q.DataType == "" {
 		q.DataType = "N/A"
 	}
+	if q.DBType == "" {
+		q.DBType = "N/A"
+	}
 }
 
 // String returns string representation of ql key
 func (q *QLRecord) String() string {
 	q.FillEmpty()
-	out := fmt.Sprintf("Key:%s Description:%s Service:%s Schema:%s Units:%s DataType:%s",
-		q.Key, q.Description, q.Service, q.Schema, q.Units, q.DataType)
+	out := fmt.Sprintf("Key:%s Description:%s Service:%s Schema:%s Units:%s DataType:%s DBType: %s",
+		q.Key, q.Description, q.Service, q.Schema, q.Units, q.DataType, q.DBType)
 	return out
 }
 
 // Details function provides record representation
 func (q *QLRecord) Details(show string) string {
 	q.FillEmpty()
-	repr := fmt.Sprintf("%s, service: %s, schema: %s, units: %s, data-type: %s",
-		q.Description, q.Service, q.Schema, q.Units, q.DataType)
+	repr := fmt.Sprintf("%s, service: %s, schema: %s, units: %s, data-type: %s, db-type: %s",
+		q.Description, q.Service, q.Schema, q.Units, q.DataType, q.DBType)
 	if show == "key" {
 		return q.Key
 	}
@@ -64,6 +68,9 @@ func (q *QLRecord) Details(show string) string {
 		return q.Units
 	}
 	if show == "data-type" {
+		return q.DataType
+	}
+	if show == "db-type" {
 		return q.DataType
 	}
 	return repr
