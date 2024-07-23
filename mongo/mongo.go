@@ -255,6 +255,18 @@ func Insert(dbname, collname string, records []map[string]any) {
 	}
 }
 
+// InsertRecord insert record with given spec to MongoDB
+func InsertRecord(dbname, collname string, rec bson.M) error {
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	if _, err := c.InsertOne(ctx, &rec); err != nil {
+		log.Printf("Fail to insert record %v, error %v\n", rec, err)
+		return err
+	}
+	return nil
+}
+
 // UpsertRecord insert record with given spec to MongoDB
 func UpsertRecord(dbname, collname string, spec bson.M, rec bson.M) error {
 	client := Mongo.Connect()
