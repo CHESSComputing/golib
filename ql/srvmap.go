@@ -52,6 +52,7 @@ func (q *QLManager) Init(fname string) error {
 		}
 	}
 	q.Map = srvMap
+	q.Records = records
 	return nil
 }
 
