@@ -109,6 +109,16 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 			}
 		}
 	}
+	// check if we are given Zenodo request
+	if strings.Contains(rurl, "zenodo.org") {
+		if vals, ok := h.Headers["ZenodoAccessToken"]; ok {
+			if len(vals) == 1 && vals[0] != h.Token && vals[0] != "" {
+				// we overwrite access bearer value with provided Zenodo access token
+				req.Header.Del("Authorization")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", vals[0]))
+			}
+		}
+	}
 	client := &http.Client{}
 	if h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
@@ -152,6 +162,16 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 		for key, values := range h.Headers {
 			for _, val := range values {
 				req.Header.Add(key, val)
+			}
+		}
+	}
+	// check if we are given Zenodo request
+	if strings.Contains(rurl, "zenodo.org") {
+		if vals, ok := h.Headers["ZenodoAccessToken"]; ok {
+			if len(vals) == 1 && vals[0] != h.Token && vals[0] != "" {
+				// we overwrite access bearer value with provided Zenodo access token
+				req.Header.Del("Authorization")
+				req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", vals[0]))
 			}
 		}
 	}
