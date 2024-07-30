@@ -29,7 +29,7 @@ type HttpRequest struct {
 	Scope   string
 	Expires time.Time
 	Verbose int
-	Headers map[string]string
+	Headers map[string][]string
 }
 
 // NewHttpRequest initilizes and returns new HttpRequest object
@@ -103,8 +103,10 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 	req.Header.Add("Accept", "application/json")
 	//     req.Header.Add("Accept-Encoding", "")
 	if h.Headers != nil {
-		for key, val := range h.Headers {
-			req.Header.Add(key, val)
+		for key, values := range h.Headers {
+			for _, val := range values {
+				req.Header.Add(key, val)
+			}
 		}
 	}
 	client := &http.Client{}
@@ -147,8 +149,10 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("Accept", contentType)
 	if h.Headers != nil {
-		for key, val := range h.Headers {
-			req.Header.Add(key, val)
+		for key, values := range h.Headers {
+			for _, val := range values {
+				req.Header.Add(key, val)
+			}
 		}
 	}
 	client := &http.Client{}
