@@ -312,6 +312,10 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		}
 		// setup cfile to $HOME/.foxden.yaml
 		cfile = filepath.Join(home, ".foxden.yaml")
+		// setup cfile to $FOXDEN_CONFIG if it is set in environment
+		if _, err := os.Stat(os.Getenv("FOXDEN_CONFIG")); err == nil {
+			cfile = os.Getenv("FOXDEN_CONFIG")
+		}
 	}
 
 	// check if we do have configuration file
