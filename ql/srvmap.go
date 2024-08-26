@@ -2,10 +2,12 @@ package ql
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	utils "github.com/CHESSComputing/golib/utils"
 	bson "go.mongodb.org/mongo-driver/bson"
@@ -85,8 +87,8 @@ func (q *QLManager) ServiceQueries(query string) (map[string]bson.M, error) {
 		return nil, err
 	}
 	for key, smap := range spec {
-		for srv, skeys := range q.Map {
-			if utils.InList(key, skeys) {
+		for srv, _ := range q.Map {
+			if allowed := q.QueryKeyAllowed(key, srv); allowed {
 				if val, ok := sqMap[srv]; ok {
 					val[key] = smap
 					sqMap[srv] = val
@@ -97,4 +99,23 @@ func (q *QLManager) ServiceQueries(query string) (map[string]bson.M, error) {
 		}
 	}
 	return sqMap, nil
+}
+
+// Determines if a key from a user query is allowed for querying the given service.
+// A user query key is considered "allowed" if it is an exact match for one of the
+// service's allowed query keys OR if the user query key has a prefix equal to one
+// of the allowed service query keys followed by a ".". The latter matching condition
+// allows for queries on nested fields with dot notation.
+func (q *QLManager) QueryKeyAllowed(key string, service string) bool {
+	if service_keys, ok := q.Map[service]; ok {
+		if utils.InList(key, service_keys) {
+			return true
+		}
+		for _, service_key := range service_keys {
+			if strings.HasPrefix(key, fmt.Sprintf("%s.", service_key)) {
+				return true
+			}
+		}
+	}
+	return false
 }
