@@ -211,6 +211,12 @@ type Publication struct {
 	Zenodo
 }
 
+// MaterialCommons represents MaterialCommons service configuration
+type MaterialCommons struct {
+	Url   string `mapstructure:"Url"`
+	Token string `mapstructure:"Token"`
+}
+
 // SpecScans represents SpecScansService configuration
 type SpecScans struct {
 	WebServer  `mapstructure:"WebServer"`
@@ -290,6 +296,7 @@ type SrvConfig struct {
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
+	MaterialCommons `mapstructure:"MaterialCommons"`
 }
 
 func (c *SrvConfig) String() string {
