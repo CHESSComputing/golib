@@ -14,6 +14,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TrustedUser represents single trusted user information
+type TrustedUser struct {
+	User string `json:"user"`
+	IP   string `json:"ip"`
+	MAC  string `json:"mac"`
+}
+
 // LDAP attributes
 type LDAP struct {
 	URL      string `mapstructure:"url"`      // ldap url
@@ -297,6 +304,8 @@ type SrvConfig struct {
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
 	MaterialCommons `mapstructure:"MaterialCommons"`
+
+	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
 }
 
 func (c *SrvConfig) String() string {
