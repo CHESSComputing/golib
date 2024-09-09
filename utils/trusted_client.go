@@ -40,7 +40,7 @@ func (t *TrustedClient) Encrypt(salt string) ([]byte, error) {
 }
 
 // Decrypt decrypt trusted client information
-func (t *TrustedClient) Decrypt(edata []byte, salt string) (TrustedClient, error) {
+func (t *TrustedClient) Decrypt(edata []byte, salt string) error {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
@@ -48,8 +48,9 @@ func (t *TrustedClient) Decrypt(edata []byte, salt string) (TrustedClient, error
 	cipher := srvConfig.Config.Encryption.Cipher
 	data, err := cryptoutils.Decrypt(edata, salt, cipher)
 	if err != nil {
-		return tdata, err
+		return err
 	}
 	err = json.Unmarshal(data, &tdata)
-	return tdata, err
+	t = &tdata
+	return err
 }
