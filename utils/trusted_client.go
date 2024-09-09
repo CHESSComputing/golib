@@ -51,6 +51,8 @@ func (t *TrustedClient) Decrypt(edata []byte, salt string) error {
 		return err
 	}
 	err = json.Unmarshal(data, &tdata)
-	t = &tdata
+	t.User = tdata.User
+	t.IPs = tdata.IPs
+	t.MACs = tdata.MACs
 	return err
 }
