@@ -107,3 +107,44 @@ func HeaderMiddleware(webServer srvConfig.WebServer) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// LoggerMiddleware is custom logger for gin server
+func LoggerMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Start timer
+		start := time.Now()
+
+		// Process the request
+		c.Next()
+
+		// Calculate the duration
+		duration := time.Since(start).Seconds()
+
+		// Get the status code that is sent to the client
+		statusCode := c.Writer.Status()
+
+		// Get the client IP address
+		clientIP := c.ClientIP()
+
+		// Log the request details
+		r := c.Request
+
+		// Save the current log flags
+		originalFlags := log.Flags()
+
+		// Set custom log flags
+		log.SetFlags(log.Ldate | log.Ltime)
+
+		// yield log message about HTTP request
+		log.Printf("%s %d %s %s [client: %s] [%v sec]",
+			r.Proto,
+			statusCode,
+			r.Method,
+			c.Request.URL.Path,
+			clientIP,
+			duration)
+
+		// Restore the original log flags
+		log.SetFlags(originalFlags)
+	}
+}
