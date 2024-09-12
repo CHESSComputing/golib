@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -108,11 +109,35 @@ func HeaderMiddleware(webServer srvConfig.WebServer) gin.HandlerFunc {
 	}
 }
 
+// CustomResponseWriter wraps gin.ResponseWriter to track response size.
+type CustomResponseWriter struct {
+	gin.ResponseWriter
+	bodySize int
+}
+
+// Write tracks the number of bytes written in the response.
+func (w *CustomResponseWriter) Write(data []byte) (int, error) {
+	size, err := w.ResponseWriter.Write(data)
+	w.bodySize += size
+	return size, err
+}
+
 // LoggerMiddleware is custom logger for gin server
 func LoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start timer
 		start := time.Now()
+
+		// Track data in (incoming request size)
+		var dataIn int
+		contentLength := c.Request.Header.Get("Content-Length")
+		if contentLength != "" {
+			dataIn, _ = strconv.Atoi(contentLength)
+		}
+
+		// Create a custom response writer to track data out (response size)
+		customWriter := &CustomResponseWriter{ResponseWriter: c.Writer}
+		c.Writer = customWriter
 
 		// Process the request
 		c.Next()
@@ -126,6 +151,9 @@ func LoggerMiddleware() gin.HandlerFunc {
 		// Get the client IP address
 		clientIP := c.ClientIP()
 
+		// Track data out (number of bytes written in response)
+		dataOut := customWriter.bodySize
+
 		// Log the request details
 		r := c.Request
 
@@ -135,13 +163,15 @@ func LoggerMiddleware() gin.HandlerFunc {
 		// Set custom log flags
 		log.SetFlags(log.Ldate | log.Ltime)
 
-		// yield log message about HTTP request
-		log.Printf("%s %d %s %s [client: %s] [%v sec]",
+		// Log the request details using custom fields
+		log.Printf("%s %d %s %s [client: %s] [bytes in: %v | out: %v] [req: %.6f sec]",
 			r.Proto,
 			statusCode,
 			r.Method,
 			c.Request.URL.Path,
 			clientIP,
+			dataIn,
+			dataOut,
 			duration)
 
 		// Restore the original log flags
