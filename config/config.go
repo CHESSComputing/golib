@@ -21,6 +21,14 @@ type TrustedUser struct {
 	MAC  string `json:"mac"`
 }
 
+// Globug represents globus information
+type Globus struct {
+	ClientID     string `mapstructure:"client_id`      // client id
+	ClientSecret string `mapstructure:"client_secret"` // client secret
+	TransferURL  string `mapstructure:"transger_url"`  // globus transfer url
+	AuthURL      string `mapstructure:"auth_url"`      // globus auth url
+}
+
 // LDAP attributes
 type LDAP struct {
 	URL      string `mapstructure:"url"`      // ldap url
@@ -303,6 +311,7 @@ type SrvConfig struct {
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
+	Globus          `mapstructure:"Globus"`
 	MaterialCommons `mapstructure:"MaterialCommons"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
