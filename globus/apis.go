@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -20,11 +21,12 @@ func Token(scope string) (string, error) {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
-	data := fmt.Sprintf("grant_type=client_credentials&scope=%s&client_id=%s&client_secret=%s",
-		scope,
-		srvConfig.Config.Globus.ClientID,
-		srvConfig.Config.Globus.ClientSecret)
-	req, err := http.NewRequest("POST", srvConfig.Config.Globus.AuthURL, strings.NewReader(data))
+	data := url.Values{}
+	data.Set("scope", scope)
+	data.Set("grant_type", "client_credentials")
+	data.Set("client_id", srvConfig.Config.Globus.ClientID)
+	data.Set("client_secret", srvConfig.Config.Globus.ClientSecret)
+	req, err := http.NewRequest("POST", srvConfig.Config.Globus.AuthURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return "", err
 	}
