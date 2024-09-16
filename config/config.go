@@ -25,7 +25,7 @@ type TrustedUser struct {
 type Globus struct {
 	ClientID     string `mapstructure:"client_id`      // client id
 	ClientSecret string `mapstructure:"client_secret"` // client secret
-	TransferURL  string `mapstructure:"transger_url"`  // globus transfer url
+	TransferURL  string `mapstructure:"transfer_url"`  // globus transfer url
 	AuthURL      string `mapstructure:"auth_url"`      // globus auth url
 }
 
