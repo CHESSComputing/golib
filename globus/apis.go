@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 )
+
+// Verbose shows verbose output for this module
+var Verbose int
 
 // Token API obtains Globus access token
 // example through curl
@@ -27,10 +31,25 @@ func Token(scope string) (string, error) {
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
+	// Dump the HTTP request (for debugging)
+	if Verbose > 2 {
+		dumpRequest, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Printf("HTTP Request:\n%s\n", dumpRequest)
+		}
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
+	}
+	// Dump the HTTP response (for debugging)
+	if Verbose > 2 {
+		dumpResponse, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			fmt.Printf("HTTP Response:\n%s\n", dumpResponse)
+		}
 	}
 	defer resp.Body.Close()
 
@@ -61,11 +80,26 @@ func Search(token string, pattern string) {
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
 
+	// Dump the HTTP request (for debugging)
+	if Verbose > 2 {
+		dumpRequest, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Printf("HTTP Request:\n%s\n", dumpRequest)
+		}
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
 		return
+	}
+	// Dump the HTTP response (for debugging)
+	if Verbose > 2 {
+		dumpResponse, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			fmt.Printf("HTTP Response:\n%s\n", dumpResponse)
+		}
 	}
 	defer resp.Body.Close()
 
@@ -98,11 +132,27 @@ func Ls(token, endpointID, path string) {
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
 
+	// Dump the HTTP request (for debugging)
+	if Verbose > 2 {
+		dumpRequest, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Printf("HTTP Request:\n%s\n", dumpRequest)
+		}
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
 		return
+	}
+
+	// Dump the HTTP response (for debugging)
+	if Verbose > 2 {
+		dumpResponse, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			fmt.Printf("HTTP Response:\n%s\n", dumpResponse)
+		}
 	}
 	defer resp.Body.Close()
 
@@ -136,10 +186,25 @@ func Mkdir(token, endpointID, path string) error {
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
+	// Dump the HTTP request (for debugging)
+	if Verbose > 2 {
+		dumpRequest, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Printf("HTTP Request:\n%s\n", dumpRequest)
+		}
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	}
+	// Dump the HTTP response (for debugging)
+	if Verbose > 2 {
+		dumpResponse, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			fmt.Printf("HTTP Response:\n%s\n", dumpResponse)
+		}
 	}
 	defer resp.Body.Close()
 
@@ -181,10 +246,25 @@ func SharedLink(token, endpointID, path string) (string, error) {
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
+	// Dump the HTTP request (for debugging)
+	if Verbose > 2 {
+		dumpRequest, err := httputil.DumpRequestOut(req, true)
+		if err == nil {
+			fmt.Printf("HTTP Request:\n%s\n", dumpRequest)
+		}
+	}
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
+	}
+	// Dump the HTTP response (for debugging)
+	if Verbose > 2 {
+		dumpResponse, err := httputil.DumpResponse(resp, true)
+		if err == nil {
+			fmt.Printf("HTTP Response:\n%s\n", dumpResponse)
+		}
 	}
 	defer resp.Body.Close()
 
