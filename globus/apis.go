@@ -71,12 +71,13 @@ func Token(scope string) (string, error) {
 // Search API provides search API to globus search pattern
 // example of curl
 // curl -H "Accept: application/json" -H "Authorization: Bearer $t" "https://transfer.api.globus.org/v0.10/endpoint_search?filter_fulltext=CHESS"
-func Search(token string, pattern string) {
+func Search(token string, pattern string) []GlobusSearchResponse {
+	var records []GlobusSearchResponse
 	url := fmt.Sprintf("%s/endpoint_search?filter_fulltext=%s", srvConfig.Config.Globus.TransferURL, pattern)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
-		return
+		return records
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -94,7 +95,7 @@ func Search(token string, pattern string) {
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
-		return
+		return records
 	}
 	// Dump the HTTP response (for debugging)
 	if Verbose > 2 {
@@ -107,19 +108,27 @@ func Search(token string, pattern string) {
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println("Error:", resp.Status)
-		return
+		return records
 	}
 
 	var searchResponse GlobusEndpointResponse
 	err = json.NewDecoder(resp.Body).Decode(&searchResponse)
 	if err != nil {
 		fmt.Println("Error decoding response:", err)
-		return
+		return records
 	}
 
 	for _, endpoint := range searchResponse.Endpoints {
-		fmt.Printf("Found endpoint: ID=%s, Name=%s\n", endpoint.ID, endpoint.DisplayName)
+		rec := GlobusSearchResponse{
+			Id:          endpoint.ID,
+			Name:        endpoint.DisplayName,
+			Owner:       endpoint.Owner,
+			Description: endpoint.Description,
+		}
+		records = append(records, rec)
+		//         fmt.Printf("Found endpoint: ID=%s, Name=%s\n", endpoint.ID, endpoint.DisplayName)
 	}
+	return records
 }
 
 // Ls API provides listing files within Globus
