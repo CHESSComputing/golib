@@ -23,7 +23,7 @@ type TrustedUser struct {
 
 // Globug represents globus information
 type Globus struct {
-	ClientID     string `mapstructure:"client_id`      // client id
+	ClientID     string `mapstructure:"client_id"`     // client id
 	ClientSecret string `mapstructure:"client_secret"` // client secret
 	TransferURL  string `mapstructure:"transfer_url"`  // globus transfer url
 	AuthURL      string `mapstructure:"auth_url"`      // globus auth url
