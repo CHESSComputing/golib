@@ -228,8 +228,9 @@ type Publication struct {
 
 // MaterialCommons represents MaterialCommons service configuration
 type MaterialCommons struct {
-	Url   string `mapstructure:"Url"`
-	Token string `mapstructure:"Token"`
+	Url    string `mapstructure:"Url"`
+	ApiKey string `mapstructure:"ApiKey"`
+	Token  string `mapstructure:"Token"`
 }
 
 // SpecScans represents SpecScansService configuration
