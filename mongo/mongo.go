@@ -329,17 +329,23 @@ func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any 
 	return out
 }
 
-// GetSorted records from MongoDB sorted by given key
-func GetSorted(dbname, collname string, spec bson.M, skeys []string) []map[string]any {
+// GetSorted records from MongoDB sorted by given key with specific order
+func GetSorted(dbname, collname string, spec bson.M, skeys []string, sortOrder, idx, limit int) []map[string]any {
 	out := []map[string]any{}
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
-	var sortSpec bson.M
-	for _, s := range skeys {
-		sortSpec[s] = 1
+	// Construct the sort options using the provided sort keys and sort order
+	sortOptions := bson.D{}
+	for _, key := range skeys {
+		sortOptions = append(sortOptions, bson.E{Key: key, Value: sortOrder})
 	}
-	opts := options.Find().SetSort(sortSpec)
+
+	// Define the find options with the constructed sortOptions
+	opts := options.Find().SetSort(sortOptions).SetSkip(int64(idx))
+	if limit > 0 {
+		opts = opts.SetLimit(int64(limit))
+	}
 	cur, err := c.Find(ctx, spec, opts)
 	cur.All(ctx, &out)
 	if err != nil {
