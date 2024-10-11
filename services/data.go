@@ -22,11 +22,13 @@ func (s *MetaRecord) JsonString() string {
 
 // ServiceQuery represents service query along with its results
 type ServiceQuery struct {
-	Query string `json:"query"`
-	Spec  any    `json:"spec"`
-	SQL   string `json:"sql"`
-	Idx   int    `json:"idx"`
-	Limit int    `json:"limit"`
+	Query     string   `json:"query"`
+	Spec      any      `json:"spec"`
+	SQL       string   `json:"sql"`
+	Idx       int      `json:"idx"`
+	Limit     int      `json:"limit"`
+	SortKeys  []string `json:"sort_keys"`
+	SortOrder int      `json:"sort_order"`
 }
 
 // ServiceResults represents service results
