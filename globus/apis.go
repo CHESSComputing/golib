@@ -17,12 +17,14 @@ var Verbose int
 // Token API obtains Globus access token
 // example through curl
 // curl -X POST https://auth.globus.org/v2/oauth2/token --header "Content-Type: application/x-www-form-urlencoded" --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=$scope" --data-urlencode "client_id=$clientid" --data-urlencode "client_secret=$secret"
-func Token(scope string) (string, error) {
+func Token(scopes []string) (string, error) {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	data := url.Values{}
-	data.Set("scope", scope)
+	for _, s := range scopes {
+		data.Add("scope", s)
+	}
 	data.Set("grant_type", "client_credentials")
 	data.Set("client_id", srvConfig.Config.Globus.ClientID)
 	data.Set("client_secret", srvConfig.Config.Globus.ClientSecret)
