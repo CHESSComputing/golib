@@ -37,9 +37,10 @@ type LDAP struct {
 	Password string `mapstructure:"password"` // LDAP password to use
 }
 
-// Zenodo credentials
-type Zenodo struct {
-	URL         string `mapstructure:"Url"`         // zenodo url
+// DOI attributes
+type DOI struct {
+	Name        string `mapstructure:"Name"`        // doi name
+	URL         string `mapstructure:"Url"`         // doi url
 	AccessToken string `mapstructure:"AccessToken"` // access token
 }
 
@@ -223,7 +224,6 @@ type OreCastMetaData struct {
 // Publication represents Publication service configuration
 type Publication struct {
 	WebServer `mapstructure:"WebServer"`
-	Zenodo
 }
 
 // MaterialCommons represents MaterialCommons service configuration
@@ -314,6 +314,7 @@ type SrvConfig struct {
 	Publication     `mapstructure:"PublicationService"`
 	Globus          `mapstructure:"Globus"`
 	MaterialCommons `mapstructure:"MaterialCommons"`
+	DOI             `mapstructure:"DOI"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
 }
