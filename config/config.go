@@ -39,7 +39,8 @@ type LDAP struct {
 
 // DOI attributes
 type DOI struct {
-	Name        string `mapstructure:"Name"`        // doi name
+	Name        string `mapstructure:"Name"`        // doi name, e.g. Zenodo or MaterialCommons
+	ProjectName string `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
 	URL         string `mapstructure:"Url"`         // doi url
 	AccessToken string `mapstructure:"AccessToken"` // access token
 }
