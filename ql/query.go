@@ -50,7 +50,7 @@ func ParseQuery(query string) (bson.M, error) {
 					spec["_id"] = oid
 				}
 			}
-			return spec, nil
+			return adjustQuery(spec), nil
 		}
 		log.Printf("ERROR: unable to parse input query '%s' error %v", query, err)
 		return nil, err
@@ -125,6 +125,12 @@ func adjustQuery(spec bson.M) bson.M {
 				log.Printf("WARNING: unable to find matching schema key for %s, existing schema keys %+v", kkk, _schemaKeys)
 			}
 			nspec[kkk] = val
+		}
+		// watch for regex
+		if strings.Contains(fmt.Sprintf("%v", val), "*") {
+			// replace asterisk pattern with proper regexp
+			v := strings.Replace(fmt.Sprintf("%v", val), "*", ".*", -1)
+			nspec[kkk] = bson.M{"$regex": v}
 		}
 	}
 	if Verbose > 0 {

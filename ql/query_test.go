@@ -1,6 +1,7 @@
 package ql
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -26,4 +27,18 @@ func TestParseQuery(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	t.Logf("input query %s spec=%+v\n", querySpec, spec)
+
+	// test 3: use regex
+	query = `{"did":" /beamline*"}`
+	spec, err = ParseQuery(query)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if val, ok := spec["did"]; ok {
+		vvv := fmt.Sprintf("%v", val)
+		if vvv != "map[$regex: /beamline.*]" {
+			msg := fmt.Sprintf("parsed query %s does not fit regexp", vvv)
+			t.Errorf(msg)
+		}
+	}
 }
