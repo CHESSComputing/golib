@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/go-ldap/ldap/v3"
 )
@@ -46,4 +47,12 @@ func Search(ldapURL, login, password, baseDN, user string, attributes []string) 
 		controls)
 	result, err := l.Search(searchReq)
 	return result, err
+}
+
+// helper function to remove specific suffix from the end of the string
+func removeSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		return s[:len(s)-len(suffix)]
+	}
+	return s
 }

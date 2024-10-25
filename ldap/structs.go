@@ -10,9 +10,11 @@ import (
 
 // Entry represents LDAP user entry
 type Entry struct {
-	DN     string
-	Groups []string
-	Expire time.Time
+	DN        string
+	Groups    []string
+	Btrs      []string
+	Beamlines []string
+	Expire    time.Time
 }
 
 // Belong checks if group belongs with LDAP entry
@@ -58,6 +60,29 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 				Groups: attr.Values,
 				Expire: time.Now(),
 			}
+			// find out BTRs and Beamlines
+			var btrs, beamlines []string
+			for _, val := range attr.Values {
+				if strings.Contains(val, "OU=BTR") {
+					for _, a := range strings.Split(val, ",") {
+						if strings.HasPrefix(a, "CN=") {
+							btr := strings.Replace(a, "CN=", "", -1)
+							btrs = append(btrs, btr)
+						}
+					}
+				}
+				if strings.Contains(val, "CN=Users") && strings.Contains(val, "-m") {
+					for _, a := range strings.Split(val, ",") {
+						if strings.HasPrefix(a, "CN=") && a != "CN=Users" {
+							beamline := strings.Replace(a, "CN=", "", -1)
+							beamline = removeSuffix(beamline, "-m")
+							beamlines = append(beamlines, beamline)
+						}
+					}
+				}
+			}
+			cacheEntry.Beamlines = beamlines
+			cacheEntry.Btrs = btrs
 			// here we suppose to have only eny entry per user filled with groups
 			c.Map[user] = cacheEntry
 			return cacheEntry, nil
