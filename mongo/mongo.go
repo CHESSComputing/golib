@@ -394,6 +394,18 @@ func Count(dbname, collname string, spec bson.M) int {
 	return int(nrec)
 }
 
+// Distinct gets number records from MongoDB
+func Distinct(dbname, collname, field string, filter bson.D) ([]any, error) {
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	records, err := c.Distinct(ctx, field, filter)
+	if err != nil {
+		log.Printf("Unable to fetch unique records, field %s spec %v, error %v\n", field, filter, err)
+	}
+	return records, err
+}
+
 // Remove records from MongoDB
 func Remove(dbname, collname string, spec bson.M) error {
 	client := Mongo.Connect()
