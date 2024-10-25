@@ -88,7 +88,7 @@ func (t *Token) Validate(clientId string) error {
 		return err
 	}
 	if !tkn.Valid {
-		return errors.New("invalid token")
+		return errors.New("token.Validate: invalid token")
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 		return claims, err
 	}
 	if !tkn.Valid {
-		err := errors.New("invalid token")
+		err := errors.New("TokenClaims: invalid token")
 		return claims, err
 	}
 	return claims, nil
