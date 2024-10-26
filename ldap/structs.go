@@ -15,6 +15,7 @@ type Entry struct {
 	Btrs      []string
 	Beamlines []string
 	Expire    time.Time
+	Foxdens   []string
 }
 
 // Belong checks if group belongs with LDAP entry
@@ -61,7 +62,7 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 				Expire: time.Now(),
 			}
 			// find out BTRs and Beamlines
-			var btrs, beamlines []string
+			var btrs, beamlines, foxdens []string
 			for _, val := range attr.Values {
 				if strings.Contains(val, "OU=BTR") {
 					for _, a := range strings.Split(val, ",") {
@@ -80,7 +81,16 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 						}
 					}
 				}
+				if strings.Contains(val, "CN=foxden") {
+					for _, a := range strings.Split(val, ",") {
+						if strings.HasPrefix(a, "CN=foxden") {
+							foxden := strings.Replace(a, "CN=", "", -1)
+							foxdens = append(foxdens, foxden)
+						}
+					}
+				}
 			}
+			cacheEntry.Foxdens = foxdens
 			cacheEntry.Beamlines = beamlines
 			cacheEntry.Btrs = btrs
 			// here we suppose to have only eny entry per user filled with groups
