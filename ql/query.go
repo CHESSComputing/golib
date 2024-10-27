@@ -50,6 +50,9 @@ func ParseQuery(query string) (bson.M, error) {
 					spec["_id"] = oid
 				}
 			}
+			if _, ok := spec["$or"]; ok {
+				return spec, nil
+			}
 			return adjustQuery(spec), nil
 		}
 		log.Printf("ERROR: unable to parse input query '%s' error %v", query, err)

@@ -41,4 +41,15 @@ func TestParseQuery(t *testing.T) {
 			t.Errorf(msg)
 		}
 	}
+	// test 4: use complex regex query
+	query = `{"$or":[{"beamline":".*val.*"},{"btr":".*val.*"}]}`
+	spec, err = ParseQuery(query)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	fmt.Println("query", query)
+	fmt.Println("spec", spec)
+	if len(spec) == 0 {
+		t.Errorf("empty spec")
+	}
 }
