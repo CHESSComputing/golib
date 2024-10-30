@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 )
+
+// keep map of globus collection vs ids for caching purposes
+var globusCache map[string]string
 
 // generate Globus collection URL link
 func GlobusLink(cid, path string) (string, error) {
@@ -31,6 +35,12 @@ func GlobusLink(cid, path string) (string, error) {
 
 // ChessGlobusLink provides globus link to given globus collection name and path
 func ChessGlobusLink(collection, path string) (string, error) {
+	if globusCache == nil {
+		globusCache = make(map[string]string)
+	}
+	if cid, ok := globusCache[collection]; ok {
+		return GlobusLink(cid, path)
+	}
 	var cid string
 	scopes := []string{"urn:globus:auth:scope:transfer.api.globus.org:all"}
 	token, err := Token(scopes)
@@ -38,10 +48,14 @@ func ChessGlobusLink(collection, path string) (string, error) {
 		return "", err
 	}
 	// find collection id
+	mapMutex := sync.RWMutex{}
 	records := Search(token, collection)
 	for _, r := range records {
 		if r.Name == collection {
 			cid = r.Id
+			mapMutex.Lock()
+			globusCache[collection] = cid
+			mapMutex.Unlock()
 			break
 		}
 	}
