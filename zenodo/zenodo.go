@@ -10,8 +10,8 @@ import "errors"
 
 // Creator represents creator record
 type Creator struct {
-	Name       string `json:"name"`
-	Affliation string `json:"affiliation"`
+	Name        string `json:"name"`
+	Affiliation string `json:"affiliation"`
 }
 
 // MetaDataRecord represents meta-data record
@@ -109,4 +109,25 @@ type AddResponse struct {
 	Owner    int    `json:"owner"`
 	RecordId int64  `json:"record_id"`
 	Links    Links  `json:"links"`
+}
+
+// File describes common file record
+type File struct {
+	Name string `json:"name"`
+	File string `json:"file"`
+}
+
+// DoiRecord represents doi record
+type DoiRecord struct {
+	Id     int64  `json:"id"`
+	Doi    string `json:"doi"`
+	DoiUrl string `json:"doi_url"`
+	Files  []File `json:"files,omitempty"`
+	Links  Links  `json:"links"`
+}
+
+// PublishRecord describes publicatin record
+type PublishRecord struct {
+	MetaData MetaDataRecord `json:"metadata"`
+	Files    []File         `json:"files"`
 }
