@@ -125,9 +125,3 @@ type DoiRecord struct {
 	Files  []File `json:"files,omitempty"`
 	Links  Links  `json:"links"`
 }
-
-// PublishRecord describes publicatin record
-type PublishRecord struct {
-	MetaData MetaDataRecord `json:"metadata"`
-	Files    []File         `json:"files"`
-}
