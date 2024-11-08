@@ -46,9 +46,9 @@ func Publish(did, description string) (string, error) {
 	// if project does not exist we'll create it
 	if projectID == 0 {
 		req := mcapi.CreateProjectRequest{
-			Name:        "FOXDEN datasets",
-			Description: "FOXDEN repository of public datasets",
-			Summary:     "FOXDEN repository of public dataset",
+			Name:        projectName,
+			Description: fmt.Sprintf("%s: repository of public datasets", projectName),
+			Summary:     fmt.Sprintf("%s: repository of public datasets", projectName),
 		}
 		proj, err := mcClient.CreateProject(req)
 		if err != nil {
