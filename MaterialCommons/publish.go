@@ -34,6 +34,9 @@ func Publish(did, description string) (string, error) {
 
 	var projectID, datasetID int
 	projectName := srvConfig.Config.DOI.ProjectName
+	if projectName == "" {
+		projectName = "FOXDEN datasets"
+	}
 	records, err := mcClient.ListProjects()
 	if err != nil {
 		return doi, err
