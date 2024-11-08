@@ -1,6 +1,7 @@
 package beamlines
 
 import (
+	"fmt"
 	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -11,7 +12,9 @@ import (
 func SchemaFileName(sname string) string {
 	var fname string
 	for _, f := range srvConfig.Config.CHESSMetaData.SchemaFiles {
-		if strings.Contains(f, sname) {
+		fval := strings.ToLower(f)
+		suffix := fmt.Sprintf("%s.json", strings.ToLower(sname))
+		if strings.HasSuffix(fval, suffix) {
 			fname = f
 			break
 		}
