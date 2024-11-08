@@ -9,6 +9,7 @@ import (
 
 var mcClient *mcapi.Client
 
+// helper function to get MaterialCommons client
 func getMcClient() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
@@ -24,13 +25,14 @@ func getMcClient() {
 	return
 }
 
-func Publish(did, description string) (string, error) {
+// Publish function pulishes FOXDEN dataset with did and description in MaterialCommons
+func Publish(did, description string) (string, string, error) {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	getMcClient()
 	var err error
-	var doi string
+	var doi, doiLink string
 
 	var projectID, datasetID int
 	projectName := srvConfig.Config.DOI.ProjectName
@@ -39,7 +41,7 @@ func Publish(did, description string) (string, error) {
 	}
 	records, err := mcClient.ListProjects()
 	if err != nil {
-		return doi, err
+		return doi, doiLink, err
 	}
 	for _, r := range records {
 		if r.Name == projectName {
@@ -55,7 +57,7 @@ func Publish(did, description string) (string, error) {
 		}
 		proj, err := mcClient.CreateProject(req)
 		if err != nil {
-			return doi, err
+			return doi, doiLink, err
 		}
 		projectID = proj.ID
 	}
@@ -72,18 +74,19 @@ func Publish(did, description string) (string, error) {
 	}
 	ds, err := mcClient.DepositDataset(projectID, deposit)
 	if err != nil {
-		return doi, err
+		return doi, doiLink, err
 	}
 	datasetID = ds.ID
 
 	// publish deposit
 	_, err = mcClient.PublishDataset(projectID, datasetID)
 	if err != nil {
-		return doi, err
+		return doi, doiLink, err
 	}
 	ds, err = mcClient.MintDOIForDataset(projectID, datasetID)
 	if err == nil {
 		doi = ds.DOI
+		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 	}
-	return doi, err
+	return doi, doiLink, err
 }
