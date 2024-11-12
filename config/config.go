@@ -39,8 +39,10 @@ type LDAP struct {
 
 // DOI attributes
 type DOI struct {
-	Provider    string `mapstructure:"Provider"`    // doi provider, e.g. Zenodo or MaterialCommons
-	ProjectName string `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
+	Provider        string          `mapstructure:"Provider"`    // doi provider, e.g. Zenodo or MaterialCommons
+	ProjectName     string          `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
+	Zenodo          Zenodo          `mapstructure:"Zenodo"`
+	MaterialCommons MaterialCommons `mapstructure:"MaterialCommons"`
 }
 
 // DID structure
@@ -322,8 +324,6 @@ type SrvConfig struct {
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
 	Globus          `mapstructure:"Globus"`
-	MaterialCommons `mapstructure:"MaterialCommons"`
-	Zenodo          `mapstructure:"Zenodo"`
 	DOI             `mapstructure:"DOI"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
