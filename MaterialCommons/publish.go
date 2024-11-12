@@ -18,8 +18,8 @@ func getMcClient() {
 		return
 	}
 	args := &mcapi.ClientArgs{
-		BaseURL: srvConfig.Config.DOI.URL,
-		APIKey:  srvConfig.Config.DOI.AccessToken,
+		BaseURL: srvConfig.Config.MaterialCommons.URL,
+		APIKey:  srvConfig.Config.MaterialCommons.AccessToken,
 	}
 	mcClient = mcapi.NewClient(args)
 	return
@@ -35,7 +35,7 @@ func Publish(did, description string) (string, string, error) {
 	var doi, doiLink string
 
 	var projectID, datasetID int
-	projectName := srvConfig.Config.DOI.ProjectName
+	projectName := srvConfig.Config.MaterialCommons.ProjectName
 	if projectName == "" {
 		projectName = "FOXDEN datasets"
 	}
