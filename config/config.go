@@ -231,11 +231,16 @@ type Publication struct {
 	WebServer `mapstructure:"WebServer"`
 }
 
+// Zenodo represents Zenodo service configuration
+type Zenodo struct {
+	Url         string `mapstructure:"Url"`
+	AccessToken string `mapstructure:"AccessToken"`
+}
+
 // MaterialCommons represents MaterialCommons service configuration
 type MaterialCommons struct {
-	Url    string `mapstructure:"Url"`
-	ApiKey string `mapstructure:"ApiKey"`
-	Token  string `mapstructure:"Token"`
+	Url         string `mapstructure:"Url"`
+	AccessToken string `mapstructure:"AccessToken"`
 }
 
 // SpecScans represents SpecScansService configuration
@@ -319,6 +324,7 @@ type SrvConfig struct {
 	Publication     `mapstructure:"PublicationService"`
 	Globus          `mapstructure:"Globus"`
 	MaterialCommons `mapstructure:"MaterialCommons"`
+	Zenodo          `mapstructure:"Zenodo"`
 	DOI             `mapstructure:"DOI"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
