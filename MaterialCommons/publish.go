@@ -18,7 +18,7 @@ func getMcClient() {
 		return
 	}
 	args := &mcapi.ClientArgs{
-		BaseURL: srvConfig.Config.MaterialCommons.URL,
+		BaseURL: srvConfig.Config.MaterialCommons.Url,
 		APIKey:  srvConfig.Config.MaterialCommons.AccessToken,
 	}
 	mcClient = mcapi.NewClient(args)
