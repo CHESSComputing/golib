@@ -239,6 +239,7 @@ type Zenodo struct {
 type MaterialCommons struct {
 	Url         string `mapstructure:"Url"`
 	AccessToken string `mapstructure:"AccessToken"`
+	ProjectName string `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
 }
 
 // SpecScans represents SpecScansService configuration
