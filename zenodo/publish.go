@@ -3,8 +3,10 @@ package zenodo
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/CHESSComputing/golib/services"
@@ -27,6 +29,20 @@ func initSrv() {
 	_httpWriteRequest.GetToken()
 }
 
+// helper function to check response status
+func checkResponse(resp *http.Response) error {
+	if resp.StatusCode != 200 {
+		// read response body to get error
+		if data, err := io.ReadAll(resp.Body); err == nil {
+			msg := fmt.Sprintf("call to upstream service not successfull, %s", string(data))
+			return errors.New(msg)
+		}
+		msg := fmt.Sprintf("call to upstream service fails with code %d", resp.StatusCode)
+		return errors.New(msg)
+	}
+	return nil
+}
+
 func CreateRecord() (int64, error) {
 	// init reader/writer and srv config
 	initSrv()
@@ -37,6 +53,9 @@ func CreateRecord() (int64, error) {
 	resp, err := _httpWriteRequest.Post(rurl, "application/json", bytes.NewBuffer([]byte{}))
 	defer resp.Body.Close()
 	if err != nil {
+		return docId, err
+	}
+	if err := checkResponse(resp); err != nil {
 		return docId, err
 	}
 
@@ -66,6 +85,9 @@ func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 	if err != nil {
 		return err
 	}
+	if err := checkResponse(metaResp); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -87,7 +109,10 @@ func PublishRecord(docId int64) (DoiRecord, error) {
 	rurl = fmt.Sprintf("%s/docs/%d", srvConfig.Config.Services.PublicationURL, docId)
 	docsResp, err := _httpReadRequest.Get(rurl)
 	defer docsResp.Body.Close()
-	if err != nil || (docsResp.StatusCode < 200 || docsResp.StatusCode >= 400) {
+	if err != nil {
+		return doiRecord, err
+	}
+	if err := checkResponse(docsResp); err != nil {
 		return doiRecord, err
 	}
 	data, err := io.ReadAll(docsResp.Body)
