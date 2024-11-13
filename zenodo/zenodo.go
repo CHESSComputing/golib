@@ -44,6 +44,11 @@ func (m *MetaDataRecord) Validate() error {
 	return nil
 }
 
+// MetaRecords used to publish meta-data record to zenodo
+type MetaRecord struct {
+	Metadata MetaDataRecord `json:"metadata"`
+}
+
 // Error represents individual zenodo error struct
 type Error struct {
 	Field    string
