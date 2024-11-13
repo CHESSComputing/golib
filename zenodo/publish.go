@@ -75,7 +75,8 @@ func CreateRecord() (int64, error) {
 func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 	// init reader/writer and srv config
 	initSrv()
-	data, err := json.Marshal(mrec)
+	rec := MetaRecord{Metadata: mrec}
+	data, err := json.Marshal(rec)
 	if err != nil {
 		return err
 	}
