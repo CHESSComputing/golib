@@ -102,8 +102,11 @@ func PublishRecord(docId int64) (DoiRecord, error) {
 	rurl := fmt.Sprintf("%s/publish/%d", srvConfig.Config.Services.PublicationURL, docId)
 	publishResp, err := _httpWriteRequest.Post(rurl, "application/json", bytes.NewBuffer([]byte{}))
 	defer publishResp.Body.Close()
-	if err != nil || (publishResp.StatusCode < 200 || publishResp.StatusCode >= 400) {
+	if err != nil {
 		return doiRecord, err
+	}
+	if err := checkResponse(publishResp); err != nil {
+		return err
 	}
 
 	// fetch our document
