@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/CHESSComputing/golib/services"
@@ -31,7 +32,7 @@ func initSrv() {
 
 // helper function to check response status
 func checkResponse(resp *http.Response) error {
-	if resp.StatusCode != 200 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
 		// read response body to get error
 		if data, err := io.ReadAll(resp.Body); err == nil {
 			msg := fmt.Sprintf("call to upstream service not successfull, %s", string(data))
@@ -43,6 +44,7 @@ func checkResponse(resp *http.Response) error {
 	return nil
 }
 
+// CreateRecord provides create record API
 func CreateRecord() (int64, error) {
 	// init reader/writer and srv config
 	initSrv()
@@ -70,6 +72,47 @@ func CreateRecord() (int64, error) {
 		return docId, err
 	}
 	return doc.Id, nil
+}
+
+func getBid(did int64) (string, error) {
+	rurl := fmt.Sprintf("%s/docs/%d", srvConfig.Config.Services.PublicationURL, did)
+	resp, err := _httpReadRequest.Get(rurl)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	var rec DoiRecord
+	data, err := io.ReadAll(resp.Body)
+	err = json.Unmarshal(data, &rec)
+	if err != nil {
+		return "", err
+	}
+	arr := strings.Split(rec.Links.Bucket, "/")
+	bid := arr[len(arr)-1]
+	return bid, nil
+}
+
+// AddRecord represents add API to zenodo
+func AddRecord(docId int64, name string, foxdenRecord any) error {
+	initSrv()
+	data, err := json.Marshal(foxdenRecord)
+	if err != nil {
+		return err
+	}
+	bid, err := getBid(docId)
+	if err != nil {
+		return err
+	}
+	rurl := fmt.Sprintf("%s/add/%s/%s", srvConfig.Config.Services.PublicationURL, bid, name)
+	resp, err := _httpWriteRequest.Put(rurl, "application/json", bytes.NewBuffer(data))
+	defer resp.Body.Close()
+	if err != nil {
+		return err
+	}
+	if err := checkResponse(resp); err != nil {
+		return err
+	}
+	return nil
 }
 
 func UpdateRecord(docId int64, mrec MetaDataRecord) error {
@@ -106,7 +149,7 @@ func PublishRecord(docId int64) (DoiRecord, error) {
 		return doiRecord, err
 	}
 	if err := checkResponse(publishResp); err != nil {
-		return err
+		return doiRecord, err
 	}
 
 	// fetch our document

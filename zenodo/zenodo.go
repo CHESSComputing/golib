@@ -8,6 +8,12 @@ import "errors"
 // snd, some discussion about zenodo APIs:
 // https://github.com/zenodo/zenodo/issues/2168
 
+// FoxdenRecord represents foxden upload record
+type FoxdenRecord struct {
+	Beamline string `json:"beamline"`
+	Type     string `json:"type"`
+}
+
 // Creator represents creator record
 type Creator struct {
 	Name        string `json:"name"`
@@ -47,6 +53,7 @@ func (m *MetaDataRecord) Validate() error {
 // MetaRecords used to publish meta-data record to zenodo
 type MetaRecord struct {
 	Metadata MetaDataRecord `json:"metadata"`
+	Files    any            `json:"files,omitempty"`
 }
 
 // Error represents individual zenodo error struct
