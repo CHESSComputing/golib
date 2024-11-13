@@ -23,6 +23,8 @@ func initSrv() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
+	_httpReadRequest.GetToken()
+	_httpWriteRequest.GetToken()
 }
 
 func CreateRecord() (int64, error) {
