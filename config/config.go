@@ -52,6 +52,12 @@ type DID struct {
 	Divider    string `mapstructure:divider`    // did key-value divider, default "="
 }
 
+// Embed structure
+type Embed struct {
+	DocDb string `mapstructure:"DocDb"`
+	SqlDb string `mapstructure:"SqlDb"`
+}
+
 // QL structure
 type QL struct {
 	ServiceMapFile string `mapstructure:ServiceMapFile` // service map file name
@@ -325,6 +331,7 @@ type SrvConfig struct {
 	Publication     `mapstructure:"PublicationService"`
 	Globus          `mapstructure:"Globus"`
 	DOI             `mapstructure:"DOI"`
+	Embed           `mapstructure:"Embed"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
 }
