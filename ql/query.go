@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	utils "github.com/CHESSComputing/golib/utils"
-	bson "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -31,8 +30,8 @@ var _schemaKeys SchemaKeys
 
 // ParseQuery function provides basic parser for user queries and return
 // results in bson dictionary
-func ParseQuery(query string) (bson.M, error) {
-	spec := make(bson.M)
+func ParseQuery(query string) (map[string]any, error) {
+	spec := make(map[string]any)
 	if strings.TrimSpace(query) == "" {
 		log.Println("WARNING: empty query string")
 		return nil, errors.New("empty query")
@@ -89,7 +88,7 @@ func ParseQuery(query string) (bson.M, error) {
 		}
 	} else {
 		// or, query as free text
-		spec["$text"] = bson.M{"$search": query}
+		spec["$text"] = map[string]any{"$search": query}
 	}
 	if Verbose > 0 {
 		log.Printf("input query %s spec=%v", query, spec)
@@ -98,9 +97,9 @@ func ParseQuery(query string) (bson.M, error) {
 }
 
 // helper function to adjust query keys
-func adjustQuery(spec bson.M) bson.M {
+func adjustQuery(spec map[string]any) map[string]any {
 	// TODO: take input query and change its keys to match schema
-	nspec := make(bson.M)
+	nspec := make(map[string]any)
 	for kkk, val := range spec {
 		if strings.HasPrefix(kkk, "$") {
 			continue
@@ -121,7 +120,7 @@ func adjustQuery(spec bson.M) bson.M {
 			} else {
 				//                 pat, err := regexp.Compile(fmt.Sprintf("/^%s$/i", sval))
 				pat := fmt.Sprintf("^%s$", sval)
-				nspec[key] = bson.M{"$regex": pat, "$options": "i"}
+				nspec[key] = map[string]any{"$regex": pat, "$options": "i"}
 			}
 		} else {
 			if kkk != "did" {
@@ -133,7 +132,7 @@ func adjustQuery(spec bson.M) bson.M {
 		if strings.Contains(fmt.Sprintf("%v", val), "*") {
 			// replace asterisk pattern with proper regexp
 			v := strings.Replace(fmt.Sprintf("%v", val), "*", ".*", -1)
-			nspec[kkk] = bson.M{"$regex": v}
+			nspec[kkk] = map[string]any{"$regex": v}
 		}
 	}
 	if Verbose > 0 {

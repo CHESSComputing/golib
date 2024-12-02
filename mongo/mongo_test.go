@@ -2,8 +2,6 @@ package mongo
 
 import (
 	"testing"
-
-	bson "go.mongodb.org/mongo-driver/bson"
 )
 
 // TestMongoInsert
@@ -14,7 +12,7 @@ func TestMongoInsert(t *testing.T) {
 	InitMongoDB("mongodb://localhost:8230")
 
 	// remove all records in test collection
-	Remove(dbname, collname, bson.M{})
+	Remove(dbname, collname, map[string]any{})
 
 	// insert one record
 	var records []map[string]any
@@ -24,7 +22,7 @@ func TestMongoInsert(t *testing.T) {
 	Insert(dbname, collname, records)
 
 	// look-up one record
-	spec := bson.M{"dataset": dataset}
+	spec := map[string]any{"dataset": dataset}
 	idx := 0
 	limit := 1
 	records = Get(dbname, collname, spec, idx, limit)
@@ -40,7 +38,7 @@ func TestMongoInsert(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	spec = bson.M{"test": 1}
+	spec = map[string]any{"test": 1}
 	records = Get(dbname, collname, spec, idx, limit)
 	if len(records) != 1 {
 		t.Errorf("unable to find records using spec '%s', records %+v", spec, records)

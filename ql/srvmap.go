@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	utils "github.com/CHESSComputing/golib/utils"
-	bson "go.mongodb.org/mongo-driver/bson"
 )
 
 // ServiceMap defines FOXDEN service QL mapping
@@ -80,8 +79,8 @@ func (q *QLManager) Services() []string {
 }
 
 // ServiceQueries parses given query string into list of service queries
-func (q *QLManager) ServiceQueries(query string) (map[string]bson.M, error) {
-	sqMap := make(map[string]bson.M)
+func (q *QLManager) ServiceQueries(query string) (map[string]map[string]any, error) {
+	sqMap := make(map[string]map[string]any)
 	spec, err := ParseQuery(query)
 	if err != nil {
 		return nil, err
@@ -93,7 +92,7 @@ func (q *QLManager) ServiceQueries(query string) (map[string]bson.M, error) {
 					val[key] = smap
 					sqMap[srv] = val
 				} else {
-					sqMap[srv] = bson.M{key: smap}
+					sqMap[srv] = map[string]any{key: smap}
 				}
 			}
 		}

@@ -256,7 +256,7 @@ func Insert(dbname, collname string, records []map[string]any) {
 }
 
 // InsertRecord insert record with given spec to MongoDB
-func InsertRecord(dbname, collname string, rec bson.M) error {
+func InsertRecord(dbname, collname string, rec map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -268,7 +268,7 @@ func InsertRecord(dbname, collname string, rec bson.M) error {
 }
 
 // UpsertRecord insert record with given spec to MongoDB
-func UpsertRecord(dbname, collname string, spec bson.M, rec bson.M) error {
+func UpsertRecord(dbname, collname string, spec, rec map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -302,7 +302,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 }
 
 // Get records from MongoDB
-func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any {
+func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any {
 	out := []map[string]any{}
 	client := Mongo.Connect()
 	ctx := context.TODO()
@@ -330,7 +330,7 @@ func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any 
 }
 
 // GetSorted records from MongoDB sorted by given key with specific order
-func GetSorted(dbname, collname string, spec bson.M, skeys []string, sortOrder, idx, limit int) []map[string]any {
+func GetSorted(dbname, collname string, spec map[string]any, skeys []string, sortOrder, idx, limit int) []map[string]any {
 	out := []map[string]any{}
 	client := Mongo.Connect()
 	ctx := context.TODO()
@@ -363,8 +363,8 @@ func GetSorted(dbname, collname string, spec bson.M, skeys []string, sortOrder, 
 }
 
 // helper function to present in bson selected fields
-func sel(q ...string) (r bson.M) {
-	r = make(bson.M, len(q))
+func sel(q ...string) (r map[string]any) {
+	r = make(map[string]any, len(q))
 	for _, s := range q {
 		r[s] = 1
 	}
@@ -372,7 +372,7 @@ func sel(q ...string) (r bson.M) {
 }
 
 // Update inplace for given spec
-func Update(dbname, collname string, spec, newdata bson.M) {
+func Update(dbname, collname string, spec, newdata map[string]any) {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -383,7 +383,7 @@ func Update(dbname, collname string, spec, newdata bson.M) {
 }
 
 // Count gets number records from MongoDB
-func Count(dbname, collname string, spec bson.M) int {
+func Count(dbname, collname string, spec map[string]any) int {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -407,7 +407,7 @@ func Distinct(dbname, collname, field string, filter bson.D) ([]any, error) {
 }
 
 // Remove records from MongoDB
-func Remove(dbname, collname string, spec bson.M) error {
+func Remove(dbname, collname string, spec map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)

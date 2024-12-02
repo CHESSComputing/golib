@@ -4,7 +4,6 @@ import (
 	"log"
 
 	tiedodb "github.com/HouzuoGuo/tiedot/db"
-	bson "go.mongodb.org/mongo-driver/bson"
 )
 
 var db *tiedodb.DB
@@ -26,7 +25,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 }
 
 // Get records from document-oriented db
-func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any {
+func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any {
 	coll := db.Use(collname)
 	var results []map[string]any
 	row := make(map[string]any)
@@ -39,16 +38,16 @@ func Get(dbname, collname string, spec bson.M, idx, limit int) []map[string]any 
 }
 
 // Update inplace for given spec
-func Update(dbname, collname string, spec, newdata bson.M) {
+func Update(dbname, collname string, spec, newdata map[string]any) {
 }
 
 // Count gets number records from document-oriented db
-func Count(dbname, collname string, spec bson.M) int {
+func Count(dbname, collname string, spec map[string]any) int {
 	return 0
 }
 
 // Remove records from document-oriented db
-func Remove(dbname, collname string, spec bson.M) error {
+func Remove(dbname, collname string, spec map[string]any) error {
 	var err error
 	return err
 }
