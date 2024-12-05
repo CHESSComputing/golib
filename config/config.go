@@ -289,7 +289,7 @@ type Authz struct {
 
 	TestMode     bool   `mapstructure:TestMode`  // test mode
 	CheckLDAP    bool   `mapstructure:CheckLDAP` // check users scope in LDAP
-	DBUri        string `mapstructure:"DBUri"`   // database URI
+	DBFile       string `mapstructure:"DBFile"`
 	ClientID     string `mapstructure:"ClientId"`
 	ClientSecret string `mapstructure:"ClientSecret"`
 	Domain       string `mapstructure:"Domain"`
