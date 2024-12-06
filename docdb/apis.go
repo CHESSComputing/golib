@@ -67,7 +67,7 @@ func Count(dbname, collname string, spec map[string]any) int {
 // Remove records from document-oriented db
 func Remove(dbname, collname string, spec map[string]any) error {
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.Remove(dbname, collname, spec)
+		return embed.Remove(dbname, collname, spec)
 	}
 	return mongo.Remove(dbname, collname, spec)
 }
@@ -75,7 +75,7 @@ func Remove(dbname, collname string, spec map[string]any) error {
 // Distinct gets number records from document-oriented db
 func Distinct(dbname, collname, field string) ([]any, error) {
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.Distinct(dbname, collname, field)
+		return embed.Distinct(dbname, collname, field)
 	}
 	return mongo.Distinct(dbname, collname, field)
 }
@@ -83,7 +83,7 @@ func Distinct(dbname, collname, field string) ([]any, error) {
 // InsertRecord insert record with given spec to document-oriented db
 func InsertRecord(dbname, collname string, rec map[string]any) error {
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.InsertRecord(dbname, collname, rec)
+		return embed.InsertRecord(dbname, collname, rec)
 	}
 	return mongo.InsertRecord(dbname, collname, rec)
 }
@@ -91,7 +91,7 @@ func InsertRecord(dbname, collname string, rec map[string]any) error {
 // GetSorted fetches records from document-oriented db sorted by given key with specific order
 func GetSorted(dbname, collname string, spec map[string]any, skeys []string, sortOrder, idx, limit int) []map[string]any {
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.GetSorted(dbname, collname, spec, skeys, sortOrder, idx, limit)
+		return embed.GetSorted(dbname, collname, spec, skeys, sortOrder, idx, limit)
 	}
 	return mongo.GetSorted(dbname, collname, spec, skeys, sortOrder, idx, limit)
 }
