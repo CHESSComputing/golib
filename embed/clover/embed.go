@@ -33,6 +33,11 @@ func InitDB(dbDir string) {
 	log.Printf("Clover database initialized at %s", dbDir)
 }
 
+// Insert records into document-oriented db
+func Insert(dbname, collname string, records []map[string]any) {
+	Upsert(dbname, collname, "", records)
+}
+
 // Upsert records into document-oriented db
 func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	if err := db.CreateCollection(collname); err != nil && err != clover.ErrCollectionExist {

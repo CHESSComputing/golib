@@ -36,6 +36,11 @@ func ensureDirExists(dir string) error {
 	return nil
 }
 
+// Insert records into BadgerDB
+func Insert(dbname, collname string, records []map[string]any) {
+	upsert(collname, records)
+}
+
 // Upsert records into BadgerDB
 func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	return upsert(collname, records)

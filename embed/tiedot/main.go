@@ -18,6 +18,11 @@ func InitDB(uri string) {
 	}
 }
 
+// Insert records into document-oriented db
+func Insert(dbname, collname string, records []map[string]any) {
+	Upsert(dbname, collname, "", records)
+}
+
 // Upsert records into document-oriented db
 func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	var err error

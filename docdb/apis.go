@@ -1,6 +1,8 @@
 package docdb
 
 import (
+	"log"
+
 	srvConfig "github.com/CHESSComputing/golib/config"
 	embed "github.com/CHESSComputing/golib/embed/badger"
 	"github.com/CHESSComputing/golib/mongo"
@@ -12,10 +14,21 @@ func InitDocDB(uri string) {
 		srvConfig.Init()
 	}
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.InitDB(uri)
+		log.Printf("Use embed db %s", srvConfig.Config.Embed.DocDb)
+		embed.InitDB(srvConfig.Config.Embed.DocDb)
 		return
 	}
+	log.Printf("Use mongo db %s", uri)
 	mongo.InitMongoDB(uri)
+}
+
+// Insert record into document-oriented db
+func Insert(dbname, collname string, records []map[string]any) {
+	if srvConfig.Config.Embed.DocDb != "" {
+		embed.Insert(dbname, collname, records)
+		return
+	}
+	mongo.Insert(dbname, collname, records)
 }
 
 // Upsert records into document-oriented db
