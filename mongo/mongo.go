@@ -395,9 +395,10 @@ func Count(dbname, collname string, spec map[string]any) int {
 }
 
 // Distinct gets number records from MongoDB
-func Distinct(dbname, collname, field string, filter bson.D) ([]any, error) {
+func Distinct(dbname, collname, field string) ([]any, error) {
 	client := Mongo.Connect()
 	ctx := context.TODO()
+	filter := bson.D{}
 	c := client.Database(dbname).Collection(collname)
 	records, err := c.Distinct(ctx, field, filter)
 	if err != nil {
