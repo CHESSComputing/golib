@@ -182,3 +182,41 @@ func remove(collname string, spec map[string]interface{}) error {
 		return nil
 	})
 }
+
+// Distinct gets number records from document-oriented db
+func Distinct(dbname, collname, field string) ([]any, error) {
+	spec := make(map[string]any)
+	results, err := get(collname, spec)
+	var out []any
+	// loop over records and check if record contains the field key
+	for _, rec := range results {
+		if _, ok := rec[field]; ok {
+			out = append(out, rec)
+		}
+	}
+	return out, err
+}
+
+// InsertRecord insert record with given spec to document-oriented db
+func InsertRecord(dbname, collname string, rec map[string]any) error {
+	var records []map[string]any
+	records = append(records, rec)
+	return upsert(collname, records)
+}
+
+// GetSorted fetches records from document-oriented db sorted by given key with specific order
+func GetSorted(dbname, collname string, spec map[string]any, skeys []string, sortOrder, idx, limit int) []map[string]any {
+	var out []map[string]any
+	results, err := get(collname, spec)
+	if err != nil {
+		log.Println("ERROR: ", err)
+		return out
+	}
+	// TODO: implement how to properly sort records
+	for i := idx; i < limit; i++ {
+		if i < len(results) {
+			out = append(out, results[i])
+		}
+	}
+	return out
+}
