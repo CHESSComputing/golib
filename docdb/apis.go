@@ -2,7 +2,7 @@ package docdb
 
 import (
 	srvConfig "github.com/CHESSComputing/golib/config"
-	embed "github.com/CHESSComputing/golib/embed"
+	embed "github.com/CHESSComputing/golib/embed/badger"
 	"github.com/CHESSComputing/golib/mongo"
 )
 
@@ -29,7 +29,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 // Get records from document-oriented db
 func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any {
 	if srvConfig.Config.Embed.DocDb != "" {
-		embed.Get(dbname, collname, spec, idx, limit)
+		return embed.Get(dbname, collname, spec, idx, limit)
 	}
 	return mongo.Get(dbname, collname, spec, idx, limit)
 }
