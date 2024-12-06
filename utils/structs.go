@@ -46,6 +46,7 @@ func MapKeys(rec map[string]interface{}) []string {
 	for k := range rec {
 		keys = append(keys, k)
 	}
+	sort.Sort(StringList(keys))
 	return keys
 }
 
