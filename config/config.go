@@ -313,6 +313,7 @@ type Services struct {
 
 // SrvConfig represents configuration structure
 type SrvConfig struct {
+	S3              `mapstructure:"S3"`
 	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
 	LDAP            `mapstructure:LDAP`
