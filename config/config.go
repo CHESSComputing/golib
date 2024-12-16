@@ -260,6 +260,7 @@ type SpecScans struct {
 
 // S3 defines s3 structure
 type S3 struct {
+	Name         string `mapstructure:"Name"`
 	AccessKey    string `mapstructure:"AccessKey"`
 	AccessSecret string `mapstructure:"AccessSecret"`
 	Endpoint     string `mapstructure:"Endpoint"`
