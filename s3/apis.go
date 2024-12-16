@@ -14,7 +14,7 @@ func BucketContent(bucket string) (BucketObject, error) {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
+	if srvConfig.Config.S3.Name == "minio" {
 		return bucketContent(bucket)
 	}
 	return BucketObject{}, nil
@@ -27,8 +27,8 @@ func ListBuckets() ([]minio.BucketInfo, error) {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return blist, nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return listBuckets()
 	}
 	return blist, nil
 }
@@ -40,8 +40,8 @@ func ListObjects(bucket string) ([]minio.ObjectInfo, error) {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return olist, nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return listObjects(bucket)
 	}
 	return olist, nil
 }
@@ -52,8 +52,8 @@ func CreateBucket(bucket string) error {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return createBucket(bucket)
 	}
 	return nil
 }
@@ -64,8 +64,8 @@ func DeleteBucket(bucket string) error {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return deleteBucket(bucket)
 	}
 	return nil
 }
@@ -77,8 +77,8 @@ func UploadObject(bucket, objectName, contentType string, reader io.Reader, size
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return info, nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return uploadObject(bucket, objectName, contentType, reader, size)
 	}
 	return info, nil
 }
@@ -89,8 +89,8 @@ func DeleteObject(bucket, objectName, versionId string) error {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return deleteObject(bucket, objectName, versionId)
 	}
 	return nil
 }
@@ -102,8 +102,8 @@ func GetObject(bucket, objectName string) ([]byte, error) {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name != "minio" {
-		return obj, nil
+	if srvConfig.Config.S3.Name == "minio" {
+		return getObject(bucket, objectName)
 	}
 	return obj, nil
 }
