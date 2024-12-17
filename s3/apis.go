@@ -34,15 +34,33 @@ type BucketObject struct {
 	Objects []ObjectInfo `json:"objects"`
 }
 
-// BucketContent provides content on given bucket
-func BucketContent(bucket string) (BucketObject, error) {
+// Init function initializes S3 backend storage
+func Init() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
+	var err error
+	if srvConfig.Config.S3.Name == "minio" {
+		err = minioInitialize()
+	} else {
+		err = cephInitialize(
+			srvConfig.Config.DataManagement.S3.Endpoint,
+			srvConfig.Config.DataManagement.S3.AccessKey,
+			srvConfig.Config.DataManagement.S3.AccessSecret,
+			srvConfig.Config.DataManagement.S3.Region,
+		)
+	}
+	if err != nil {
+		log.Fatal("ERROR", err)
+	}
+}
+
+// BucketContent provides content on given bucket
+func BucketContent(bucket string) (BucketObject, error) {
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
 		var objects []ObjectInfo
-		bobj, err := bucketContent(bucket)
+		bobj, err := minioBucketContent(bucket)
 		for _, obj := range bobj.Objects {
 			o := ObjectInfo{
 				Name:         obj.Key,
@@ -59,18 +77,15 @@ func BucketContent(bucket string) (BucketObject, error) {
 		}
 		return b, err
 	}
-	return BucketObject{}, nil
+	return cephBucketContent(bucket)
 }
 
 // ListBuckets provides list of buckets in S3 store
 func ListBuckets() ([]BucketInfo, error) {
 	var blist []BucketInfo
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		buckets, err := listBuckets()
+		buckets, err := minioListBuckets()
 		for _, bucket := range buckets {
 			b := BucketInfo{
 				Name:         bucket.Name,
@@ -80,18 +95,15 @@ func ListBuckets() ([]BucketInfo, error) {
 		}
 		return blist, err
 	}
-	return blist, nil
+	return cephListBuckets()
 }
 
 // ListObjects provides list of buckets in S3 store
 func ListObjects(bucket string) ([]ObjectInfo, error) {
 	var olist []ObjectInfo
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		objects, err := listObjects(bucket)
+		objects, err := minioListObjects(bucket)
 		for _, obj := range objects {
 			o := ObjectInfo{
 				Name:         obj.Key,
@@ -104,67 +116,51 @@ func ListObjects(bucket string) ([]ObjectInfo, error) {
 		}
 		return olist, err
 	}
-	return olist, nil
+	return cephListObjects(bucket)
 }
 
 // CreateBucket creates new bucket in S3 store
 func CreateBucket(bucket string) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return createBucket(bucket)
+		return minioCreateBucket(bucket)
 	}
-	return nil
+	return cephCreateBucket(bucket)
 }
 
 // DeleteBucket deletes bucket in S3 store
 func DeleteBucket(bucket string) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return deleteBucket(bucket)
+		return minioDeleteBucket(bucket)
 	}
-	return nil
+	return cephDeleteBucket(bucket)
 }
 
 // UploadObject uploads given object to S3 store
 func UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		_, err := uploadObject(bucket, objectName, contentType, reader, size)
+		_, err := minioUploadObject(bucket, objectName, contentType, reader, size)
 		return err
 	}
-	return nil
+	return cephUploadObject(bucket, objectName, contentType, reader, size)
 }
 
 // DeleteObject deletes object from S3 storage
 func DeleteObject(bucket, objectName, versionId string) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return deleteObject(bucket, objectName, versionId)
+		return minioDeleteObject(bucket, objectName, versionId)
 	}
-	return nil
+	return cephDeleteObject(bucket, objectName, versionId)
 }
 
 // GetObjects returns given object from S3 storage
 func GetObject(bucket, objectName string) ([]byte, error) {
-	var obj []byte
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return getObject(bucket, objectName)
+		return minioGetObject(bucket, objectName)
 	}
-	return obj, nil
+	return cephGetObject(bucket, objectName)
 }

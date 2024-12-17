@@ -22,8 +22,12 @@ type S3 struct {
 	UseSSL       bool
 }
 
+var minioClient *minio.Client
+
 // helper function to get s3 minio client
-func s3client() (*minio.Client, error) {
+func minioInitialize() error {
+	var err error
+
 	// get s3 object without any buckets info
 	s3 := S3{
 		Endpoint:     srvConfig.Config.DataManagement.S3.Endpoint,
@@ -36,14 +40,11 @@ func s3client() (*minio.Client, error) {
 	}
 
 	// Initialize minio client object.
-	minioClient, err := minio.New(s3.Endpoint, &minio.Options{
+	minioClient, err = minio.New(s3.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(s3.AccessKey, s3.AccessSecret, ""),
 		Secure: s3.UseSSL,
 	})
-	if err != nil {
-		log.Printf("ERROR: unable to initialize s3 endpoint %s, error %v", s3.Endpoint, err)
-	}
-	return minioClient, err
+	return err
 }
 
 // MinioBucketObject represents s3 object
@@ -52,12 +53,12 @@ type MinioBucketObject struct {
 	Objects []minio.ObjectInfo `json:"objects"`
 }
 
-// bucketContent provides content on given bucket
-func bucketContent(bucket string) (MinioBucketObject, error) {
+// minioBucketContent provides content on given bucket
+func minioBucketContent(bucket string) (MinioBucketObject, error) {
 	if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
 		log.Printf("looking for bucket:'%s'", bucket)
 	}
-	objects, err := listObjects(bucket)
+	objects, err := minioListObjects(bucket)
 	if err != nil {
 		log.Printf("ERROR: unabel to list bucket '%s', error %v", bucket, err)
 	}
@@ -69,29 +70,16 @@ func bucketContent(bucket string) (MinioBucketObject, error) {
 }
 
 // helper function to provide list of buckets in S3 store
-func listBuckets() ([]minio.BucketInfo, error) {
-	var out []minio.BucketInfo
+func minioListBuckets() ([]minio.BucketInfo, error) {
 	ctx := context.Background()
-	minioClient, err := s3client()
-	if err != nil {
-		log.Println("ERROR", err)
-		return out, err
-	}
-
 	buckets, err := minioClient.ListBuckets(ctx)
 	return buckets, err
 }
 
 // helper function to provide list of buckets in S3 store
-func listObjects(bucket string) ([]minio.ObjectInfo, error) {
+func minioListObjects(bucket string) ([]minio.ObjectInfo, error) {
 	var out []minio.ObjectInfo
 	ctx := context.Background()
-	minioClient, err := s3client()
-	if err != nil {
-		log.Println("ERROR", err)
-		return out, err
-	}
-
 	// list individual buckets
 	objectCh := minioClient.ListObjects(ctx, bucket, minio.ListObjectsOptions{
 		Recursive: true,
@@ -99,7 +87,7 @@ func listObjects(bucket string) ([]minio.ObjectInfo, error) {
 	for object := range objectCh {
 		if object.Err != nil {
 			log.Printf("ERROR: unable to list objects in a bucket, error %v", object.Err)
-			return out, err
+			return out, object.Err
 		}
 		//         obj := fmt.Sprintf("%v %s %10d %s\n", object.LastModified, object.ETag, object.Size, object.Key)
 		out = append(out, object)
@@ -108,18 +96,13 @@ func listObjects(bucket string) ([]minio.ObjectInfo, error) {
 }
 
 // helper function to create new bucket in S3 store
-func createBucket(bucket string) error {
+func minioCreateBucket(bucket string) error {
 	// get s3 object without any buckets info
-	minioClient, err := s3client()
-	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client, error %v", err)
-		return err
-	}
 	ctx := context.Background()
 
 	// create new bucket on s3 storage
 	//     err = minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{Region: location})
-	err = minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
+	err := minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
 	if err != nil {
 		// Check to see if we already own this bucket (which happens if you run this twice)
 		exists, errBucketExists := minioClient.BucketExists(ctx, bucket)
@@ -138,14 +121,11 @@ func createBucket(bucket string) error {
 	}
 	return err
 }
-func deleteBucket(bucket string) error {
-	minioClient, err := s3client()
-	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client, error %v", err)
-		return err
-	}
+
+// helper function to delete bucket in S3 store
+func minioDeleteBucket(bucket string) error {
 	ctx := context.Background()
-	err = minioClient.RemoveBucket(ctx, bucket)
+	err := minioClient.RemoveBucket(ctx, bucket)
 	if err != nil {
 		log.Printf("ERROR: unable to remove bucket %s, error, %v", bucket, err)
 	}
@@ -153,12 +133,7 @@ func deleteBucket(bucket string) error {
 }
 
 // helper function to upload given object to S3 store
-func uploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) (minio.UploadInfo, error) {
-	minioClient, err := s3client()
-	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client, error %v", err)
-		return minio.UploadInfo{}, err
-	}
+func minioUploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) (minio.UploadInfo, error) {
 	ctx := context.Background()
 
 	// Upload the zip file with PutObject
@@ -184,12 +159,7 @@ func uploadObject(bucket, objectName, contentType string, reader io.Reader, size
 }
 
 // helper function to delete object from S3 storage
-func deleteObject(bucket, objectName, versionId string) error {
-	minioClient, err := s3client()
-	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client, error %v", err)
-		return err
-	}
+func minioDeleteObject(bucket, objectName, versionId string) error {
 	ctx := context.Background()
 
 	// remove given object from our s3 store
@@ -200,7 +170,7 @@ func deleteObject(bucket, objectName, versionId string) error {
 	if versionId != "" {
 		options.VersionID = versionId
 	}
-	err = minioClient.RemoveObject(
+	err := minioClient.RemoveObject(
 		ctx,
 		bucket,
 		objectName,
@@ -212,12 +182,7 @@ func deleteObject(bucket, objectName, versionId string) error {
 }
 
 // helper function to get given object from S3 storage
-func getObject(bucket, objectName string) ([]byte, error) {
-	minioClient, err := s3client()
-	if err != nil {
-		log.Printf("ERROR: unable to initialize minio client, error %v", err)
-		return []byte{}, err
-	}
+func minioGetObject(bucket, objectName string) ([]byte, error) {
 	ctx := context.Background()
 
 	// Upload the zip file with PutObject
