@@ -1,12 +1,38 @@
 package s3
 
+// S3 APIs
+//
+// Copyright (c) 2024 - Valentin Kuznetsov <vkuznet@gmail.com>
+//
+
 import (
 	"io"
 	"log"
+	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
-	minio "github.com/minio/minio-go/v7"
 )
+
+// ObjectInfo provides information about S3 object
+type ObjectInfo struct {
+	Name         string    `json:"name"`          // Name of the object
+	LastModified time.Time `json:"last_modified"` // Date and time the object was last modified.
+	Size         int64     `json:"size"`          // Size in bytes of the object.
+	ContentType  string    `json:"content_type"`  // A standard MIME type describing the format of the object data.
+	Expires      time.Time `json:"expires"`       // The date and time at which the object is no longer able to be cached.
+}
+
+// BucketInfo provides information about S3 bucket
+type BucketInfo struct {
+	Name         string    `json:"name"`
+	CreationDate time.Time `json:"creation_date"`
+}
+
+// BucketObject represents S3 bucket object
+type BucketObject struct {
+	Bucket  string       `json:"bucket"`
+	Objects []ObjectInfo `json:"objects"`
+}
 
 // BucketContent provides content on given bucket
 func BucketContent(bucket string) (BucketObject, error) {
@@ -15,33 +41,68 @@ func BucketContent(bucket string) (BucketObject, error) {
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return bucketContent(bucket)
+		var objects []ObjectInfo
+		bobj, err := bucketContent(bucket)
+		for _, obj := range bobj.Objects {
+			o := ObjectInfo{
+				Name:         obj.Key,
+				LastModified: obj.LastModified,
+				Size:         obj.Size,
+				ContentType:  obj.ContentType,
+				Expires:      obj.Expires,
+			}
+			objects = append(objects, o)
+		}
+		b := BucketObject{
+			Bucket:  bobj.Bucket,
+			Objects: objects,
+		}
+		return b, err
 	}
 	return BucketObject{}, nil
 }
 
 // ListBuckets provides list of buckets in S3 store
-func ListBuckets() ([]minio.BucketInfo, error) {
-	var blist []minio.BucketInfo
+func ListBuckets() ([]BucketInfo, error) {
+	var blist []BucketInfo
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return listBuckets()
+		buckets, err := listBuckets()
+		for _, bucket := range buckets {
+			b := BucketInfo{
+				Name:         bucket.Name,
+				CreationDate: bucket.CreationDate,
+			}
+			blist = append(blist, b)
+		}
+		return blist, err
 	}
 	return blist, nil
 }
 
 // ListObjects provides list of buckets in S3 store
-func ListObjects(bucket string) ([]minio.ObjectInfo, error) {
-	var olist []minio.ObjectInfo
+func ListObjects(bucket string) ([]ObjectInfo, error) {
+	var olist []ObjectInfo
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return listObjects(bucket)
+		objects, err := listObjects(bucket)
+		for _, obj := range objects {
+			o := ObjectInfo{
+				Name:         obj.Key,
+				LastModified: obj.LastModified,
+				Size:         obj.Size,
+				ContentType:  obj.ContentType,
+				Expires:      obj.Expires,
+			}
+			olist = append(olist, o)
+		}
+		return olist, err
 	}
 	return olist, nil
 }
@@ -71,16 +132,16 @@ func DeleteBucket(bucket string) error {
 }
 
 // UploadObject uploads given object to S3 store
-func UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) (minio.UploadInfo, error) {
-	var info minio.UploadInfo
+func UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
 	if srvConfig.Config.S3.Name == "minio" {
-		return uploadObject(bucket, objectName, contentType, reader, size)
+		_, err := uploadObject(bucket, objectName, contentType, reader, size)
+		return err
 	}
-	return info, nil
+	return nil
 }
 
 // DeleteObject deletes object from S3 storage

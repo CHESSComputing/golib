@@ -46,14 +46,14 @@ func s3client() (*minio.Client, error) {
 	return minioClient, err
 }
 
-// BucketObject represents s3 object
-type BucketObject struct {
+// MinioBucketObject represents s3 object
+type MinioBucketObject struct {
 	Bucket  string             `json:"bucket"`
 	Objects []minio.ObjectInfo `json:"objects"`
 }
 
 // bucketContent provides content on given bucket
-func bucketContent(bucket string) (BucketObject, error) {
+func bucketContent(bucket string) (MinioBucketObject, error) {
 	if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
 		log.Printf("looking for bucket:'%s'", bucket)
 	}
@@ -61,7 +61,7 @@ func bucketContent(bucket string) (BucketObject, error) {
 	if err != nil {
 		log.Printf("ERROR: unabel to list bucket '%s', error %v", bucket, err)
 	}
-	obj := BucketObject{
+	obj := MinioBucketObject{
 		Bucket:  bucket,
 		Objects: objects,
 	}
