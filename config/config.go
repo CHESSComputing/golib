@@ -265,6 +265,7 @@ type S3 struct {
 	AccessSecret string `mapstructure:"AccessSecret"`
 	Endpoint     string `mapstructure:"Endpoint"`
 	UseSSL       bool   `mapstructure:"UseSSL"`
+	Region       string `mapstructure:"region"`
 }
 
 // DataManagement represents data-management service configuration
