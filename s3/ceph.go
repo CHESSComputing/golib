@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	aws3 "github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -147,4 +149,39 @@ func cephDeleteObject(bucket, objectName, versionId string) error {
 		return fmt.Errorf("unable to delete object %s from bucket %s: %v", objectName, bucket, err)
 	}
 	return nil
+}
+
+// GetS3Link generates a URL for an object in the S3 bucket or a bucket itself if objectName is empty.
+// If expiresIn is 0, it generates a permanent link (for public buckets or objects with appropriate ACL).
+func cephGetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
+	endpoint := s3Client.Endpoint // Get the endpoint configured in the S3 client
+
+	// Permanent URL
+	if expiresIn == 0 {
+		if objectName == "" {
+			// Generate link to the bucket
+			return fmt.Sprintf("%s/%s", endpoint, bucket), nil
+		}
+		// Generate link to the object
+		return fmt.Sprintf("%s/%s/%s", endpoint, bucket, objectName), nil
+	}
+
+	// Pre-signed URL with expiration
+	if objectName == "" {
+		return "", fmt.Errorf("cannot generate a pre-signed URL for the bucket itself with an expiration time")
+	}
+
+	// Create a request to get the object
+	req, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(objectName),
+	})
+
+	// Generate a pre-signed URL
+	url, err := req.Presign(expiresIn)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate pre-signed URL for object %s in bucket %s: %v", objectName, bucket, err)
+	}
+
+	return url, nil
 }

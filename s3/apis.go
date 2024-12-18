@@ -164,3 +164,12 @@ func GetObject(bucket, objectName string) ([]byte, error) {
 	}
 	return cephGetObject(bucket, objectName)
 }
+
+// GetS3Link generates a pre-signed URL for an object in the S3 bucket
+func GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
+	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
+	if srvConfig.Config.S3.Name == "minio" {
+		return minioGetS3Link(bucket, objectName, expiresIn)
+	}
+	return cephGetS3Link(bucket, objectName, expiresIn)
+}

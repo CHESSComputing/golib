@@ -6,8 +6,10 @@ package s3
 //
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
+	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	minio "github.com/minio/minio-go/v7"
@@ -197,4 +199,32 @@ func minioGetObject(bucket, objectName string) ([]byte, error) {
 	}
 	data, err := io.ReadAll(object)
 	return data, err
+}
+
+// minioGetS3Link generates a URL for an object in the bucket or a bucket itself if objectName is empty.
+// If expiresIn is 0, it generates a permanent link (for public buckets or objects with appropriate ACL).
+func minioGetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
+	// Permanent URL
+	if expiresIn == 0 {
+		if objectName == "" {
+			// Generate link to the bucket
+			return fmt.Sprintf("%s/%s", minioClient.EndpointURL().String(), bucket), nil
+		}
+		// Generate link to the object
+		return fmt.Sprintf("%s/%s/%s", minioClient.EndpointURL().String(), bucket, objectName), nil
+	}
+
+	// Pre-signed URL with expiration
+	if objectName == "" {
+		return "", fmt.Errorf("cannot generate a pre-signed URL for the bucket itself with an expiration time")
+	}
+
+	// Generate a pre-signed URL for the object
+	ctx := context.Background()
+	url, err := minioClient.PresignedGetObject(ctx, bucket, objectName, expiresIn, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate pre-signed URL for object %s in bucket %s: %v", objectName, bucket, err)
+	}
+
+	return url.String(), nil
 }
