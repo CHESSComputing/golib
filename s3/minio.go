@@ -5,10 +5,13 @@ package s3
 // Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -29,7 +32,7 @@ type MinioClient struct {
 	S3Client *minio.Client
 }
 
-// helper function to get s3 minio client
+// Initialize initializes the S3 client for MinIO S3 storage
 func (c *MinioClient) Initialize() error {
 	var err error
 
@@ -58,7 +61,7 @@ type MinioBucketObject struct {
 	Objects []minio.ObjectInfo `json:"objects"`
 }
 
-// BucketContent provides content on given bucket
+// BucketContent retrieves all objects in a bucket
 func (c *MinioClient) BucketContent(bucket string) (BucketObject, error) {
 	if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
 		log.Printf("looking for bucket:'%s'", bucket)
@@ -74,7 +77,7 @@ func (c *MinioClient) BucketContent(bucket string) (BucketObject, error) {
 	return bobj, err
 }
 
-// helper function to provide list of buckets in S3 store
+// ListBuckets retrieves all available buckets
 func (c *MinioClient) ListBuckets() ([]BucketInfo, error) {
 	ctx := context.Background()
 	buckets, err := c.S3Client.ListBuckets(ctx)
@@ -91,7 +94,7 @@ func (c *MinioClient) ListBuckets() ([]BucketInfo, error) {
 	return blist, err
 }
 
-// helper function to provide list of buckets in S3 store
+// ListObjects lists all objects in a bucket
 func (c *MinioClient) ListObjects(bucket string) ([]ObjectInfo, error) {
 	var olist []ObjectInfo
 	ctx := context.Background()
@@ -118,7 +121,7 @@ func (c *MinioClient) ListObjects(bucket string) ([]ObjectInfo, error) {
 	return olist, nil
 }
 
-// helper function to create new bucket in S3 store
+// CreateBucket creates a new bucket
 func (c *MinioClient) CreateBucket(bucket string) error {
 	// get s3 object without any buckets info
 	ctx := context.Background()
@@ -145,7 +148,7 @@ func (c *MinioClient) CreateBucket(bucket string) error {
 	return err
 }
 
-// helper function to delete bucket in S3 store
+// DeleteBucket deletes an existing bucket
 func (c *MinioClient) DeleteBucket(bucket string) error {
 	ctx := context.Background()
 	err := c.S3Client.RemoveBucket(ctx, bucket)
@@ -155,7 +158,7 @@ func (c *MinioClient) DeleteBucket(bucket string) error {
 	return err
 }
 
-// helper function to upload given object to S3 store
+// UploadObject uploads an object to a bucket
 func (c *MinioClient) UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
 	ctx := context.Background()
 
@@ -181,7 +184,7 @@ func (c *MinioClient) UploadObject(bucket, objectName, contentType string, reade
 	return err
 }
 
-// helper function to delete object from S3 storage
+// DeleteObject deletes an object from a bucket
 func (c *MinioClient) DeleteObject(bucket, objectName, versionId string) error {
 	ctx := context.Background()
 
@@ -204,7 +207,7 @@ func (c *MinioClient) DeleteObject(bucket, objectName, versionId string) error {
 	return err
 }
 
-// helper function to get given object from S3 storage
+// GetObject retrieves an object from a bucket
 func (c *MinioClient) GetObject(bucket, objectName string) ([]byte, error) {
 	ctx := context.Background()
 
@@ -222,7 +225,7 @@ func (c *MinioClient) GetObject(bucket, objectName string) ([]byte, error) {
 	return data, err
 }
 
-// minioGetS3Link generates a URL for an object in the bucket or a bucket itself if objectName is empty.
+// GetS3Link generates a URL for an object in the bucket or a bucket itself if objectName is empty.
 // If expiresIn is 0, it generates a permanent link (for public buckets or objects with appropriate ACL).
 func (c *MinioClient) GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
 	// Permanent URL
@@ -248,4 +251,95 @@ func (c *MinioClient) GetS3Link(bucket, objectName string, expiresIn time.Durati
 	}
 
 	return url.String(), nil
+}
+
+// UploadFile upload given file to a bucket
+func (c *MinioClient) UploadFile(bucketName, fileName string) error {
+	ctx := context.Background()
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+	fileSize := fileInfo.Size()
+
+	if fileSize <= LargeFileThreshold {
+		// Use UploadObject API for small files
+		_, err = c.S3Client.PutObject(ctx, bucketName, filepath.Base(fileName), file, fileSize, minio.PutObjectOptions{
+			ContentType: "application/octet-stream",
+		})
+		if err != nil {
+			return fmt.Errorf("failed to upload small file: %v", err)
+		}
+		fmt.Println("Uploaded small file successfully!")
+	} else {
+		// Use multipart upload for large files
+		err = c.uploadLargeFile(bucketName, fileName)
+		if err != nil {
+			return fmt.Errorf("failed to upload large file: %v", err)
+		}
+		fmt.Println("Uploaded large file successfully!")
+	}
+
+	return nil
+}
+
+// uploadLargeFile helper function to upload large files via multipart upload mechanism
+func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
+	ctx := context.Background()
+	file, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	// Instantiate new core client object.
+	core := minio.Core{Client: c.S3Client}
+
+	//     fileInfo, _ := file.Stat()
+	//     fileSize := fileInfo.Size()
+
+	// Upload the file in parts
+	uploadID, err := core.NewMultipartUpload(ctx, bucketName, filepath.Base(fileName), minio.PutObjectOptions{
+		ContentType: "application/octet-stream",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to initiate multipart upload: %v", err)
+	}
+
+	var parts []minio.CompletePart
+	buffer := make([]byte, LargeFileThreshold) // 5 MB part size
+	partNumber := 1
+
+	for {
+		bytesRead, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("failed to read file: %v", err)
+		}
+		if bytesRead == 0 {
+			break
+		}
+
+		part, err := core.PutObjectPart(ctx, bucketName, filepath.Base(fileName), uploadID, partNumber,
+			bytes.NewReader(buffer[:bytesRead]), int64(bytesRead), minio.PutObjectPartOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to upload part: %v", err)
+		}
+		parts = append(parts, minio.CompletePart{
+			PartNumber: partNumber,
+			ETag:       part.ETag,
+		})
+		partNumber++
+	}
+
+	// Complete the multipart upload
+	_, err = core.CompleteMultipartUpload(ctx, bucketName, filepath.Base(fileName), uploadID, parts, minio.PutObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to complete multipart upload: %v", err)
+	}
+
+	return nil
 }

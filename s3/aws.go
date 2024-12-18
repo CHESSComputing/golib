@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -19,7 +21,7 @@ type AWSClient struct {
 	S3Client *aws3.S3
 }
 
-// Initialize initializes the S3 client for Ceph
+// Initialize initializes the S3 client for AWS S3 storage
 func (c *AWSClient) Initialize() error {
 	endpoint := srvConfig.Config.DataManagement.S3.Endpoint
 	accessKey := srvConfig.Config.DataManagement.S3.AccessKey
@@ -38,7 +40,7 @@ func (c *AWSClient) Initialize() error {
 	return nil
 }
 
-// cephListBuckets retrieves all available buckets
+// ListBuckets retrieves all available buckets
 func (c *AWSClient) ListBuckets() ([]BucketInfo, error) {
 	output, err := c.S3Client.ListBuckets(&aws3.ListBucketsInput{})
 	if err != nil {
@@ -55,7 +57,7 @@ func (c *AWSClient) ListBuckets() ([]BucketInfo, error) {
 	return buckets, nil
 }
 
-// cephCreateBucket creates a new bucket
+// CreateBucket creates a new bucket
 func (c *AWSClient) CreateBucket(bucket string) error {
 	_, err := c.S3Client.CreateBucket(&aws3.CreateBucketInput{
 		Bucket: aws.String(bucket),
@@ -66,7 +68,7 @@ func (c *AWSClient) CreateBucket(bucket string) error {
 	return nil
 }
 
-// cephDeleteBucket deletes an existing bucket
+// DeleteBucket deletes an existing bucket
 func (c *AWSClient) DeleteBucket(bucket string) error {
 	_, err := c.S3Client.DeleteBucket(&aws3.DeleteBucketInput{
 		Bucket: aws.String(bucket),
@@ -77,7 +79,7 @@ func (c *AWSClient) DeleteBucket(bucket string) error {
 	return nil
 }
 
-// cephListObjects lists all objects in a bucket
+// ListObjects lists all objects in a bucket
 func (c *AWSClient) ListObjects(bucket string) ([]ObjectInfo, error) {
 	output, err := c.S3Client.ListObjectsV2(&aws3.ListObjectsV2Input{
 		Bucket: aws.String(bucket),
@@ -97,7 +99,7 @@ func (c *AWSClient) ListObjects(bucket string) ([]ObjectInfo, error) {
 	return objects, nil
 }
 
-// cephBucketContent retrieves all objects in a bucket
+// BucketContent retrieves all objects in a bucket
 func (c *AWSClient) BucketContent(bucket string) (BucketObject, error) {
 	objects, err := c.ListObjects(bucket)
 	if err != nil {
@@ -109,7 +111,7 @@ func (c *AWSClient) BucketContent(bucket string) (BucketObject, error) {
 	}, nil
 }
 
-// cephUploadObject uploads an object to a bucket
+// UploadObject uploads an object to a bucket
 func (c *AWSClient) UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
 	// Wrap the reader using aws.ReadSeekCloser
 	readSeeker := aws.ReadSeekCloser(reader)
@@ -127,7 +129,7 @@ func (c *AWSClient) UploadObject(bucket, objectName, contentType string, reader 
 	return nil
 }
 
-// cephGetObject retrieves an object from a bucket
+// GetObject retrieves an object from a bucket
 func (c *AWSClient) GetObject(bucket, objectName string) ([]byte, error) {
 	output, err := c.S3Client.GetObject(&aws3.GetObjectInput{
 		Bucket: aws.String(bucket),
@@ -146,7 +148,7 @@ func (c *AWSClient) GetObject(bucket, objectName string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// cephDeleteObject deletes an object from a bucket
+// DeleteObject deletes an object from a bucket
 func (c *AWSClient) DeleteObject(bucket, objectName, versionId string) error {
 	_, err := c.S3Client.DeleteObject(&aws3.DeleteObjectInput{
 		Bucket:    aws.String(bucket),
@@ -192,4 +194,115 @@ func (c *AWSClient) GetS3Link(bucket, objectName string, expiresIn time.Duration
 	}
 
 	return url, nil
+}
+
+// UploadFile upload given file to a bucket
+func (c *AWSClient) UploadFile(bucketName, fileName string) error {
+
+	file, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+	fileSize := fileInfo.Size()
+
+	if fileSize <= LargeFileThreshold {
+		// Use UploadObject API for small files
+		buffer := bytes.NewBuffer(nil)
+		_, err = io.Copy(buffer, file)
+		if err != nil {
+			return fmt.Errorf("failed to read file into buffer: %v", err)
+		}
+
+		_, err = c.S3Client.PutObject(&s3.PutObjectInput{
+			Bucket:      aws.String(bucketName),
+			Key:         aws.String(filepath.Base(fileName)),
+			Body:        bytes.NewReader(buffer.Bytes()),
+			ContentType: aws.String("application/octet-stream"),
+		})
+		if err != nil {
+			return fmt.Errorf("failed to upload small file: %v", err)
+		}
+		fmt.Println("Uploaded small file successfully!")
+	} else {
+		// Use multipart upload for large files
+		err = c.uploadLargeFile(bucketName, fileName)
+		if err != nil {
+			return fmt.Errorf("failed to upload large file: %v", err)
+		}
+		fmt.Println("Uploaded large file successfully!")
+	}
+
+	return nil
+}
+
+// uploadLargeFile helper function to upload large files via multipart upload mechanism
+func (c *AWSClient) uploadLargeFile(bucketName, fileName string) error {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
+
+	//     fileInfo, _ := file.Stat()
+	//     fileSize := fileInfo.Size()
+
+	// Initiate multipart upload
+	createResp, err := c.S3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(filepath.Base(fileName)),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create multipart upload: %v", err)
+	}
+
+	var completedParts []*s3.CompletedPart
+	buffer := make([]byte, LargeFileThreshold) // 5 MB part size
+	var partNumber int64 = 1
+
+	for {
+		bytesRead, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("failed to read file: %v", err)
+		}
+		if bytesRead == 0 {
+			break
+		}
+
+		// Upload part
+		uploadResp, err := c.S3Client.UploadPart(&s3.UploadPartInput{
+			Bucket:     aws.String(bucketName),
+			Key:        createResp.Key,
+			UploadId:   createResp.UploadId,
+			PartNumber: aws.Int64(partNumber),
+			Body:       bytes.NewReader(buffer[:bytesRead]),
+		})
+		if err != nil {
+			return fmt.Errorf("failed to upload part: %v", err)
+		}
+
+		// Track completed part
+		completedParts = append(completedParts, &s3.CompletedPart{
+			ETag:       uploadResp.ETag,
+			PartNumber: aws.Int64(partNumber),
+		})
+		partNumber++
+	}
+
+	// Complete multipart upload
+	_, err = c.S3Client.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
+		Bucket:   aws.String(bucketName),
+		Key:      aws.String(filepath.Base(fileName)),
+		UploadId: createResp.UploadId,
+		MultipartUpload: &s3.CompletedMultipartUpload{
+			Parts: completedParts,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to complete multipart upload: %v", err)
+	}
+
+	return nil
 }

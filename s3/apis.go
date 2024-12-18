@@ -13,6 +13,9 @@ import (
 	"time"
 )
 
+// LargeFileThreshold define threshold for large files
+const LargeFileThreshold = 5 * 1024 * 1024 // 5 MB threshold for large files
+
 // ObjectInfo provides information about S3 object
 type ObjectInfo struct {
 	Name         string    `json:"name"`          // Name of the object
@@ -46,6 +49,7 @@ type S3Client interface {
 	DeleteObject(bucket, objectName, versionId string) error
 	GetObject(bucket, objectName string) ([]byte, error)
 	GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error)
+	UploadFile(bucketName, fileName string) error
 }
 
 // InitializeS3Client initializes either AWSClient or MinioClient based on the option.
