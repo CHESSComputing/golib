@@ -6,11 +6,11 @@ package s3
 //
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"time"
-
-	srvConfig "github.com/CHESSComputing/golib/config"
 )
 
 // ObjectInfo provides information about S3 object
@@ -34,142 +34,38 @@ type BucketObject struct {
 	Objects []ObjectInfo `json:"objects"`
 }
 
-// Init function initializes S3 backend storage
-func Init() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
+// Generic S3Client interface
+type S3Client interface {
+	Initialize() error
+	BucketContent(bucket string) (BucketObject, error)
+	ListBuckets() ([]BucketInfo, error)
+	ListObjects(bucket string) ([]ObjectInfo, error)
+	CreateBucket(bucket string) error
+	DeleteBucket(bucket string) error
+	UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error
+	DeleteObject(bucket, objectName, versionId string) error
+	GetObject(bucket, objectName string) ([]byte, error)
+	GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error)
+}
+
+// InitializeS3Client initializes either AWSClient or MinioClient based on the option.
+func InitializeS3Client(clientType string) (S3Client, error) {
+	var s3Client S3Client
 	var err error
-	if srvConfig.Config.S3.Name == "minio" {
-		err = minioInitialize()
-	} else {
-		err = cephInitialize(
-			srvConfig.Config.DataManagement.S3.Endpoint,
-			srvConfig.Config.DataManagement.S3.AccessKey,
-			srvConfig.Config.DataManagement.S3.AccessSecret,
-			srvConfig.Config.DataManagement.S3.Region,
-		)
+	switch clientType {
+	case "aws":
+		log.Println("Initializing AWS Client")
+		// Initialize and return AWSClient
+		s3Client = &AWSClient{}
+	case "minio":
+		log.Println("Initializing MinIO Client")
+		// Initialize and return MinioClient
+		s3Client = &MinioClient{}
+	default:
+		err = errors.New(fmt.Sprintf("Unsupported client type: %s", clientType))
 	}
-	if err != nil {
-		log.Fatal("ERROR", err)
+	if s3Client != nil {
+		s3Client.Initialize()
 	}
-}
-
-// BucketContent provides content on given bucket
-func BucketContent(bucket string) (BucketObject, error) {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		var objects []ObjectInfo
-		bobj, err := minioBucketContent(bucket)
-		for _, obj := range bobj.Objects {
-			o := ObjectInfo{
-				Name:         obj.Key,
-				LastModified: obj.LastModified,
-				Size:         obj.Size,
-				ContentType:  obj.ContentType,
-				Expires:      obj.Expires,
-			}
-			objects = append(objects, o)
-		}
-		b := BucketObject{
-			Bucket:  bobj.Bucket,
-			Objects: objects,
-		}
-		return b, err
-	}
-	return cephBucketContent(bucket)
-}
-
-// ListBuckets provides list of buckets in S3 store
-func ListBuckets() ([]BucketInfo, error) {
-	var blist []BucketInfo
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		buckets, err := minioListBuckets()
-		for _, bucket := range buckets {
-			b := BucketInfo{
-				Name:         bucket.Name,
-				CreationDate: bucket.CreationDate,
-			}
-			blist = append(blist, b)
-		}
-		return blist, err
-	}
-	return cephListBuckets()
-}
-
-// ListObjects provides list of buckets in S3 store
-func ListObjects(bucket string) ([]ObjectInfo, error) {
-	var olist []ObjectInfo
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		objects, err := minioListObjects(bucket)
-		for _, obj := range objects {
-			o := ObjectInfo{
-				Name:         obj.Key,
-				LastModified: obj.LastModified,
-				Size:         obj.Size,
-				ContentType:  obj.ContentType,
-				Expires:      obj.Expires,
-			}
-			olist = append(olist, o)
-		}
-		return olist, err
-	}
-	return cephListObjects(bucket)
-}
-
-// CreateBucket creates new bucket in S3 store
-func CreateBucket(bucket string) error {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		return minioCreateBucket(bucket)
-	}
-	return cephCreateBucket(bucket)
-}
-
-// DeleteBucket deletes bucket in S3 store
-func DeleteBucket(bucket string) error {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		return minioDeleteBucket(bucket)
-	}
-	return cephDeleteBucket(bucket)
-}
-
-// UploadObject uploads given object to S3 store
-func UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		_, err := minioUploadObject(bucket, objectName, contentType, reader, size)
-		return err
-	}
-	return cephUploadObject(bucket, objectName, contentType, reader, size)
-}
-
-// DeleteObject deletes object from S3 storage
-func DeleteObject(bucket, objectName, versionId string) error {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		return minioDeleteObject(bucket, objectName, versionId)
-	}
-	return cephDeleteObject(bucket, objectName, versionId)
-}
-
-// GetObjects returns given object from S3 storage
-func GetObject(bucket, objectName string) ([]byte, error) {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		return minioGetObject(bucket, objectName)
-	}
-	return cephGetObject(bucket, objectName)
-}
-
-// GetS3Link generates a pre-signed URL for an object in the S3 bucket
-func GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
-	log.Printf("Use %s S3 storage", srvConfig.Config.S3.Name)
-	if srvConfig.Config.S3.Name == "minio" {
-		return minioGetS3Link(bucket, objectName, expiresIn)
-	}
-	return cephGetS3Link(bucket, objectName, expiresIn)
+	return s3Client, err
 }

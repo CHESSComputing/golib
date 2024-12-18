@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -13,10 +14,17 @@ import (
 	aws3 "github.com/aws/aws-sdk-go/service/s3"
 )
 
-var s3Client *aws3.S3
+// AWSClient represents AWS S3 client
+type AWSClient struct {
+	S3Client *aws3.S3
+}
 
 // Initialize initializes the S3 client for Ceph
-func cephInitialize(endpoint, accessKey, secretKey, region string) error {
+func (c *AWSClient) Initialize() error {
+	endpoint := srvConfig.Config.DataManagement.S3.Endpoint
+	accessKey := srvConfig.Config.DataManagement.S3.AccessKey
+	secretKey := srvConfig.Config.DataManagement.S3.AccessSecret
+	region := srvConfig.Config.DataManagement.S3.Region
 	sess, err := session.NewSession(&aws.Config{
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region), // Region is needed even for Ceph.
@@ -26,13 +34,13 @@ func cephInitialize(endpoint, accessKey, secretKey, region string) error {
 	if err != nil {
 		return err
 	}
-	s3Client = aws3.New(sess)
+	c.S3Client = aws3.New(sess)
 	return nil
 }
 
 // cephListBuckets retrieves all available buckets
-func cephListBuckets() ([]BucketInfo, error) {
-	output, err := s3Client.ListBuckets(&aws3.ListBucketsInput{})
+func (c *AWSClient) ListBuckets() ([]BucketInfo, error) {
+	output, err := c.S3Client.ListBuckets(&aws3.ListBucketsInput{})
 	if err != nil {
 		return nil, fmt.Errorf("unable to list buckets: %v", err)
 	}
@@ -48,8 +56,8 @@ func cephListBuckets() ([]BucketInfo, error) {
 }
 
 // cephCreateBucket creates a new bucket
-func cephCreateBucket(bucket string) error {
-	_, err := s3Client.CreateBucket(&aws3.CreateBucketInput{
+func (c *AWSClient) CreateBucket(bucket string) error {
+	_, err := c.S3Client.CreateBucket(&aws3.CreateBucketInput{
 		Bucket: aws.String(bucket),
 	})
 	if err != nil {
@@ -59,8 +67,8 @@ func cephCreateBucket(bucket string) error {
 }
 
 // cephDeleteBucket deletes an existing bucket
-func cephDeleteBucket(bucket string) error {
-	_, err := s3Client.DeleteBucket(&aws3.DeleteBucketInput{
+func (c *AWSClient) DeleteBucket(bucket string) error {
+	_, err := c.S3Client.DeleteBucket(&aws3.DeleteBucketInput{
 		Bucket: aws.String(bucket),
 	})
 	if err != nil {
@@ -70,8 +78,8 @@ func cephDeleteBucket(bucket string) error {
 }
 
 // cephListObjects lists all objects in a bucket
-func cephListObjects(bucket string) ([]ObjectInfo, error) {
-	output, err := s3Client.ListObjectsV2(&aws3.ListObjectsV2Input{
+func (c *AWSClient) ListObjects(bucket string) ([]ObjectInfo, error) {
+	output, err := c.S3Client.ListObjectsV2(&aws3.ListObjectsV2Input{
 		Bucket: aws.String(bucket),
 	})
 	if err != nil {
@@ -90,8 +98,8 @@ func cephListObjects(bucket string) ([]ObjectInfo, error) {
 }
 
 // cephBucketContent retrieves all objects in a bucket
-func cephBucketContent(bucket string) (BucketObject, error) {
-	objects, err := ListObjects(bucket)
+func (c *AWSClient) BucketContent(bucket string) (BucketObject, error) {
+	objects, err := c.ListObjects(bucket)
 	if err != nil {
 		return BucketObject{}, err
 	}
@@ -102,11 +110,11 @@ func cephBucketContent(bucket string) (BucketObject, error) {
 }
 
 // cephUploadObject uploads an object to a bucket
-func cephUploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
+func (c *AWSClient) UploadObject(bucket, objectName, contentType string, reader io.Reader, size int64) error {
 	// Wrap the reader using aws.ReadSeekCloser
 	readSeeker := aws.ReadSeekCloser(reader)
 
-	_, err := s3Client.PutObject(&aws3.PutObjectInput{
+	_, err := c.S3Client.PutObject(&aws3.PutObjectInput{
 		Bucket:        aws.String(bucket),
 		Key:           aws.String(objectName),
 		Body:          readSeeker,
@@ -120,8 +128,8 @@ func cephUploadObject(bucket, objectName, contentType string, reader io.Reader, 
 }
 
 // cephGetObject retrieves an object from a bucket
-func cephGetObject(bucket, objectName string) ([]byte, error) {
-	output, err := s3Client.GetObject(&aws3.GetObjectInput{
+func (c *AWSClient) GetObject(bucket, objectName string) ([]byte, error) {
+	output, err := c.S3Client.GetObject(&aws3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(objectName),
 	})
@@ -139,8 +147,8 @@ func cephGetObject(bucket, objectName string) ([]byte, error) {
 }
 
 // cephDeleteObject deletes an object from a bucket
-func cephDeleteObject(bucket, objectName, versionId string) error {
-	_, err := s3Client.DeleteObject(&aws3.DeleteObjectInput{
+func (c *AWSClient) DeleteObject(bucket, objectName, versionId string) error {
+	_, err := c.S3Client.DeleteObject(&aws3.DeleteObjectInput{
 		Bucket:    aws.String(bucket),
 		Key:       aws.String(objectName),
 		VersionId: aws.String(versionId),
@@ -153,8 +161,8 @@ func cephDeleteObject(bucket, objectName, versionId string) error {
 
 // GetS3Link generates a URL for an object in the S3 bucket or a bucket itself if objectName is empty.
 // If expiresIn is 0, it generates a permanent link (for public buckets or objects with appropriate ACL).
-func cephGetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
-	endpoint := s3Client.Endpoint // Get the endpoint configured in the S3 client
+func (c *AWSClient) GetS3Link(bucket, objectName string, expiresIn time.Duration) (string, error) {
+	endpoint := c.S3Client.Endpoint // Get the endpoint configured in the S3 client
 
 	// Permanent URL
 	if expiresIn == 0 {
@@ -172,7 +180,7 @@ func cephGetS3Link(bucket, objectName string, expiresIn time.Duration) (string, 
 	}
 
 	// Create a request to get the object
-	req, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+	req, _ := c.S3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(objectName),
 	})
