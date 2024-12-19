@@ -42,6 +42,7 @@ type DOI struct {
 	Provider        string          `mapstructure:"Provider"`    // doi provider, e.g. Zenodo or MaterialCommons
 	ProjectName     string          `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
 	Zenodo          Zenodo          `mapstructure:"Zenodo"`
+	Datacite        Datacite        `mapstructure:"Datacite"`
 	MaterialCommons MaterialCommons `mapstructure:"MaterialCommons"`
 }
 
@@ -248,6 +249,12 @@ type MaterialCommons struct {
 	Url         string `mapstructure:"Url"`
 	AccessToken string `mapstructure:"AccessToken"`
 	ProjectName string `mapstructure:"ProjectName"` // name of the project (only valid for MaterialCommons)
+}
+
+// Datacite represents Datacite service configuration
+type Datacite struct {
+	Url         string `mapstructure:"Url"`
+	AccessToken string `mapstructure:"AccessToken"`
 }
 
 // SpecScans represents SpecScansService configuration
