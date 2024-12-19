@@ -13,12 +13,18 @@ import (
 
 // ZenodoProvider represents Zenodo provider
 type ZenodoProvider struct {
+	HttpRequest *services.HttpRequest
+	Token       string
 }
 
 // Init function initializes Zenodo provider
 func (z *ZenodoProvider) Init() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
+	}
+	if z.HttpRequest == nil {
+		z.HttpRequest = services.NewHttpRequest("read", 0)
+		z.HttpRequest.Token = z.Token
 	}
 }
 
@@ -32,7 +38,7 @@ func (z *ZenodoProvider) Publish(did, description string) (string, string, error
 	}
 
 	// extract meta-data record for our did
-	query := fmt.Sprintf("{\"did\": %s}", did)
+	query := fmt.Sprintf("{\"did\": \"%s\"}", did)
 	rec := services.ServiceRequest{
 		Client:       "foxden-doi",
 		ServiceQuery: services.ServiceQuery{Query: query, Idx: 0, Limit: -1},
@@ -40,7 +46,7 @@ func (z *ZenodoProvider) Publish(did, description string) (string, string, error
 
 	data, err := json.Marshal(rec)
 	rurl := fmt.Sprintf("%s/search", srvConfig.Config.Services.MetaDataURL)
-	resp, err := _httpReadRequest.Post(rurl, "application/json", bytes.NewBuffer(data))
+	resp, err := z.HttpRequest.Post(rurl, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return doi, doiLink, err
 	}
@@ -51,10 +57,16 @@ func (z *ZenodoProvider) Publish(did, description string) (string, string, error
 	}
 	var records []map[string]any
 	err = json.Unmarshal(data, &records)
+	if err != nil {
+		return doi, doiLink, err
+	}
 
 	// add foxden record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: records}
 	err = zenodo.AddRecord(docId, "foxden-metadata.json", frec)
+	if err != nil {
+		return doi, doiLink, err
+	}
 
 	// create new meta-data record
 	creator := zenodo.Creator{Name: "FOXDEN", Affiliation: "Cornell University"}
