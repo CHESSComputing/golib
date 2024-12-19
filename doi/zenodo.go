@@ -1,14 +1,28 @@
 package doi
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 
+	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/CHESSComputing/golib/services"
 	"github.com/CHESSComputing/golib/zenodo"
 )
 
+// Zenodo represents Zenodo publisher
 type Zenodo struct {
 }
 
+// Init function initializes Zenodo publisher
+func (z *Zenodo) Init() {
+	if srvConfig.Config == nil {
+		srvConfig.Init()
+	}
+}
+
+// Publish provides publication of dataset with did and description
 func (z *Zenodo) Publish(did, description string) (string, string, error) {
 	var doi, doiLink string
 	var err error
@@ -17,10 +31,30 @@ func (z *Zenodo) Publish(did, description string) (string, string, error) {
 		return doi, doiLink, err
 	}
 
+	// extract meta-data record for our did
+	query := fmt.Sprintf("{\"did\": %s}", did)
+	rec := services.ServiceRequest{
+		Client:       "foxden-doi",
+		ServiceQuery: services.ServiceQuery{Query: query, Idx: 0, Limit: -1},
+	}
+
+	data, err := json.Marshal(rec)
+	rurl := fmt.Sprintf("%s/search", srvConfig.Config.Services.MetaDataURL)
+	resp, err := _httpReadRequest.Post(rurl, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return doi, doiLink, err
+	}
+	defer resp.Body.Close()
+	data, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return doi, doiLink, err
+	}
+	var records []map[string]any
+	err = json.Unmarshal(data, &records)
+
 	// add foxden record
-	// TODO: add to FoxdenRecord MetaData
-	frec := zenodo.FoxdenRecord{Beamline: "test-beamline", Type: "raw-data", MetaData: "todo"}
-	err = zenodo.AddRecord(docId, "foxden-meta.json", frec)
+	frec := zenodo.FoxdenRecord{Did: did, MetaData: records}
+	err = zenodo.AddRecord(docId, "foxden-metadata.json", frec)
 
 	// create new meta-data record
 	creator := zenodo.Creator{Name: "FOXDEN", Affiliation: "Cornell University"}
