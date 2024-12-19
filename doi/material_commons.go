@@ -19,7 +19,7 @@ func (m *MCProvider) Init() {
 }
 
 // Publish provides publication of dataset with did and description
-func (m *MCProvider) Publish(did, description string) (string, string, error) {
-	doi, doiLink, err := materialCommons.Publish(did, description)
+func (m *MCProvider) Publish(did, description string, record any) (string, string, error) {
+	doi, doiLink, err := materialCommons.Publish(did, description, record)
 	return doi, doiLink, err
 }
