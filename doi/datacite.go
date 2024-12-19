@@ -7,7 +7,8 @@ import (
 
 // DataciteProvider represents Datacite provider
 type DataciteProvider struct {
-	Name string
+	Name    string
+	Verbose int
 }
 
 // Init function initializes Datacite publisher

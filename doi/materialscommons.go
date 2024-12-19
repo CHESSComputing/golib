@@ -1,25 +1,26 @@
 package doi
 
 import (
-	materialCommons "github.com/CHESSComputing/golib/MaterialCommons"
 	srvConfig "github.com/CHESSComputing/golib/config"
+	materialscommons "github.com/CHESSComputing/golib/materialscommons"
 )
 
 // MCProvider represents Material Commons provider
 type MCProvider struct {
-	Name string
+	Name    string
+	Verbose int
 }
 
-// Init function initializes MaterialCommons publisher
+// Init function initializes MaterialsCommons publisher
 func (m *MCProvider) Init() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
-	m.Name = srvConfig.Config.MaterialCommons.ProjectName
+	m.Name = srvConfig.Config.MaterialsCommons.ProjectName
 }
 
 // Publish provides publication of dataset with did and description
 func (m *MCProvider) Publish(did, description string, record any) (string, string, error) {
-	doi, doiLink, err := materialCommons.Publish(did, description, record)
+	doi, doiLink, err := materialscommons.Publish(did, description, record)
 	return doi, doiLink, err
 }

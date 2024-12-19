@@ -1,8 +1,9 @@
-package MaterialCommons
+package MaterialsCommons
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -11,7 +12,7 @@ import (
 
 var mcClient *mcapi.Client
 
-// helper function to get MaterialCommons client
+// helper function to get MaterialsCommons client
 func getMcClient() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
@@ -20,14 +21,14 @@ func getMcClient() {
 		return
 	}
 	args := &mcapi.ClientArgs{
-		BaseURL: srvConfig.Config.MaterialCommons.Url,
-		APIKey:  srvConfig.Config.MaterialCommons.AccessToken,
+		BaseURL: srvConfig.Config.DOI.MaterialsCommons.Url,
+		APIKey:  srvConfig.Config.DOI.MaterialsCommons.AccessToken,
 	}
 	mcClient = mcapi.NewClient(args)
 	return
 }
 
-// Publish function pulishes FOXDEN dataset with did and description in MaterialCommons
+// Publish function pulishes FOXDEN dataset with did and description in MaterialsCommons
 func Publish(did, description string, record any) (string, string, error) {
 	var err error
 	var doi, doiLink string
@@ -36,16 +37,19 @@ func Publish(did, description string, record any) (string, string, error) {
 		srvConfig.Init()
 	}
 
-	// get MaterialCommons client
+	// get MaterialsCommons client
 	getMcClient()
 
+	log.Printf("mcClient %+v", mcClient)
+
 	// find out project ID to use
-	projectName := srvConfig.Config.MaterialCommons.ProjectName
+	projectName := srvConfig.Config.MaterialsCommons.ProjectName
 	if projectName == "" {
 		projectName = "FOXDEN datasets"
 	}
 	records, err := mcClient.ListProjects()
 	if err != nil {
+		log.Println("unable to list projects, error", err)
 		return doi, doiLink, err
 	}
 	for _, r := range records {
@@ -62,6 +66,7 @@ func Publish(did, description string, record any) (string, string, error) {
 		}
 		proj, err := mcClient.CreateProject(req)
 		if err != nil {
+			log.Println("unable to create project, error", err)
 			return doi, doiLink, err
 		}
 		projectID = proj.ID
@@ -70,19 +75,23 @@ func Publish(did, description string, record any) (string, string, error) {
 	// Create a temporary file with out record
 	tempFile, err := os.CreateTemp("", "foxden-*.json")
 	if err != nil {
+		log.Println("unable to create temp foxden.json file, error", err)
 		return doi, doiLink, err
 	}
 	defer os.Remove(tempFile.Name())
 	content, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
+		log.Println("unable to marshal record, error", err)
 		return doi, doiLink, err
 	}
 	_, err = tempFile.Write(content)
 	if err != nil {
+		log.Println("unable to write record, error", err)
 		return doi, doiLink, err
 	}
 	err = tempFile.Close()
 	if err != nil {
+		log.Println("unable to close temp file, error", err)
 		return doi, doiLink, err
 	}
 
@@ -108,6 +117,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	}
 	ds, err := mcClient.DepositDataset(projectID, deposit)
 	if err != nil {
+		log.Println("unable to deposit dataset, error", err)
 		return doi, doiLink, err
 	}
 	datasetID = ds.ID
@@ -115,6 +125,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	// publish deposit within project and dataset ids
 	_, err = mcClient.PublishDataset(projectID, datasetID)
 	if err != nil {
+		log.Println("unable to publish dataset, error", err)
 		return doi, doiLink, err
 	}
 

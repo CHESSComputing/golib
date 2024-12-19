@@ -2,6 +2,7 @@ package doi
 
 import (
 	"fmt"
+	"log"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/CHESSComputing/golib/zenodo"
@@ -9,6 +10,7 @@ import (
 
 // ZenodoProvider represents Zenodo provider
 type ZenodoProvider struct {
+	Verbose int
 }
 
 // Init function initializes Zenodo provider
@@ -26,12 +28,18 @@ func (z *ZenodoProvider) Publish(did, description string, record any) (string, s
 	if err != nil {
 		return doi, doiLink, err
 	}
+	if z.Verbose > 0 {
+		log.Println("Created zenodo record", docId)
+	}
 
 	// add foxden record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: record}
 	err = zenodo.AddRecord(docId, "foxden-metadata.json", frec)
 	if err != nil {
 		return doi, doiLink, err
+	}
+	if z.Verbose > 0 {
+		log.Println("Created foxden record")
 	}
 
 	// create new meta-data record
@@ -50,11 +58,17 @@ func (z *ZenodoProvider) Publish(did, description string, record any) (string, s
 	if err != nil {
 		return doi, doiLink, err
 	}
+	if z.Verbose > 0 {
+		log.Println("Updated doi record")
+	}
 
 	// publish record
 	doiRecord, err := zenodo.PublishRecord(docId)
 	if err != nil {
 		return doi, doiLink, err
+	}
+	if z.Verbose > 0 {
+		log.Println("Published doi record")
 	}
 	return doiRecord.Doi, doiRecord.DoiUrl, nil
 }
