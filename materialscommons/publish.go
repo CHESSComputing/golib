@@ -40,8 +40,6 @@ func Publish(did, description string, record any) (string, string, error) {
 	// get MaterialsCommons client
 	getMcClient()
 
-	log.Printf("mcClient %+v", mcClient)
-
 	// find out project ID to use
 	projectName := srvConfig.Config.MaterialsCommons.ProjectName
 	if projectName == "" {
@@ -73,7 +71,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	}
 
 	// Create a temporary file with out record
-	tempFile, err := os.CreateTemp("", "foxden-*.json")
+	tempFile, err := os.CreateTemp("", "foxden-metadata.json")
 	if err != nil {
 		log.Println("unable to create temp foxden.json file, error", err)
 		return doi, doiLink, err
@@ -99,8 +97,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	datasetFiles := []mcapi.DatasetFileUpload{
 		mcapi.DatasetFileUpload{
 			File:        tempFile.Name(),
-			Description: description,
-			Directory:   "foxden",
+			Description: "FOXDEN MetaData",
 		},
 	}
 
