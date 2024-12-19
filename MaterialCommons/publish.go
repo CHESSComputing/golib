@@ -61,6 +61,20 @@ func Publish(did, description string) (string, string, error) {
 		}
 		projectID = proj.ID
 	}
+	// add dataset files to our deposit
+	// TODO: obtain files from FOXDEN, e.g. get meta-data record
+	var files []string
+	var datasetFiles []mcapi.DatasetFileUpload
+	for _, fname := range files {
+		dir := "foxden"  // TODO: decide on directory placement
+		desc := "foxden" // TODO: decide on description of the file
+		f := mcapi.DatasetFileUpload{
+			File:        fname,
+			Description: desc,
+			Directory:   dir,
+		}
+		datasetFiles = append(datasetFiles, f)
+	}
 
 	// create new deposit
 	name := fmt.Sprintf("FOXDEN dataset %s", did)
@@ -71,6 +85,7 @@ func Publish(did, description string) (string, string, error) {
 			Description: description,
 			Summary:     summary,
 		},
+		Files: datasetFiles,
 	}
 	ds, err := mcClient.DepositDataset(projectID, deposit)
 	if err != nil {
