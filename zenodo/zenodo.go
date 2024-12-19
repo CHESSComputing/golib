@@ -10,8 +10,7 @@ import "errors"
 
 // FoxdenRecord represents foxden upload record
 type FoxdenRecord struct {
-	Beamline string `json:"beamline"`
-	Type     string `json:"type"`
+	Did      string `json:"did"`
 	MetaData any    `json:"meta_data"`
 }
 
