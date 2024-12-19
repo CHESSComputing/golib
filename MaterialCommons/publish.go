@@ -1,7 +1,9 @@
 package MaterialCommons
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	mcapi "github.com/materials-commons/gomcapi"
@@ -26,15 +28,18 @@ func getMcClient() {
 }
 
 // Publish function pulishes FOXDEN dataset with did and description in MaterialCommons
-func Publish(did, description string) (string, string, error) {
+func Publish(did, description string, record any) (string, string, error) {
+	var err error
+	var doi, doiLink string
+	var projectID, datasetID int
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
-	getMcClient()
-	var err error
-	var doi, doiLink string
 
-	var projectID, datasetID int
+	// get MaterialCommons client
+	getMcClient()
+
+	// find out project ID to use
 	projectName := srvConfig.Config.MaterialCommons.ProjectName
 	if projectName == "" {
 		projectName = "FOXDEN datasets"
@@ -61,19 +66,33 @@ func Publish(did, description string) (string, string, error) {
 		}
 		projectID = proj.ID
 	}
-	// add dataset files to our deposit
-	// TODO: obtain files from FOXDEN, e.g. get meta-data record
-	var files []string
-	var datasetFiles []mcapi.DatasetFileUpload
-	for _, fname := range files {
-		dir := "foxden"  // TODO: decide on directory placement
-		desc := "foxden" // TODO: decide on description of the file
-		f := mcapi.DatasetFileUpload{
-			File:        fname,
-			Description: desc,
-			Directory:   dir,
-		}
-		datasetFiles = append(datasetFiles, f)
+
+	// Create a temporary file with out record
+	tempFile, err := os.CreateTemp("", "foxden-*.json")
+	if err != nil {
+		return doi, doiLink, err
+	}
+	defer os.Remove(tempFile.Name())
+	content, err := json.MarshalIndent(record, "", "  ")
+	if err != nil {
+		return doi, doiLink, err
+	}
+	_, err = tempFile.Write(content)
+	if err != nil {
+		return doi, doiLink, err
+	}
+	err = tempFile.Close()
+	if err != nil {
+		return doi, doiLink, err
+	}
+
+	// compose dataset file
+	datasetFiles := []mcapi.DatasetFileUpload{
+		mcapi.DatasetFileUpload{
+			File:        tempFile.Name(),
+			Description: description,
+			Directory:   "foxden",
+		},
 	}
 
 	// create new deposit
@@ -93,11 +112,13 @@ func Publish(did, description string) (string, string, error) {
 	}
 	datasetID = ds.ID
 
-	// publish deposit
+	// publish deposit within project and dataset ids
 	_, err = mcClient.PublishDataset(projectID, datasetID)
 	if err != nil {
 		return doi, doiLink, err
 	}
+
+	// Mint DOI using our project and dataset ids
 	ds, err = mcClient.MintDOIForDataset(projectID, datasetID)
 	if err == nil {
 		doi = ds.DOI
