@@ -12,6 +12,7 @@ import "errors"
 type FoxdenRecord struct {
 	Beamline string `json:"beamline"`
 	Type     string `json:"type"`
+	MetaData any    `json:"meta_data"`
 }
 
 // Creator represents creator record
