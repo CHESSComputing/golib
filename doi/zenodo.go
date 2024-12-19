@@ -11,19 +11,19 @@ import (
 	"github.com/CHESSComputing/golib/zenodo"
 )
 
-// Zenodo represents Zenodo publisher
-type Zenodo struct {
+// ZenodoProvider represents Zenodo provider
+type ZenodoProvider struct {
 }
 
-// Init function initializes Zenodo publisher
-func (z *Zenodo) Init() {
+// Init function initializes Zenodo provider
+func (z *ZenodoProvider) Init() {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
 }
 
 // Publish provides publication of dataset with did and description
-func (z *Zenodo) Publish(did, description string) (string, string, error) {
+func (z *ZenodoProvider) Publish(did, description string) (string, string, error) {
 	var doi, doiLink string
 	var err error
 	docId, err := zenodo.CreateRecord()
