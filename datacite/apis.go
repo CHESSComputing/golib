@@ -10,6 +10,13 @@ import (
 	srvConfig "github.com/CHESSComputing/golib/config"
 )
 
+/*
+ * Datacite documentation:
+ * https://support.datacite.org/reference/post_dois
+ * https://support.datacite.org/docs/api-create-dois
+ * https://schema.datacite.org/meta/kernel-4/
+ */
+
 // Publish provides publication of did into datacite
 func Publish(did, description string, record any) (string, string, error) {
 	var doi, doiLink string
