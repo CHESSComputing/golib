@@ -253,8 +253,12 @@ type MaterialsCommons struct {
 
 // Datacite represents Datacite service configuration
 type Datacite struct {
-	Url         string `mapstructure:"Url"`
-	AccessToken string `mapstructure:"AccessToken"`
+	Url          string `mapstructure:"Url"`
+	AccessToken  string `mapstructure:"AccessToken"`
+	AccessKey    string `mapstructure:"AccessKey"`
+	AccessSecret string `mapstructure:"AccessSecret"`
+	Username     string `mapstructure:"username"`
+	Password     string `mapstructure:"password"`
 }
 
 // SpecScans represents SpecScansService configuration
