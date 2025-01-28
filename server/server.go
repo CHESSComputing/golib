@@ -194,7 +194,14 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 					panic(err)
 				}
 				m := fmt.Sprintf("%s/%s", base, dir)
-				r.StaticFS(m, http.FS(filesFS))
+				if webServer.StaticDir != "" {
+					sdir := filepath.Join(webServer.StaticDir, dir)
+					log.Printf("for end-point %s use static directory %s\n", m, sdir)
+					r.StaticFS(m, http.Dir(sdir))
+				} else {
+					log.Printf("for end-point %s use embeded fs\n", m)
+					r.StaticFS(m, http.FS(filesFS))
+				}
 			}
 		}
 	}
