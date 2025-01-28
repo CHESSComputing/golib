@@ -185,7 +185,18 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	}
 
 	// static files
-	if fsys != nil {
+	if webServer.StaticDir != "" {
+		log.Printf("Load static files from local area %s\n", webServer.StaticDir)
+		if entries, err := os.ReadDir(webServer.StaticDir); err == nil {
+			for _, e := range entries {
+				dir := e.Name()
+				m := fmt.Sprintf("%s/%s", base, dir)
+				sdir := filepath.Join(webServer.StaticDir, dir)
+				log.Printf("for end-point %s use static directory %s\n", m, sdir)
+				r.StaticFS(m, http.Dir(sdir))
+			}
+		}
+	} else if fsys != nil {
 		if entries, err := os.ReadDir(static); err == nil {
 			for _, e := range entries {
 				dir := e.Name()
@@ -205,20 +216,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 			}
 		}
 	} else {
-		if webServer.StaticDir != "" {
-			log.Println("WARNING: fsys is %v, will try to load static files from local area %s", fsys, webServer.StaticDir)
-			if entries, err := os.ReadDir(webServer.StaticDir); err == nil {
-				for _, e := range entries {
-					dir := e.Name()
-					m := fmt.Sprintf("%s/%s", base, dir)
-					sdir := filepath.Join(webServer.StaticDir, dir)
-					log.Printf("for end-point %s use static directory %s\n", m, sdir)
-					r.StaticFS(m, http.Dir(sdir))
-				}
-			}
-		} else {
-			log.Println("ERROR: neither fsys or webServer.StaticDir is set, no css/js support")
-		}
+		log.Println("ERROR: neither fsys or webServer.StaticDir is set, no css/js support")
 	}
 
 	_routes = r.Routes()
