@@ -197,7 +197,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 			}
 		}
 	} else if fsys != nil {
-		if entries, err := os.ReadDir(static); err == nil {
+		if entries, err := fs.ReadDir(fsys, static); err == nil {
 			for _, e := range entries {
 				dir := e.Name()
 				filesFS, err := fs.Sub(fsys, filepath.Join(static, dir))
