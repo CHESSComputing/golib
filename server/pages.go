@@ -13,6 +13,8 @@ import (
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/process"
+
+	utils "github.com/CHESSComputing/golib/utils"
 )
 
 //
@@ -22,6 +24,7 @@ import (
 // ErrorPage returns error page
 func ErrorPage(fsys fs.FS, msg string, err error) string {
 	log.Printf("ERROR: %v\n", err)
+	log.Printf("STACKTRACE:\n%v", utils.Stack())
 	tmpl := MakeTmpl(fsys, "Error")
 	tmpl["Content"] = msg
 	return TmplPage(fsys, "error.tmpl", tmpl)
