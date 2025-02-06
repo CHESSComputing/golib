@@ -35,6 +35,7 @@ type LDAP struct {
 	BaseDN   string `mapstructure:"baseDN`    // ldap baseDN
 	Login    string `mapstructure:"login"`    // LDAP login to use
 	Password string `mapstructure:"password"` // LDAP password to use
+	Expire   int    `mapstructure:"expire"`   // LDAP cache record expire (in seconds)
 }
 
 // DOI attributes
@@ -414,6 +415,10 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 	}
 	if err := viper.Unmarshal(&config); err != nil {
 		return config, err
+	}
+	// set defaults
+	if config.LDAP.Expire == 0 {
+		config.LDAP.Expire = 3600 // LDAP cache records expire in 1 hour
 	}
 	return config, nil
 }
