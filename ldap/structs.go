@@ -44,23 +44,31 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	ldapURL := srvConfig.Config.LDAP.URL
 	baseDN := srvConfig.Config.LDAP.BaseDN
 	attributes := []string{"memberOf"}
+	expireDuration := time.Duration(srvConfig.Config.LDAP.Expire) * time.Second
+
+	// Check if the entry exists in the cache and is still valid
 	if cacheEntry, ok := c.Map[user]; ok {
-		if cacheEntry.Expire.Before(time.Now()) {
+		if time.Now().Before(cacheEntry.Expire) {
 			return cacheEntry, nil
 		}
 	}
+
+	// Perform LDAP search if no valid cache entry is found
 	results, err := Search(ldapURL, login, password, baseDN, user, attributes)
 	if err != nil {
 		return Entry{}, err
 	}
 	for _, entry := range results.Entries {
 		for _, attr := range entry.Attributes {
+			// Create cache entry with correct expiration time
 			// here attr.Name is our attribute name, e.g. memberOf
 			cacheEntry := Entry{
 				DN:     entry.DN,
 				Groups: attr.Values,
-				Expire: time.Now(),
+				Expire: time.Now().Add(expireDuration), // Expiration based on config
+
 			}
+
 			// find out BTRs and Beamlines
 			var btrs, beamlines, foxdens []string
 			for _, val := range attr.Values {
@@ -93,11 +101,11 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 			cacheEntry.Foxdens = foxdens
 			cacheEntry.Beamlines = beamlines
 			cacheEntry.Btrs = btrs
-			// here we suppose to have only eny entry per user filled with groups
+
+			// Store in cache
 			c.Map[user] = cacheEntry
 			return cacheEntry, nil
 		}
 	}
-	// we should not reach this point
-	return Entry{}, errors.New("no cache entry")
+	return Entry{}, errors.New("no cache entry found")
 }
