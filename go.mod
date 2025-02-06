@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/HouzuoGuo/tiedot v0.0.0-20210905174726-ae1e16866d06
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/dchest/captcha v1.0.0
 	github.com/dgraph-io/badger/v4 v4.5.0
 	github.com/gin-contrib/sessions v1.0.1
@@ -18,12 +19,14 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/materials-commons/gomcapi v0.0.5
 	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/minio/minio-go/v7 v7.0.82
 	github.com/ostafen/clover/v2 v2.0.0-alpha.3
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/prometheus/procfs v0.15.1
 	github.com/rs/xid v1.6.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/viper v1.19.0
+	github.com/stretchr/testify v1.10.0
 	github.com/ulule/limiter/v3 v3.11.2
 	github.com/vkuznet/cryptoutils v0.0.2
 	github.com/vkuznet/http-logging v0.0.0-20210729230351-fc50acd79868
@@ -39,13 +42,13 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/aws/aws-sdk-go v1.55.5 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.0.0 // indirect
@@ -90,13 +93,13 @@ require (
 	github.com/materials-commons/hydra v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.0.82 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
