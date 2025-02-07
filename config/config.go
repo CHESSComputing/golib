@@ -27,6 +27,7 @@ type Globus struct {
 	ClientSecret string `mapstructure:"client_secret"` // client secret
 	TransferURL  string `mapstructure:"transfer_url"`  // globus transfer url
 	AuthURL      string `mapstructure:"auth_url"`      // globus auth url
+	OriginID     string `mapstructure:"origin_id"`     // globus origin ID for CHESS Raw data collection
 }
 
 // LDAP attributes
