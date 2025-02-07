@@ -40,6 +40,9 @@ func ChessGlobusLink(collection, path string) (string, error) {
 	if globusCache == nil {
 		globusCache = make(map[string]string)
 	}
+	if srvConfig.Config == nil {
+		srvConfig.Init()
+	}
 
 	// if FOXDEN configuration provides Globus OriginID we will use it as collection id
 	if srvConfig.Config.Globus.OriginID != "" {
