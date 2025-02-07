@@ -15,7 +15,7 @@ func TestGlobusLink(t *testing.T) {
 		t.Error(err)
 	}
 	spath := url.QueryEscape("/2024-3/id1a3/ko-3538-d/align-0925")
-	epath := fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&&origin_path=%s", cid, spath)
+	epath := fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&origin_path=%s", cid, spath)
 	if gurl != epath {
 		msg := fmt.Sprintf("ERROR: got\n%s\nexpect:\n%s", gurl, epath)
 		t.Error(msg)
