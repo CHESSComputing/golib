@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+
+	srvConfig "github.com/CHESSComputing/golib/config"
 )
 
 // keep map of globus collection vs ids for caching purposes
@@ -38,9 +40,18 @@ func ChessGlobusLink(collection, path string) (string, error) {
 	if globusCache == nil {
 		globusCache = make(map[string]string)
 	}
+
+	// if FOXDEN configuration provides Globus OriginID we will use it as collection id
+	if srvConfig.Config.Globus.OriginID != "" {
+		return GlobusLink(srvConfig.Config.Globus.ClientID, path)
+	}
+
+	// check if globusCache has our collection
 	if cid, ok := globusCache[collection]; ok {
 		return GlobusLink(cid, path)
 	}
+
+	// obtain collection id from globus
 	var cid string
 	scopes := []string{"urn:globus:auth:scope:transfer.api.globus.org:all"}
 	token, err := Token(scopes)
