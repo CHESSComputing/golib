@@ -31,7 +31,7 @@ func GlobusLink(cid, path string) (string, error) {
 	idir := arr[0]                        // leading part
 	edir := strings.Split(arr[1], "/")[0] // ending part (first directory)
 	epath := url.QueryEscape(fmt.Sprintf("%s/%s", idir, edir))
-	gurl := fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&&origin_path=%s", cid, epath)
+	gurl := fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&origin_path=%s", cid, epath)
 	return gurl, nil
 }
 
@@ -46,7 +46,7 @@ func ChessGlobusLink(collection, path string) (string, error) {
 
 	// if FOXDEN configuration provides Globus OriginID we will use it as collection id
 	if srvConfig.Config.Globus.OriginID != "" {
-		return GlobusLink(srvConfig.Config.Globus.ClientID, path)
+		return GlobusLink(srvConfig.Config.Globus.OriginID, path)
 	}
 
 	// check if globusCache has our collection
