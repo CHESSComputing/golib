@@ -21,6 +21,19 @@ func TestGlobusLink(t *testing.T) {
 		t.Error(msg)
 	}
 
+	// test /nfs/chess/raw/2025-1/id3b/thompson-4135-a raw path
+	path = "/nfs/chess/raw/2025-1/id3b/thompson-4135-a"
+	gurl, err = GlobusLink(cid, path)
+	if err != nil {
+		t.Error(err)
+	}
+	spath = url.QueryEscape("/2025-1/id3b/thompson-4135-a")
+	epath = fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&origin_path=%s", cid, spath)
+	if gurl != epath {
+		msg := fmt.Sprintf("ERROR: got\n%s\nexpect:\n%s", gurl, epath)
+		t.Error(msg)
+	}
+
 	// test for empty path
 	_, err = GlobusLink(cid, "")
 	if err == nil {
