@@ -281,9 +281,17 @@ type S3 struct {
 	Region       string `mapstructure:"region"`
 }
 
+// FS defines FileSystem backend
+type FS struct {
+	Name    string `mapstructure:"Name"`
+	Kind    string `mapstructure:"Kind"`
+	Storage string `mapstructure:"Storage"`
+}
+
 // DataManagement represents data-management service configuration
 type DataManagement struct {
 	S3
+	FS
 	WebServer `mapstructure:"WebServer"`
 }
 
