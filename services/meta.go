@@ -26,6 +26,7 @@ func MetaDataRecords(query string, skeys []string, sorder, idx, limit int) ([]ma
 	}
 	rurl := fmt.Sprintf("%s/search", srvConfig.Config.Services.MetaDataURL)
 	httpReadRequest := NewHttpRequest("read", 0)
+	httpReadRequest.GetToken()
 	resp, err := httpReadRequest.Post(rurl, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return records, err
