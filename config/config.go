@@ -211,22 +211,24 @@ type Discovery struct {
 
 // MetaData represents metadata service configuration
 type MetaData struct {
-	WebServer   `mapstructure:"WebServer"`
-	MongoDB     `mapstructure:"MongoDB"`
-	LexiconFile string `mapstructure:"LexiconFile"` // lexicon file
+	WebServer              `mapstructure:"WebServer"`
+	MongoDB                `mapstructure:"MongoDB"`
+	LexiconFile            string   `mapstructure:"LexiconFile"`            // lexicon file
+	DataLocationAttributes []string `mapstructure:"DataLocationAttributes"` // data location attributes to use
 }
 
 // CHESSMetaData represents CHESS MetaData configuration
 type CHESSMetaData struct {
-	WebServer           `mapstructure:"WebServer"`
-	MongoDB             `mapstructure:"MongoDB"`
-	LexiconFile         string   `mapstructure:"LexiconFile"`     // lexicon file
-	TestMode            bool     `mapstructure:TestMode`          // test mode
-	SchemaFiles         []string `json:"SchemaFiles"`             // schema files
-	SchemaRenewInterval int      `json:"SchemaRenewInterval"`     // schema renew interval
-	WebSectionsFile     string   `mapstructure:"WebSectionsFile"` // file for web form sections
-	OrderedSections     []string `mapstructure:OrderedSections`   // ordered sections for web UI
-	SkipKeys            []string `mapstructure:SkipKeys`          // keys to skip for web forms
+	WebServer              `mapstructure:"WebServer"`
+	MongoDB                `mapstructure:"MongoDB"`
+	SchemaRenewInterval    int      `json:"SchemaRenewInterval"`            // schema renew interval
+	WebSectionsFile        string   `mapstructure:"WebSectionsFile"`        // file for web form sections
+	LexiconFile            string   `mapstructure:"LexiconFile"`            // lexicon file
+	TestMode               bool     `mapstructure:TestMode`                 // test mode
+	DataLocationAttributes []string `mapstructure:"DataLocationAttributes"` // data location attributes to use
+	SchemaFiles            []string `json:"SchemaFiles"`                    // schema files
+	OrderedSections        []string `mapstructure:OrderedSections`          // ordered sections for web UI
+	SkipKeys               []string `mapstructure:SkipKeys`                 // keys to skip for web forms
 }
 
 // OreCastMetaData represents OreCast MetaData configuration
