@@ -121,7 +121,7 @@ type WebServer struct {
 	Port        int    `mapstructure:"Port"`        // server port number
 	Verbose     int    `mapstructure:"Verbose"`     // verbose output
 	Base        string `mapstructure:"Base"`        // base URL
-	StaticDir   string `mapstructure:"StaticDir"`   // speficy static dir location
+	StaticDir   string `mapstructure:"StaticDir"`   // specify static dir location
 	LogFile     string `mapstructure:"LogFile"`     // server log file
 	LogLongFile bool   `mapstructure:"LogLongFile"` // server log structure
 
@@ -129,7 +129,7 @@ type WebServer struct {
 	LimiterPeriod   string   `mapstructure:"Rate"`      // limiter rate value
 	LimiterHeader   string   `json:"limiter_header"`    // limiter header to use
 	LimiterSkipList []string `json:"limiter_skip_list"` // limiter skip list
-	MetricsPrefix   string   `json:"metrics_prefix"`    // metrics prefix used for prometheus
+	MetricsPrefix   string   `json:"metrics_prefix"`    // metrics prefix used for Prometheus
 
 	// etag options
 	Etag         string `json:"etag"`          // etag value to use for ETag generation
@@ -391,17 +391,29 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 	// check if we do have configuration file
 	if _, err := os.Stat(cfile); err == nil {
 		viper.SetConfigFile(cfile)
+		if os.Getenv("FOXDEN_DEBUG") != "" {
+			fmt.Println("Parse FOXDEN config:", cfile)
+		}
 	} else {
 		if _, err := os.Stat(os.Getenv("FOXDEN_CONFIG")); err == nil {
+			if os.Getenv("FOXDEN_DEBUG") != "" {
+				fmt.Println("Parse FOXDEN config read from FOXDEN_CONGIV env:", os.Getenv("FOXDEN_CONFIG"))
+			}
 			viper.SetConfigFile(os.Getenv("FOXDEN_CONFIG"))
 		} else {
 			cfile = "/nfs/chess/user/chess_chapaas/.foxden.yaml"
 			if _, err := os.Stat(cfile); err == nil {
 				viper.SetConfigFile(cfile)
+				if os.Getenv("FOXDEN_DEBUG") != "" {
+					fmt.Println("Parse FOXDEN config:", cfile)
+				}
 			} else {
 				cfile = `\\chesssamba.classe.cornell.edu\user\chess_chapaas\.foxden.yaml`
 				if _, err := os.Stat(cfile); err == nil {
 					viper.SetConfigFile(cfile)
+					if os.Getenv("FOXDEN_DEBUG") != "" {
+						fmt.Println("Parse FOXDEN config:", cfile)
+					}
 				} else {
 					msg := "FOXDEN configuration file is not found"
 					fmt.Println(msg)
@@ -477,7 +489,9 @@ func Init() {
 		// check env variable
 		config = os.Getenv("FOXDEN_CONFIG")
 	}
-	//     log.Println("FOXDEN CONFIG", config)
+	if os.Getenv("FOXDEN_DEBUG") != "" {
+		log.Println("Read FOXDEN config:", config)
+	}
 	oConfig, err := ParseConfig(config)
 	if err != nil {
 		log.Fatal("ERROR", err)
