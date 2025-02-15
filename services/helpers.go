@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -86,7 +87,7 @@ func (h *HttpRequest) GetToken() {
 			log.Println("ERROR", err)
 			return
 		}
-		if h.Verbose > 0 {
+		if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 0 {
 			log.Printf("INFO: Authz response %+v, error %v", response, err)
 		}
 		h.Token = response.AccessToken
@@ -122,13 +123,16 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 			}
 		}
 	}
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
+		log.Printf("HTTP GET request to %s", rurl)
+	}
 	client := &http.Client{}
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Println("HttpRequest: GET request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("HttpRequest: GET response", string(dump), err)
 	}
@@ -178,13 +182,16 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 			}
 		}
 	}
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
+		log.Printf("HTTP %s request to %s", method, rurl)
+	}
 	client := &http.Client{}
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Printf("HttpRequest: %s request %s, error %v", method, string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Printf("HttpRequest: method %s response %s, error %v", method, string(dump), err)
 	}
@@ -201,13 +208,16 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
+		log.Printf("HTTP POST request to %s", rurl)
+	}
 	client := &http.Client{}
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpRequestOut(req, true)
 		log.Println("HttpRequest: POST form request", string(dump), err)
 	}
 	resp, err := client.Do(req)
-	if h.Verbose > 2 {
+	if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("HttpRequest: POST form response", string(dump), err)
 	}
