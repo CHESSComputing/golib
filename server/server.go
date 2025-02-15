@@ -216,7 +216,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 			}
 		}
 	} else {
-		log.Println("ERROR: neither fsys or webServer.StaticDir is set, no css/js support")
+		log.Println("WARNING: neither fsys or webServer.StaticDir is set, no css/js support")
 	}
 
 	_routes = r.Routes()
