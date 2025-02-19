@@ -9,7 +9,47 @@ import (
 	"strconv"
 	"text/template"
 	"time"
+
+	utils "github.com/CHESSComputing/golib/utils"
 )
+
+// global variables
+var _header, _footer, _footerEmpty string
+
+// Header helper function to define our header
+func Header(fsys fs.FS, base string) string {
+	if _header == "" {
+		tmpl := MakeTmpl(fsys, "Header")
+		tmpl["Base"] = base
+		_header = TmplPage(fsys, "header.tmpl", tmpl)
+	}
+	return _header
+}
+
+// Footer helper function to define our footer
+func Footer(fsys fs.FS, base string) string {
+	if _footer == "" {
+		tmpl := MakeTmpl(fsys, "Footer")
+		tmpl["Base"] = base
+		_footer = TmplPage(fsys, "footer.tmpl", tmpl)
+	}
+	return _footer
+}
+
+// FooterEmpty helper function to define our footer
+func FooterEmpty(fsys fs.FS, base string) string {
+	if _footerEmpty == "" {
+		tmpl := MakeTmpl(fsys, "Footer")
+		tmpl["Base"] = base
+		_footerEmpty = TmplPage(fsys, "footer_empty.tmpl", tmpl)
+	}
+	return _footerEmpty
+}
+
+// Base helper function to handle base path of URL requests
+func Base(base, api string) string {
+	return utils.BasePath(base, api)
+}
 
 // consume list of templates and release their full path counterparts
 func fileNames(tdir string, filenames ...string) []string {
