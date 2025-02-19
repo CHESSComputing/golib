@@ -444,10 +444,10 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		config.LDAP.Expire = 3600 // LDAP cache records expire in 1 hour
 	}
 	if len(config.CHESSMetaData.DataLocationAttributes) == 0 {
-		config.CHESSMetaData.DataLocationAttributes = []string{"data_location_raw", "btr_location_raw"}
+		config.CHESSMetaData.DataLocationAttributes = []string{"data_location_raw"}
 	}
 	if len(config.MetaData.DataLocationAttributes) == 0 {
-		config.MetaData.DataLocationAttributes = []string{"data_location_raw", "btr_location_raw"}
+		config.MetaData.DataLocationAttributes = []string{"data_location_raw"}
 	}
 	return config, nil
 }
