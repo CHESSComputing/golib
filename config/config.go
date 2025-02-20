@@ -294,7 +294,8 @@ type FS struct {
 type DataManagement struct {
 	S3
 	FS
-	WebServer `mapstructure:"WebServer"`
+	FileExtensions []string `mapstructure:"FileExtensions"`
+	WebServer      `mapstructure:"WebServer"`
 }
 
 // DataBookkeeping represents data-bookkeeping service configuration
