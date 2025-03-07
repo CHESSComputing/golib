@@ -179,6 +179,7 @@ type Frontend struct {
 	CheckAdmins     bool   `mapstructure:"CheckAdmins"`     // enable check for FOXDEN admins
 	AllowAllRecords bool   `mapstructure:"AllowAllRecords"` // allow all records to be seen
 	DefaultEndPoint string `mapstructure:"DefaultEndPoint"`
+	DocUrl          string `mapstructure:"DocUrl"` // documentation url
 }
 
 // Encryption represents encryption configuration parameters
