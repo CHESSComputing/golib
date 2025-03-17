@@ -16,9 +16,10 @@ import (
 
 // Kerberos defines kerberos structure we use
 type Kerberos struct {
-	User   string
-	Scope  string
-	Ticket []byte
+	User    string
+	Scope   string
+	Ticket  []byte
+	Expires int64
 }
 
 // helper function to check user credentials for POST requests
