@@ -155,7 +155,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	if !ok {
 		return "", "", fmt.Errorf("failed to extract DOI from response")
 	}
-	doiLink := fmt.Sprintf("%s/%s", srvConfig.Config.DOI.Datacite.Url, doi)
+	doiLink := fmt.Sprintf("%s/dois/%s", srvConfig.Config.DOI.Datacite.Url, doi)
 
 	return doi, doiLink, err
 }
