@@ -3,6 +3,7 @@ package datacite
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,46 +28,83 @@ func creators() []Creator {
 	}
 }
 
-func persistentUrl() string {
-	return srvConfig.Config.DOI.Datacite.LandingPageUrl
-}
-
-func prefix() string {
-	if srvConfig.Config.DOI.Datacite.Url == "https://api.test.datacite.org/dois" {
-		return "10.5438"
-	}
-	return ""
-}
-
 func types() Types {
 	return Types{
+		RIS:                 "FOXDEN",
+		Bibtex:              "misc",
+		SchemaOrg:           "dataset",
 		ResourceTypeGeneral: "dataset",
 	}
 }
 
+func publish2DOIService(rec any) (string, string, error) {
+	var schema, url, did string
+	var err error
+	record := rec.(map[string]any)
+	if val, ok := record["schema"]; ok {
+		schema = val.(string)
+	} else {
+		err = errors.New("unable to look-up schema in FOXDEN record")
+	}
+	if val, ok := record["did"]; ok {
+		did = val.(string)
+	} else {
+		err = errors.New("unable to look-up did in FOXDEN record")
+	}
+	url = fmt.Sprintf("%s/meta?did=%s", srvConfig.Config.Services.FrontendURL, did)
+	return schema, url, err
+}
+
+// helper function to publish foxden metadata in FOXDEN DOI service
+func publishFoxdenRecord(record any) ([]RelatedIdentifier, error) {
+	// publish given record in DOIService and obtain its URL
+	schema, url, err := publish2DOIService(record)
+	if err != nil {
+		return []RelatedIdentifier{}, err
+	}
+	out := []RelatedIdentifier{
+		RelatedIdentifier{
+			SchemaUri:             schema,
+			RelationType:          "FOXDEN metadata",
+			RelatedIdentifier:     url,
+			RelatedIdentifierType: "URL",
+			RelatedMetadataScheme: "foxden",
+		},
+	}
+	return out, nil
+}
+
 // Publish provides publication of did into datacite
 func Publish(did, description string, record any) (string, string, error) {
-	var doi, doiLink string
-	var err error
+	foxdenMeta, err := publishFoxdenRecord(record)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to publish foxden record into DOIService: %v", err)
+	}
 
 	title := Title{Title: fmt.Sprintf("FOXDEN did=%s", did)}
 	attrs := Attributes{
-		Titles:          []Title{title},
-		Prefix:          prefix(),
-		Creators:        creators(),
-		Publisher:       "Cornell University",
-		PublicationYear: time.Now().Year(),
-		Descriptions:    []string{description},
-		Types:           types(),
-		MetaData:        record,
-		URL:             persistentUrl(),
+		Titles:             []Title{title},
+		Prefix:             srvConfig.Config.DOI.Datacite.Prefix,
+		Creators:           creators(),
+		Publisher:          "Cornell University",
+		PublicationYear:    time.Now().Year(),
+		Descriptions:       []string{description},
+		Types:              types(),
+		RelatedIdentifiers: foxdenMeta,
+		URL:                srvConfig.Config.DOI.Datacite.LandingPageUrl,
 	}
 
 	// Set the DOI creation endpoint
 	url := fmt.Sprintf("%s/dois", srvConfig.Config.DOI.Datacite.Url)
 
 	// Convert payload to JSON
-	payloadBytes, err := json.Marshal(attrs)
+	payload := RequestPayload{
+		Data: RequestData{
+			Type:       "dois",
+			Attributes: attrs,
+		},
+	}
+	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to marshal metadata payload: %v", err)
 	}
@@ -117,6 +155,7 @@ func Publish(did, description string, record any) (string, string, error) {
 	if !ok {
 		return "", "", fmt.Errorf("failed to extract DOI from response")
 	}
+	doiLink := fmt.Sprintf("%s/%s", srvConfig.Config.DOI.Datacite.Url, doi)
 
 	return doi, doiLink, err
 }

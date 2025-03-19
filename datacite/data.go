@@ -6,15 +6,15 @@ import "time"
  * https://support.datacite.org/docs/api-create-dois
  */
 
-// RequestData represents request payload
+// RequestPayload represents request payload
+type RequestPayload struct {
+	Data RequestData `json:"data"`
+}
+
+// RequestData represents request data
 type RequestData struct {
-	Type            string     `json:"type"`
-	Attributes      Attributes `json:"attributes"`
-	Titles          []Title    `json:"titles"`
-	Publisher       string     `json:"publisher"`
-	PublicationYear int        `json:"publicationYear"`
-	Types           Types      `json:"types"`
-	Url             string     `json:"url"`
+	Type       string     `json:"type"`
+	Attributes Attributes `json:"attributes"`
 }
 
 // ResponseData represents response payload
@@ -25,57 +25,66 @@ type ResposeData struct {
 	Relations  Relationships `json:"relationships"`
 }
 
+// RelatedIdentifier represents related identifier meta-data
+type RelatedIdentifier struct {
+	SchemaUri             string `json:"schemaUri"`
+	RelationType          string `json:"relationType"`
+	RelatedIdentifier     string `json:"relatedIdentifier"`
+	RelatedIdentifierType string `json:"relatedIdentifierType"`
+	RelatedMetadataScheme string `json:"relatedMetadataScheme"`
+}
+
 // Attributes represent attributes
 type Attributes struct {
-	Doi                  string        `json:"doi"`
-	Prefix               string        `json:"prefix"`
-	Suffix               string        `json:"suffix"`
-	Identifiers          []string      `json:"identifiers"`
-	AlternateIdentifiers []string      `json:"alternateIdentifiers"`
-	Creators             []Creator     `json:"creators"`
-	Titles               []Title       `json:"titles"`
-	Publisher            string        `json:"publisher"`
-	Container            Container     `json:"container"`
-	PublicationYear      int           `json:"publicationYear"`
-	Subjects             []string      `json:"subjects"`
-	Contributors         []Contributor `json:"contributors"`
-	Dates                []Date        `json:"dates"`
-	Language             interface{}   `json:"language"`
-	Types                Types         `json:"types"`
-	RelatedIdentifiers   []string      `json:"relatedIdentifiers"`
-	RelatedItems         []string      `json:"relatedItems"`
-	Sizes                []string      `json:"sizes"`
-	Formats              []string      `json:"formats"`
-	Version              interface{}   `json:"version"`
-	RightsList           []string      `json:"rightsList"`
-	Descriptions         []string      `json:"descriptions"`
-	GeoLocations         []string      `json:"geoLocations"`
-	FundingReferences    []string      `json:"fundingReferences"`
-	XML                  string        `json:"xml"`
-	URL                  string        `json:"url"`
-	ContentURL           interface{}   `json:"contentUrl"`
-	MetadataVersion      int           `json:"metadataVersion"`
-	SchemaVersion        interface{}   `json:"schemaVersion"`
-	Source               string        `json:"source"`
-	IsActive             bool          `json:"isActive"`
-	State                string        `json:"state"`
-	Reason               interface{}   `json:"reason"`
-	LandingPage          interface{}   `json:"landingPage"`
-	ViewCount            int           `json:"viewCount"`
-	ViewsOverTime        []string      `json:"viewsOverTime"`
-	DownloadCount        int           `json:"downloadCount"`
-	DownloadsOverTime    []string      `json:"downloadsOverTime"`
-	ReferenceCount       int           `json:"referenceCount"`
-	CitationCount        int           `json:"citationCount"`
-	CitationsOverTime    []string      `json:"citationsOverTime"`
-	PartCount            int           `json:"partCount"`
-	PartOfCount          int           `json:"partOfCount"`
-	VersionCount         int           `json:"versionCount"`
-	VersionOfCount       int           `json:"versionOfCount"`
-	Created              time.Time     `json:"created"`
-	Registered           time.Time     `json:"registered"`
-	Published            string        `json:"published"`
-	Updated              time.Time     `json:"updated"`
+	Doi                  string              `json:"doi"`
+	Prefix               string              `json:"prefix"`
+	Suffix               string              `json:"suffix"`
+	Identifiers          []string            `json:"identifiers"`
+	AlternateIdentifiers []string            `json:"alternateIdentifiers"`
+	Creators             []Creator           `json:"creators"`
+	Titles               []Title             `json:"titles"`
+	Publisher            string              `json:"publisher"`
+	Container            Container           `json:"container"`
+	PublicationYear      int                 `json:"publicationYear"`
+	Subjects             []string            `json:"subjects"`
+	Contributors         []Contributor       `json:"contributors"`
+	Dates                []Date              `json:"dates"`
+	Language             interface{}         `json:"language"`
+	Types                Types               `json:"types"`
+	RelatedIdentifiers   []RelatedIdentifier `json:"relatedIdentifiers"`
+	RelatedItems         []string            `json:"relatedItems"`
+	Sizes                []string            `json:"sizes"`
+	Formats              []string            `json:"formats"`
+	Version              interface{}         `json:"version"`
+	RightsList           []string            `json:"rightsList"`
+	Descriptions         []string            `json:"descriptions"`
+	GeoLocations         []string            `json:"geoLocations"`
+	FundingReferences    []string            `json:"fundingReferences"`
+	XML                  string              `json:"xml"`
+	URL                  string              `json:"url"`
+	ContentURL           interface{}         `json:"contentUrl"`
+	MetadataVersion      int                 `json:"metadataVersion"`
+	SchemaVersion        interface{}         `json:"schemaVersion"`
+	Source               string              `json:"source"`
+	IsActive             bool                `json:"isActive"`
+	State                string              `json:"state"`
+	Reason               interface{}         `json:"reason"`
+	LandingPage          interface{}         `json:"landingPage"`
+	ViewCount            int                 `json:"viewCount"`
+	ViewsOverTime        []string            `json:"viewsOverTime"`
+	DownloadCount        int                 `json:"downloadCount"`
+	DownloadsOverTime    []string            `json:"downloadsOverTime"`
+	ReferenceCount       int                 `json:"referenceCount"`
+	CitationCount        int                 `json:"citationCount"`
+	CitationsOverTime    []string            `json:"citationsOverTime"`
+	PartCount            int                 `json:"partCount"`
+	PartOfCount          int                 `json:"partOfCount"`
+	VersionCount         int                 `json:"versionCount"`
+	VersionOfCount       int                 `json:"versionOfCount"`
+	Created              time.Time           `json:"created"`
+	Registered           time.Time           `json:"registered"`
+	Published            string              `json:"published"`
+	Updated              time.Time           `json:"updated"`
 
 	MetaData any `json:"metaData"`
 }
