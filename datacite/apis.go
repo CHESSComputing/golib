@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 )
@@ -17,6 +18,33 @@ import (
  * https://schema.datacite.org/meta/kernel-4/
  */
 
+func creators() []Creator {
+	return Creator{
+		Name:        "FOXDEN",
+		Affiliation: "Cornell University",
+	}
+}
+
+func persistentUrl() string {
+	return srvConfig.Config.DOI.Datacite.LandingPageUrl
+}
+
+func prefix() string {
+	if srvConfig.Config.DOI.Datacite.Url == "https://api.test.datacite.org/dois" {
+		return "10.5438"
+	}
+	return ""
+}
+
+func types() []Types {
+	t := Types{
+		ResourceTypeGeneral: "dataset",
+	}
+	var out []Types
+	out = append(out, t)
+	return out
+}
+
 // Publish provides publication of did into datacite
 func Publish(did, description string, record any) (string, string, error) {
 	var doi, doiLink string
@@ -24,10 +52,15 @@ func Publish(did, description string, record any) (string, string, error) {
 
 	title := Title{Title: fmt.Sprintf("FOXDEN did=%s", did)}
 	attrs := Attributes{
-		Titles:       []Title{title},
-		Publisher:    "Cornell University",
-		Descriptions: []string{description},
-		MetaData:     record,
+		Titles:          []Title{title},
+		Prefix:          prefix(),
+		Creators:        creators(),
+		Publisher:       "Cornell University",
+		PublicationYear: time.Time.Year(),
+		Descriptions:    []string{description},
+		Types:           types(),
+		MetaData:        record,
+		Url:             persistentUrl(),
 	}
 
 	// Set the DOI creation endpoint
