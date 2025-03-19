@@ -49,6 +49,9 @@ func Publish(did, description string, record any) (string, string, error) {
 	if srvConfig.Config.DOI.Datacite.Username != "" && srvConfig.Config.DOI.Datacite.Password != "" {
 		req.SetBasicAuth(srvConfig.Config.DOI.Datacite.Username, srvConfig.Config.DOI.Datacite.Password)
 	}
+	if srvConfig.Config.DOI.Datacite.AccessToken != "" {
+		req.Header.Set("Authorization", fmt.Println("Bearer %s", srvConfig.Config.DOI.Datacite.AccessToken))
+	}
 	req.Header.Set("Content-Type", "application/vnd.api+json")
 
 	// Send the request
