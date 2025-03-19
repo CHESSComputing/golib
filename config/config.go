@@ -266,6 +266,7 @@ type Datacite struct {
 	AccessSecret   string `mapstructure:"AccessSecret"`
 	Username       string `mapstructure:"Username"`
 	Password       string `mapstructure:"Password"`
+	Prefix         string `mapstructure:"Prefix"`
 	LandingPageUrl string `mapstructure:"LandingPageUrl"`
 }
 
