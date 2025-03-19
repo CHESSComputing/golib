@@ -19,9 +19,11 @@ import (
  */
 
 func creators() []Creator {
-	return Creator{
-		Name:        "FOXDEN",
-		Affiliation: "Cornell University",
+	return []Creator{
+		Creator{
+			Name:        "FOXDEN",
+			Affiliation: []string{"Cornell University"},
+		},
 	}
 }
 
@@ -36,13 +38,10 @@ func prefix() string {
 	return ""
 }
 
-func types() []Types {
-	t := Types{
+func types() Types {
+	return Types{
 		ResourceTypeGeneral: "dataset",
 	}
-	var out []Types
-	out = append(out, t)
-	return out
 }
 
 // Publish provides publication of did into datacite
@@ -56,11 +55,11 @@ func Publish(did, description string, record any) (string, string, error) {
 		Prefix:          prefix(),
 		Creators:        creators(),
 		Publisher:       "Cornell University",
-		PublicationYear: time.Time.Year(),
+		PublicationYear: time.Now().Year(),
 		Descriptions:    []string{description},
 		Types:           types(),
 		MetaData:        record,
-		Url:             persistentUrl(),
+		URL:             persistentUrl(),
 	}
 
 	// Set the DOI creation endpoint
@@ -83,7 +82,7 @@ func Publish(did, description string, record any) (string, string, error) {
 		req.SetBasicAuth(srvConfig.Config.DOI.Datacite.Username, srvConfig.Config.DOI.Datacite.Password)
 	}
 	if srvConfig.Config.DOI.Datacite.AccessToken != "" {
-		req.Header.Set("Authorization", fmt.Println("Bearer %s", srvConfig.Config.DOI.Datacite.AccessToken))
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", srvConfig.Config.DOI.Datacite.AccessToken))
 	}
 	req.Header.Set("Content-Type", "application/vnd.api+json")
 
