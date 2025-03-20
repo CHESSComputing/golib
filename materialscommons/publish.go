@@ -29,7 +29,7 @@ func getMcClient() {
 }
 
 // Publish function pulishes FOXDEN dataset with did and description in MaterialsCommons
-func Publish(did, description string, record any) (string, string, error) {
+func Publish(did, description string, record any, publish bool) (string, string, error) {
 	var err error
 	var doi, doiLink string
 	var projectID, datasetID int

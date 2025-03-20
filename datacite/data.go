@@ -38,6 +38,7 @@ type RelatedIdentifier struct {
 type Attributes struct {
 	Doi                  string              `json:"doi"`
 	Prefix               string              `json:"prefix"`
+	Event                string              `json:"event"`
 	Suffix               string              `json:"suffix"`
 	Identifiers          []string            `json:"identifiers"`
 	AlternateIdentifiers []string            `json:"alternateIdentifiers"`

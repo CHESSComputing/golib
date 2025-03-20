@@ -20,7 +20,7 @@ func (d *DataciteProvider) Init() {
 }
 
 // Publish provides publication of dataset with did and description
-func (d *DataciteProvider) Publish(did, description string, record any) (string, string, error) {
-	doi, doiLink, err := datacite.Publish(did, description, record)
+func (d *DataciteProvider) Publish(did, description string, record any, publish bool) (string, string, error) {
+	doi, doiLink, err := datacite.Publish(did, description, record, publish)
 	return doi, doiLink, err
 }

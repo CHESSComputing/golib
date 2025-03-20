@@ -75,14 +75,19 @@ func publishFoxdenRecord(record any) ([]RelatedIdentifier, error) {
 }
 
 // Publish provides publication of did into datacite
-func Publish(did, description string, record any) (string, string, error) {
+func Publish(did, description string, record any, publish bool) (string, string, error) {
 	foxdenMeta, err := publishFoxdenRecord(record)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to publish foxden record into DOIService: %v", err)
 	}
+	event := ""
+	if publish {
+		event = "publish"
+	}
 
 	title := Title{Title: fmt.Sprintf("FOXDEN did=%s", did)}
 	attrs := Attributes{
+		Event:              event,
 		Titles:             []Title{title},
 		Prefix:             srvConfig.Config.DOI.Datacite.Prefix,
 		Creators:           creators(),
