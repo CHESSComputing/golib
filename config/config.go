@@ -41,9 +41,10 @@ type LDAP struct {
 
 // DOI attributes
 type DOI struct {
-	DocumentDir      string           `mapstructure:"DocumentDir"` // doi document directory
-	Provider         string           `mapstructure:"Provider"`    // doi provider, e.g. Zenodo or MaterialsCommons
-	ProjectName      string           `mapstructure:"ProjectName"` // name of the project (only valid for MaterialsCommons)
+	DocumentDir      string           `mapstructure:"DocumentDir"`  // doi document directory
+	TemplateFile     string           `mapstructure:"TemplateFile"` // doi template file
+	Provider         string           `mapstructure:"Provider"`     // doi provider, e.g. Zenodo or MaterialsCommons
+	ProjectName      string           `mapstructure:"ProjectName"`  // name of the project (only valid for MaterialsCommons)
 	Zenodo           Zenodo           `mapstructure:"Zenodo"`
 	Datacite         Datacite         `mapstructure:"Datacite"`
 	MaterialsCommons MaterialsCommons `mapstructure:"MaterialsCommons"`
