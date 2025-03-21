@@ -28,7 +28,7 @@ type DOIData struct {
 
 // Default template string
 const defaultTmpl = `<html><body>
-PI: {{.PI}}!
+PI: {{.PI}}
 <br/>
 Facility: {{.Facility}}
 <br/>
