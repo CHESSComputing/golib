@@ -3,6 +3,7 @@ package doi
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -42,6 +43,9 @@ StaffScientist: {{.StaffScientist}}
 // CreateEntry creates DOI entry for DOIService
 func CreateEntry(doi string, record any, writeMeta bool) error {
 	doiDir := srvConfig.Config.DOI.DocumentDir
+	if doiDir == "" {
+		return errors.New("no DOI.DocumentDir configuration found")
+	}
 	if writeMeta {
 		fname := fmt.Sprintf("%s/metadata.json", doiDir)
 		file, err := os.Open(fname)
