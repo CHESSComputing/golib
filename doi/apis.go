@@ -22,9 +22,9 @@ type Provider interface {
 type DOIData struct {
 	PI             string
 	Facility       string
-	Beamline       string
 	Affiliation    string
 	StaffScientist string
+	Beamline       any
 }
 
 // Default template string
@@ -41,28 +41,34 @@ StaffScientist: {{.StaffScientist}}
 </body></html>`
 
 // CreateEntry creates DOI entry for DOIService
-func CreateEntry(doi string, record any, writeMeta bool) error {
+func CreateEntry(doi string, rec map[string]any, writeMeta bool) error {
 	doiDir := srvConfig.Config.DOI.DocumentDir
 	if doiDir == "" {
 		return errors.New("no DOI.DocumentDir configuration found")
 	}
+	// Create directory with 0755 permissions
+	err := os.MkdirAll(fmt.Sprintf("%s/%s", doiDir, doi), 0755)
+	if err != nil {
+		log.Println("Error creating directory:", err)
+		return err
+	}
 	if writeMeta {
-		fname := fmt.Sprintf("%s/metadata.json", doiDir)
-		file, err := os.Open(fname)
+		fname := fmt.Sprintf("%s/%s/metadata.json", doiDir, doi)
+		file, err := os.Create(fname)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("unable to create file", err)
+			return err
 		}
 		defer file.Close()
-		data, err := json.Marshal(record)
+		data, err := json.Marshal(rec)
 		if err != nil {
 			return err
 		}
 		file.Write(data)
 	}
 	doiData := DOIData{}
-	rec := record.(map[string]any)
 	if val, ok := rec["beamline"]; ok {
-		doiData.Beamline = val.(string)
+		doiData.Beamline = val
 	}
 	if val, ok := rec["pi"]; ok {
 		doiData.PI = val.(string)
@@ -77,10 +83,10 @@ func CreateEntry(doi string, record any, writeMeta bool) error {
 	if err != nil {
 		return err
 	}
-	fname := fmt.Sprintf("%s/index.html", doiDir)
-	file, err := os.Open(fname)
+	fname := fmt.Sprintf("%s/%s/index.html", doiDir, doi)
+	file, err := os.Create(fname)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
 	file.Write([]byte(result))
