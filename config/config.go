@@ -261,14 +261,13 @@ type MaterialsCommons struct {
 
 // Datacite represents Datacite service configuration
 type Datacite struct {
-	Url            string `mapstructure:"Url"`
-	AccessToken    string `mapstructure:"AccessToken"`
-	AccessKey      string `mapstructure:"AccessKey"`
-	AccessSecret   string `mapstructure:"AccessSecret"`
-	Username       string `mapstructure:"Username"`
-	Password       string `mapstructure:"Password"`
-	Prefix         string `mapstructure:"Prefix"`
-	LandingPageUrl string `mapstructure:"LandingPageUrl"`
+	Url          string `mapstructure:"Url"`
+	AccessToken  string `mapstructure:"AccessToken"`
+	AccessKey    string `mapstructure:"AccessKey"`
+	AccessSecret string `mapstructure:"AccessSecret"`
+	Username     string `mapstructure:"Username"`
+	Password     string `mapstructure:"Password"`
+	Prefix       string `mapstructure:"Prefix"`
 }
 
 // SpecScans represents SpecScansService configuration
@@ -340,6 +339,7 @@ type Services struct {
 	SpecScansURL       string `mapstructure:"SpecScansUrl"`
 	PublicationURL     string `mapstructure:"PublicationUrl"`
 	CHAPBookURL        string `mapstructure:"CHAPBookUrl"`
+	DOIServiceURL      string `mapstructure:"DOIServiceUrl"`
 }
 
 // SrvConfig represents configuration structure
