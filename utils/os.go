@@ -18,11 +18,9 @@ func DirCreationDate(dir string) (time.Time, error) {
 	}
 
 	// Try extracting creation time based on OS
-	switch sys := fileInfo.Sys().(type) {
-	case *syscall.Stat_t: // Linux & macOS (Unix systems)
-		if sys.Ctimespec.Sec > 0 {
-			return time.Unix(sys.Ctimespec.Sec, sys.Ctimespec.Nsec), nil
-		}
+	switch st := fileInfo.Sys().(type) {
+	case *syscall.Stat_t: // macOS
+		return GetCreationTime(*st), nil
 	}
 
 	// Fallback to modification time
