@@ -86,8 +86,6 @@ type Attributes struct {
 	Registered           time.Time           `json:"registered"`
 	Published            string              `json:"published"`
 	Updated              time.Time           `json:"updated"`
-
-	MetaData any `json:"metaData"`
 }
 
 // Creator represents creator struct
