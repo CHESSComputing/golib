@@ -2,6 +2,7 @@ package doi
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,7 +15,7 @@ import (
 )
 
 // global variables
-var dbtype, dburi, dbowner string
+var _db *sql.DB
 
 // Provider represents generic DOI interface
 type Provider interface {
@@ -64,24 +65,25 @@ func CreateEntry(doi string, rec map[string]any, description string, writeMeta b
 		}
 		doiData.Metadata = string(data)
 	}
-	err := insertData(doiData)
+	err := InsertData(doiData)
 	return err
 }
 
 // helper function to insert data into DOI database
-func insertData(data DOIData) error {
+func InsertData(data DOIData) error {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}
-	if dbtype == "" || dburi == "" || dbowner == "" {
+	if _db == nil {
+		dbtype, dburi, dbowner := sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
 		log.Printf("InitDB: type=%s owner=%s", dbtype, dbowner)
-		dbtype, dburi, dbowner = sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
+		db, err := sqldb.InitDB(dbtype, dburi)
+		if err != nil {
+			return err
+		}
+		_db = db
 	}
-	db, err := sqldb.InitDB(dbtype, dburi)
-	if err != nil {
-		return err
-	}
-	tx, err := db.Begin()
+	tx, err := _db.Begin()
 	if err != nil {
 		return err
 	}
@@ -94,6 +96,32 @@ func insertData(data DOIData) error {
 	}
 	err = tx.Commit()
 	return err
+}
+
+// GetData fetches records from the database based on the given ID
+func GetData(doi string) ([]DOIData, error) {
+	query := `SELECT doi, did, description, metadata, published FROM dois WHERE doi like ?`
+	rows, err := _db.Query(query, doi)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query data: %v", err)
+	}
+	defer rows.Close()
+
+	var results []DOIData
+	for rows.Next() {
+		var d DOIData
+		if err := rows.Scan(&d.Doi, &d.Did, &d.Description, &d.Metadata, &d.Published); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		results = append(results, d)
+	}
+
+	// Check for any errors encountered during iteration
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %v", err)
+	}
+
+	return results, nil
 }
 
 // RenderTemplate processes a template from a file if provided, otherwise, it uses a default template.
