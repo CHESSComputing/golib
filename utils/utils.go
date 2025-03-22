@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -14,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	srvConfig "github.com/CHESSComputing/golib/config"
 )
 
 // code is based on https://github.com/AlanBar13/pass-generator
@@ -236,4 +239,23 @@ func PaddedKey(key string, maxLen int) string {
 		}
 	}
 	return key
+}
+
+// Publish2DOIService function publishes record into FOXDEN DOI service
+func Publish2DOIService(record map[string]any) (string, string, error) {
+	if srvConfig.Config == nil {
+		srvConfig.Init()
+	}
+	var schema, url string
+	var err error
+	if val, ok := record["schema"]; ok {
+		schema = val.(string)
+	} else {
+		err = errors.New("unable to look-up schema in FOXDEN record")
+	}
+	if srvConfig.Config.Services.DOIServiceURL == "" {
+		return schema, url, errors.New("FOXDEN configuration does not provide DOIServiceURL")
+	}
+	url = srvConfig.Config.Services.DOIServiceURL
+	return schema, url, err
 }

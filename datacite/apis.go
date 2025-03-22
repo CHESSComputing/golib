@@ -11,6 +11,7 @@ import (
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	utils "github.com/CHESSComputing/golib/utils"
 )
 
 /*
@@ -40,27 +41,10 @@ func types() Types {
 	}
 }
 
-// helper function to publish record into FOXDEN DOI service
-func publish2DOIService(rec any) (string, string, error) {
-	var schema, url string
-	var err error
-	record := rec.(map[string]any)
-	if val, ok := record["schema"]; ok {
-		schema = val.(string)
-	} else {
-		err = errors.New("unable to look-up schema in FOXDEN record")
-	}
-	if srvConfig.Config.Services.DOIServiceURL == "" {
-		return schema, url, errors.New("FOXDEN configuration does not provide DOIServiceURL")
-	}
-	url = srvConfig.Config.Services.DOIServiceURL
-	return schema, url, err
-}
-
 // helper function to publish foxden metadata in FOXDEN DOI service
-func publishFoxdenRecord(record any) ([]RelatedIdentifier, error) {
+func publishFoxdenRecord(record map[string]any) ([]RelatedIdentifier, error) {
 	// publish given record in DOIService and obtain its URL
-	schema, url, err := publish2DOIService(record)
+	schema, url, err := utils.Publish2DOIService(record)
 	if err != nil {
 		log.Println("ERROR: fail to obtain DOIService url, error", err)
 		return []RelatedIdentifier{}, err
@@ -82,7 +66,7 @@ func publishFoxdenRecord(record any) ([]RelatedIdentifier, error) {
 }
 
 // Publish provides publication of did into datacite
-func Publish(did, description string, record any, publish bool) (string, string, error) {
+func Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
 	if srvConfig.Config == nil {
 		srvConfig.Init()
 	}

@@ -15,7 +15,7 @@ import (
 // Provider represents generic DOI interface
 type Provider interface {
 	Init()
-	Publish(did, description string, record any, publish bool) (string, string, error)
+	Publish(did, description string, record map[string]any, publish bool) (string, string, error)
 }
 
 // DOIData represents structure of public DOI attributes which will be written to DOI record

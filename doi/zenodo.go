@@ -21,7 +21,7 @@ func (z *ZenodoProvider) Init() {
 }
 
 // Publish provides publication of dataset with did and description
-func (z *ZenodoProvider) Publish(did, description string, record any, publish bool) (string, string, error) {
+func (z *ZenodoProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
 	var doi, doiLink string
 	var err error
 	docId, err := zenodo.CreateRecord()
