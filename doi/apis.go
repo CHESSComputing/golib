@@ -1,13 +1,10 @@
 package doi
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
-	"text/template"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -31,19 +28,6 @@ type DOIData struct {
 	Metadata    string
 	Published   int64
 }
-
-// Default template string
-const defaultTmpl = `<html><body>
-DOI: {{.DOI}}
-<br/>
-DID: {{.DID}}
-<br/>
-Description: {{.Description}}
-<br/>
-Metadata: {{.Metadata}}
-<br/>
-Published: {{.Published}}
-</body></html>`
 
 // CreateEntry creates DOI entry for DOIService
 func CreateEntry(doi string, rec map[string]any, description string, writeMeta bool) error {
@@ -122,34 +106,4 @@ func GetData(doi string) ([]DOIData, error) {
 	}
 
 	return results, nil
-}
-
-// RenderTemplate processes a template from a file if provided, otherwise, it uses a default template.
-func RenderTemplate(fileName string, data DOIData) (string, error) {
-	var tmplContent string
-
-	// If a file name is provided, read the template from the file
-	if fileName != "" {
-		content, err := os.ReadFile(fileName)
-		if err != nil {
-			return "", fmt.Errorf("failed to read template file: %v", err)
-		}
-		tmplContent = string(content)
-	} else {
-		tmplContent = defaultTmpl
-	}
-
-	// Parse the template content
-	t, err := template.New("template").Parse(tmplContent)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse template: %v", err)
-	}
-
-	var result bytes.Buffer
-	err = t.Execute(&result, data)
-	if err != nil {
-		return "", fmt.Errorf("failed to execute template: %v", err)
-	}
-
-	return result.String(), nil
 }
