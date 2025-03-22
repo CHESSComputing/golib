@@ -3,14 +3,18 @@ package doi
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"text/template"
+	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	sqldb "github.com/CHESSComputing/golib/sqldb"
 )
+
+// global variables
+var dbtype, dburi, dbowner string
 
 // Provider represents generic DOI interface
 type Provider interface {
@@ -20,77 +24,76 @@ type Provider interface {
 
 // DOIData represents structure of public DOI attributes which will be written to DOI record
 type DOIData struct {
-	PI             string
-	Facility       string
-	Affiliation    string
-	StaffScientist string
-	Beamline       any
+	Doi         string
+	Did         string
+	Description string
+	Metadata    string
+	Published   int64
 }
 
 // Default template string
 const defaultTmpl = `<html><body>
-PI: {{.PI}}
+DOI: {{.DOI}}
 <br/>
-Facility: {{.Facility}}
+DID: {{.DID}}
 <br/>
-Beamline: {{.Beamline}}
+Description: {{.Description}}
 <br/>
-Affiliation: {{.Affiliation}}
+Metadata: {{.Metadata}}
 <br/>
-StaffScientist: {{.StaffScientist}}
+Published: {{.Published}}
 </body></html>`
 
 // CreateEntry creates DOI entry for DOIService
-func CreateEntry(doi string, rec map[string]any, writeMeta bool) error {
-	doiDir := srvConfig.Config.DOI.DocumentDir
-	if doiDir == "" {
-		return errors.New("no DOI.DocumentDir configuration found")
+func CreateEntry(doi string, rec map[string]any, description string, writeMeta bool) error {
+	doiData := DOIData{Doi: doi, Published: time.Now().Unix()}
+	if val, ok := rec["did"]; ok {
+		doiData.Did = val.(string)
 	}
-	// Create directory with 0755 permissions
-	err := os.MkdirAll(fmt.Sprintf("%s/%s", doiDir, doi), 0755)
-	if err != nil {
-		log.Println("Error creating directory:", err)
-		return err
+	if description != "" {
+		doiData.Description = description
+	} else {
+		if val, ok := rec["description"]; ok {
+			doiData.Description = val.(string)
+		}
 	}
 	if writeMeta {
-		fname := fmt.Sprintf("%s/%s/metadata.json", doiDir, doi)
-		file, err := os.Create(fname)
-		if err != nil {
-			log.Println("unable to create file", err)
-			return err
-		}
-		defer file.Close()
-		data, err := json.Marshal(rec)
+		data, err := json.MarshalIndent(rec, "", "   ")
 		if err != nil {
 			return err
 		}
-		file.Write(data)
+		doiData.Metadata = string(data)
 	}
-	doiData := DOIData{}
-	if val, ok := rec["beamline"]; ok {
-		doiData.Beamline = val
+	err := insertData(doiData)
+	return err
+}
+
+// helper function to insert data into DOI database
+func insertData(data DOIData) error {
+	if srvConfig.Config == nil {
+		srvConfig.Init()
 	}
-	if val, ok := rec["pi"]; ok {
-		doiData.PI = val.(string)
+	if dbtype == "" || dburi == "" || dbowner == "" {
+		log.Printf("InitDB: type=%s owner=%s", dbtype, dbowner)
+		dbtype, dburi, dbowner = sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
 	}
-	if val, ok := rec["affiliation"]; ok {
-		doiData.Affiliation = val.(string)
-	}
-	if val, ok := rec["staff_scientist"]; ok {
-		doiData.StaffScientist = val.(string)
-	}
-	result, err := RenderTemplate(srvConfig.Config.DOI.TemplateFile, doiData)
+	db, err := sqldb.InitDB(dbtype, dburi)
 	if err != nil {
 		return err
 	}
-	fname := fmt.Sprintf("%s/%s/index.html", doiDir, doi)
-	file, err := os.Create(fname)
+	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	file.Write([]byte(result))
-	return nil
+	defer tx.Rollback()
+	query := `INSERT INTO dois (doi,did,description,metadata,published) VALUES (?,?,?,?,?)`
+	_, err = tx.Exec(query, data.Doi, data.Did, data.Description, data.Metadata, data.Published)
+	if err != nil {
+		log.Printf("Could not insert record to dois table; error: %v", err)
+		return err
+	}
+	err = tx.Commit()
+	return err
 }
 
 // RenderTemplate processes a template from a file if provided, otherwise, it uses a default template.
