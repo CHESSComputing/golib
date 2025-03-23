@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -29,8 +30,25 @@ type DOIData struct {
 	Published   int64
 }
 
+// Init function for this module
+func Init() {
+	if srvConfig.Config == nil {
+		srvConfig.Init()
+	}
+	if _db == nil {
+		dbtype, dburi, dbowner := sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
+		log.Printf("InitDB: type=%s owner=%s", dbtype, dbowner)
+		db, err := sqldb.InitDB(dbtype, dburi)
+		if err != nil {
+			log.Printf("ERROR: unable to initialize database, dbtype=%v, dburi=%v, error=%v", dbtype, dburi, err)
+		}
+		_db = db
+	}
+}
+
 // CreateEntry creates DOI entry for DOIService
 func CreateEntry(doi string, rec map[string]any, description string, writeMeta bool) error {
+	Init()
 	doiData := DOIData{Doi: doi, Published: time.Now().Unix()}
 	if val, ok := rec["did"]; ok {
 		doiData.Did = val.(string)
@@ -55,18 +73,7 @@ func CreateEntry(doi string, rec map[string]any, description string, writeMeta b
 
 // helper function to insert data into DOI database
 func InsertData(data DOIData) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
-	if _db == nil {
-		dbtype, dburi, dbowner := sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
-		log.Printf("InitDB: type=%s owner=%s", dbtype, dbowner)
-		db, err := sqldb.InitDB(dbtype, dburi)
-		if err != nil {
-			return err
-		}
-		_db = db
-	}
+	Init()
 	tx, err := _db.Begin()
 	if err != nil {
 		return err
@@ -84,7 +91,13 @@ func InsertData(data DOIData) error {
 
 // GetData fetches records from the database based on the given ID
 func GetData(doi string) ([]DOIData, error) {
-	query := `SELECT doi, did, description, metadata, published FROM dois WHERE doi like ?`
+	Init()
+	var query string
+	if strings.Contains(doi, "%") {
+		query = `SELECT doi, did, description, metadata, published FROM dois WHERE doi LIKE ?`
+	} else {
+		query = `SELECT doi, did, description, metadata, published FROM dois WHERE doi = ?`
+	}
 	rows, err := _db.Query(query, doi)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query data: %v", err)
