@@ -2,7 +2,6 @@ package doi
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -23,11 +22,11 @@ type Provider interface {
 
 // DOIData represents structure of public DOI attributes which will be written to DOI record
 type DOIData struct {
-	Doi         string
-	Did         string
-	Description string
-	Metadata    string
-	Published   int64
+	Doi            string
+	Did            string
+	Description    string
+	AccessMetadata bool
+	Published      int64
 }
 
 // Init function for this module
@@ -44,7 +43,7 @@ func Init() {
 }
 
 // CreateEntry creates DOI entry for DOIService
-func CreateEntry(doi string, rec map[string]any, description string, writeMeta bool) error {
+func CreateEntry(doi string, rec map[string]any, description string, accessMetadata bool) error {
 	Init()
 	doiData := DOIData{Doi: doi, Published: time.Now().Unix()}
 	if val, ok := rec["did"]; ok {
@@ -57,13 +56,7 @@ func CreateEntry(doi string, rec map[string]any, description string, writeMeta b
 			doiData.Description = val.(string)
 		}
 	}
-	if writeMeta {
-		data, err := json.MarshalIndent(rec, "", "   ")
-		if err != nil {
-			return err
-		}
-		doiData.Metadata = string(data)
-	}
+	doiData.AccessMetadata = accessMetadata
 	err := InsertData(doiData)
 	return err
 }
@@ -77,7 +70,7 @@ func InsertData(data DOIData) error {
 	}
 	defer tx.Rollback()
 	query := `INSERT INTO dois (doi,did,description,metadata,published) VALUES (?,?,?,?,?)`
-	_, err = tx.Exec(query, data.Doi, data.Did, data.Description, data.Metadata, data.Published)
+	_, err = tx.Exec(query, data.Doi, data.Did, data.Description, data.AccessMetadata, data.Published)
 	if err != nil {
 		log.Printf("Could not insert record to dois table; error: %v", err)
 		return err
@@ -104,9 +97,10 @@ func GetData(doi string) ([]DOIData, error) {
 	var results []DOIData
 	for rows.Next() {
 		var d DOIData
-		if err := rows.Scan(&d.Doi, &d.Did, &d.Description, &d.Metadata, &d.Published); err != nil {
+		if err := rows.Scan(&d.Doi, &d.Did, &d.Description, &d.AccessMetadata, &d.Published); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
+		// if public metadata we retrieve its record from MetaData service
 		results = append(results, d)
 	}
 
