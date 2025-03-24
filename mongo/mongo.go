@@ -316,7 +316,7 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 		}
 		cur.All(ctx, &out)
 	} else {
-		opts := options.Find().SetSkip(int64(idx))
+		opts := options.Find().SetSkip(int64(idx)).SetProjection(bson.M{"_id": 0})
 		cur, err := c.Find(ctx, spec, opts)
 		if err != nil {
 			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
@@ -344,7 +344,7 @@ func GetSorted(dbname, collname string, spec map[string]any, skeys []string, sor
 	// Define the find options with the constructed sortOptions
 	opts := options.Find().SetSort(sortOptions).SetSkip(int64(idx)).SetProjection(bson.M{"_id": 0})
 	if limit > 0 {
-		opts = opts.SetLimit(int64(limit))
+		opts = opts.SetLimit(int64(limit)).SetProjection(bson.M{"_id": 0})
 	}
 	cur, err := c.Find(ctx, spec, opts)
 	cur.All(ctx, &out)
