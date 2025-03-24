@@ -13,9 +13,6 @@ import (
 
 // Publish provides publication of did into datacite
 func Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	if srvConfig.Config.Services.DOIServiceURL == "" {
 		return "", "", errors.New("Missing DOIService url in FOXDEN configuration")
 	}

@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -369,6 +368,10 @@ type SrvConfig struct {
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
 }
 
+// Config represents configuration instance object
+var Config *SrvConfig
+
+// String shows SrvConfig object string representation
 func (c *SrvConfig) String() string {
 	data, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
@@ -378,6 +381,7 @@ func (c *SrvConfig) String() string {
 	return string(data)
 }
 
+// ParseConfig provides method to parse given configuration file
 func ParseConfig(cfile string) (SrvConfig, error) {
 	var config SrvConfig
 	if cfile == "" {
@@ -459,9 +463,15 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 	return config, nil
 }
 
+func Info() string {
+	goVersion := runtime.Version()
+	tstamp := time.Now()
+	return fmt.Sprintf("git={{VERSION}} go=%s date=%s", goVersion, tstamp)
+}
+
 /*
+// Example of using this configuration module
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	cfile := "srv.json"
 	config, err := ParseConfig(cfile)
 	if err != nil {
@@ -472,36 +482,3 @@ func main() {
 	fmt.Printf("Authz %+v\n", config.Authz)
 }
 */
-
-// Config represnets configuration instance
-var Config *SrvConfig
-
-func Info() string {
-	goVersion := runtime.Version()
-	tstamp := time.Now()
-	return fmt.Sprintf("git={{VERSION}} go=%s date=%s", goVersion, tstamp)
-}
-
-func Init() {
-	var version bool
-	flag.BoolVar(&version, "version", false, "Show version")
-	var config string
-	flag.StringVar(&config, "config", "", "server config file")
-	flag.Parse()
-	if version {
-		fmt.Println("server version:", Info())
-		return
-	}
-	if config == "" {
-		// check env variable
-		config = os.Getenv("FOXDEN_CONFIG")
-	}
-	if os.Getenv("FOXDEN_DEBUG") != "" {
-		log.Println("Read FOXDEN config:", config)
-	}
-	oConfig, err := ParseConfig(config)
-	if err != nil {
-		log.Fatal("ERROR", err)
-	}
-	Config = &oConfig
-}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/CHESSComputing/golib/zenodo"
 )
 
@@ -15,9 +14,6 @@ type ZenodoProvider struct {
 
 // Init function initializes Zenodo provider
 func (z *ZenodoProvider) Init() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 }
 
 // Publish provides publication of dataset with did and description

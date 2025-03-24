@@ -35,9 +35,6 @@ type Cache struct {
 
 // Search provides cached search results
 func (c *Cache) Search(login, password, user string) (Entry, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	if c.Map == nil {
 		c.Map = make(map[string]Entry)
 	}

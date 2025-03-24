@@ -13,9 +13,6 @@ type MCProvider struct {
 
 // Init function initializes MaterialsCommons publisher
 func (m *MCProvider) Init() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	m.Name = srvConfig.Config.MaterialsCommons.ProjectName
 }
 

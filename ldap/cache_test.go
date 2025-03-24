@@ -1,6 +1,7 @@
 package ldap
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -10,15 +11,11 @@ import (
 
 // Mock configuration initialization
 func mockConfig(expire int) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
+	config := os.Getenv("FOXDEN_CONFIG")
+	if cobj, err := srvConfig.ParseConfig(config); err == nil {
+		srvConfig.Config = &cobj
 	}
 	srvConfig.Config.LDAP.Expire = expire
-	//	srvConfig.Config = &srvConfig.Configuration{
-	//	    LDAP: srvConfig.LDAPConfig{
-	//	        Expire: expire, // Expiration time in seconds
-	//	    },
-	//	}
 }
 
 // Test for Cache Entry Expiration

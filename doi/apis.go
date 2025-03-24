@@ -32,9 +32,6 @@ type DOIData struct {
 
 // Init function for this module
 func Init() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	if _db == nil {
 		dbtype, dburi, dbowner := sqldb.ParseDBFile(srvConfig.Config.DOI.DBFile)
 		log.Printf("InitDB: type=%s owner=%s", dbtype, dbowner)

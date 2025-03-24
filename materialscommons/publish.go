@@ -14,9 +14,6 @@ var mcClient *mcapi.Client
 
 // helper function to get MaterialsCommons client
 func getMcClient() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	if mcClient != nil {
 		return
 	}
@@ -33,9 +30,6 @@ func Publish(did, description string, record any, publish bool) (string, string,
 	var err error
 	var doi, doiLink string
 	var projectID, datasetID int
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 
 	// get MaterialsCommons client
 	getMcClient()

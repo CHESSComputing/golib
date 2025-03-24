@@ -18,9 +18,6 @@ var Verbose int
 // example through curl
 // curl -X POST https://auth.globus.org/v2/oauth2/token --header "Content-Type: application/x-www-form-urlencoded" --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=$scope" --data-urlencode "client_id=$clientid" --data-urlencode "client_secret=$secret"
 func Token(scopes []string) (string, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	data := url.Values{}
 	for _, s := range scopes {
 		data.Add("scope", s)

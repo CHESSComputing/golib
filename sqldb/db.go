@@ -10,10 +10,6 @@ import (
 
 // InitDB initializes database with according to server configuration
 func InitDB(dbtype, dburi string) (*sql.DB, error) {
-	// load web section schema file
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	db, dberr := dbOpen(dbtype, dburi)
 	if dberr != nil {
 		log.Printf("unable to open dbtype=%s dburi=%s, error %v", dbtype, dburi, dberr)

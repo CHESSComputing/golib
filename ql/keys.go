@@ -79,9 +79,6 @@ func (q *QLRecord) Details(show string) string {
 // QLRecords return list of ql keys
 func QLRecords(qlKey string) ([]QLRecord, error) {
 	var records []QLRecord
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	fname := srvConfig.Config.QL.ServiceMapFile
 	file, err := os.Open(fname)
 	if err != nil {

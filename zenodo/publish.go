@@ -23,9 +23,6 @@ func initSrv() {
 	if _httpWriteRequest == nil {
 		_httpWriteRequest = services.NewHttpRequest("write", Verbose)
 	}
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	_httpReadRequest.GetToken()
 	_httpWriteRequest.GetToken()
 }

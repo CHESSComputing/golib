@@ -4,10 +4,17 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	srvConfig "github.com/CHESSComputing/golib/config"
 )
 
 // TestSchemaYaml tests schema yaml file
 func TestSchemaYaml(t *testing.T) {
+	config := os.Getenv("FOXDEN_CONFIG")
+	if cobj, err := srvConfig.ParseConfig(config); err == nil {
+		srvConfig.Config = &cobj
+	}
+
 	tmpFile, err := os.CreateTemp(os.TempDir(), "*.yaml")
 	if err != nil {
 		t.Fatal(err)

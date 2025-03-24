@@ -243,9 +243,6 @@ func PaddedKey(key string, maxLen int) string {
 
 // Publish2DOIService function publishes record into FOXDEN DOI service
 func Publish2DOIService(record map[string]any) (string, string, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	var schema, url string
 	var err error
 	if val, ok := record["schema"]; ok {

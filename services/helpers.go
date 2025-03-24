@@ -63,9 +63,6 @@ func Response(srv string, httpCode, srvCode int, err error) ServiceResponse {
 
 // GetToken obtains token from OAuth server
 func (h *HttpRequest) GetToken() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	if h.Token == "" || h.Expires.Before(time.Now()) {
 		// make a call to Authz service to obtain access token
 		rurl := fmt.Sprintf(

@@ -11,9 +11,6 @@ import (
 
 // MetaDataRecords return meta-data records for given query
 func MetaDataRecords(query string, skeys []string, sorder, idx, limit int) ([]map[string]any, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	var records []map[string]any
 	rec := ServiceRequest{
 		Client:       "foxden",

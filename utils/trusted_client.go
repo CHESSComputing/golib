@@ -27,9 +27,6 @@ func NewTrustedClient() *TrustedClient {
 
 // Encrypt encrypt trusted client information
 func (t *TrustedClient) Encrypt(salt string) ([]byte, error) {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	var edata []byte
 	data, err := json.Marshal(t)
 	if err != nil {
@@ -41,9 +38,6 @@ func (t *TrustedClient) Encrypt(salt string) ([]byte, error) {
 
 // Decrypt decrypt trusted client information
 func (t *TrustedClient) Decrypt(edata []byte, salt string) error {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	var tdata TrustedClient
 	cipher := srvConfig.Config.Encryption.Cipher
 	data, err := cryptoutils.Decrypt(edata, salt, cipher)

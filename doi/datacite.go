@@ -1,7 +1,6 @@
 package doi
 
 import (
-	srvConfig "github.com/CHESSComputing/golib/config"
 	datacite "github.com/CHESSComputing/golib/datacite"
 )
 
@@ -13,9 +12,6 @@ type DataciteProvider struct {
 
 // Init function initializes Datacite publisher
 func (d *DataciteProvider) Init() {
-	if srvConfig.Config == nil {
-		srvConfig.Init()
-	}
 	d.Name = "foxden-datacite"
 }
 
