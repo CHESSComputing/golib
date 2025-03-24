@@ -27,3 +27,25 @@ func ReadJson(fname string) []byte {
 	}
 	return []byte{}
 }
+
+// FormatJson reads json data from a given string and returns formatted JSON in bytes
+func FormatJson(jsonData []byte) []byte {
+	var data map[string]any
+	if err := json.Unmarshal(jsonData, &data); err == nil {
+		if fdata, err := json.MarshalIndent(data, "", "  "); err == nil {
+			return fdata
+		}
+	}
+	return []byte{}
+}
+
+// FormatJsonRecords reads json data records from a given string and returns formatted JSON in bytes
+func FormatJsonRecords(jsonData []byte) []byte {
+	var data []map[string]any
+	if err := json.Unmarshal(jsonData, &data); err == nil {
+		if fdata, err := json.MarshalIndent(data, "", "  "); err == nil {
+			return fdata
+		}
+	}
+	return []byte{}
+}
