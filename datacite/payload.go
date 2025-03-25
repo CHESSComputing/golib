@@ -19,29 +19,51 @@ import (
  */
 
 // helper function to provide DOI creators
-func creators() []Creator {
+func creatorsInfo() []Creator {
+	nameIdent := NameIdentifier{
+		AffiliationIdentifier:       "https://ror.org/05bnh6r87",
+		AffiliationIdentifierScheme: "ROR",
+		SchemeUri:                   "https://ror.org/",
+	}
 	return []Creator{
 		Creator{
-			Name:        "FOXDEN",
-			Affiliation: []string{"Cornell University"},
+			Name:            "FOXDEN",
+			NameType:        "Organizational",
+			NameIdentifiers: []NameIdentifier{nameIdent},
 		},
 	}
 }
 
 // helper function to provide DOI Types
-func types() Types {
+func typesInfo() Types {
 	return Types{
-		RIS:                 "FOXDEN",
-		Bibtex:              "misc",
-		SchemaOrg:           "dataset",
-		ResourceTypeGeneral: "dataset",
+		ResourceType:        "FOXDEN",
+		ResourceTypeGeneral: "Dataset",
+	}
+}
+
+func publisherInfo() Publisher {
+	return Publisher{
+		Name:                      "DataCite",
+		PublisherIdentifier:       "https://ror.org/04wxnsj81",
+		PublisherIdentifierScheme: "ROR",
+		SchemeUri:                 "https://ror.org/",
+		Lang:                      "en",
+	}
+}
+
+func descriptionInfo(d string) Description {
+	return Description{
+		Description:     d,
+		DescriptionType: "Other",
+		Lang:            "en",
 	}
 }
 
 // helper function to publish foxden metadata in FOXDEN DOI service
 func publishFoxdenRecord(record map[string]any) ([]RelatedIdentifier, error) {
 	// publish given record in DOIService and obtain its URL
-	schema, url, err := utils.Publish2DOIService(record)
+	_, url, err := utils.Publish2DOIService(record)
 	if err != nil {
 		log.Println("ERROR: fail to obtain DOIService url, error", err)
 		return []RelatedIdentifier{}, err
@@ -52,11 +74,10 @@ func publishFoxdenRecord(record map[string]any) ([]RelatedIdentifier, error) {
 	}
 	out := []RelatedIdentifier{
 		RelatedIdentifier{
-			SchemaUri:             schema,
-			RelationType:          "FOXDEN metadata",
+			RelationType:          "HasMetadata",
 			RelatedIdentifier:     url,
+			RelatedTypeGeneral:    "Dataset",
 			RelatedIdentifierType: "URL",
-			RelatedMetadataScheme: "foxden",
 		},
 	}
 	return out, nil
@@ -79,11 +100,11 @@ func DataCiteMetadata(did, description string, record map[string]any, publish bo
 		Event:              event,
 		Titles:             []Title{title},
 		Prefix:             srvConfig.Config.DOI.Datacite.Prefix,
-		Creators:           creators(),
-		Publisher:          "Cornell University",
+		Creators:           creatorsInfo(),
+		Publisher:          publisherInfo(),
 		PublicationYear:    time.Now().Year(),
-		Descriptions:       []string{description},
-		Types:              types(),
+		Descriptions:       []Description{descriptionInfo(description)},
+		Types:              typesInfo(),
 		RelatedIdentifiers: foxdenMeta,
 		URL:                srvConfig.Config.Services.DOIServiceURL,
 	}

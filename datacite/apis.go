@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -24,6 +25,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	if err != nil {
 		return "", "", fmt.Errorf("failed to marshal metadata payload: %v", err)
 	}
+	log.Println("Publish\n", string(payloadBytes))
 
 	// Create HTTP request
 	req, err := http.NewRequest("POST", url, bytes.NewReader(payloadBytes))
