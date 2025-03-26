@@ -160,14 +160,23 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 	if h.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
 	}
-	req.Header.Add("Content-Type", contentType)
-	req.Header.Add("Accept", contentType)
+	// get all HTTP headers from HttpRequest one
 	if h.Headers != nil {
 		for key, values := range h.Headers {
 			for _, val := range values {
 				req.Header.Add(key, val)
 			}
 		}
+	}
+	// setup default Content-Type and Accept if they are not set above
+	if _, ok := req.Header["Content-Type"]; !ok {
+		req.Header.Add("Content-Type", contentType)
+	}
+	if _, ok := req.Header["Accept"]; !ok {
+		// we re-use contentType for accept header as it is usually application/json
+		// if accept and content-type are different then it is better to setup them
+		// through explicit map of HttpRequest.Headers
+		req.Header.Add("Accept", contentType)
 	}
 	// check if we are given Zenodo request
 	if strings.Contains(rurl, "zenodo.org") {
