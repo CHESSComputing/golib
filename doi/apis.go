@@ -80,7 +80,7 @@ func InsertData(d DOIData) error {
 		return err
 	}
 	defer tx.Rollback()
-	query := `INSERT INTO dois (doi,doiurl,did,description,public,metadata,published) VALUES (?,?,?,?,?)`
+	query := `INSERT INTO dois (doi,doiurl,did,description,public,metadata,published) VALUES (?,?,?,?,?,?,?)`
 	_, err = tx.Exec(query, d.Doi, d.DoiUrl, d.Did, d.Description, d.Public, d.AccessMetadata, d.Published)
 	if err != nil {
 		log.Printf("Could not insert record to dois table; error: %v", err)
