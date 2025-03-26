@@ -1,7 +1,10 @@
 package datacite
 
 /*
- * https://support.datacite.org/docs/api-create-dois
+ * This module provides all metadata definitions for Datacite
+ * References:
+ * - https://support.datacite.org/docs/api-create-dois
+ * - https://datacite-metadata-schema.readthedocs.io/en/4.6/properties/overview/
  */
 
 // RequestPayload represents request payload
