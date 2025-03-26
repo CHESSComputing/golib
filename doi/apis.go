@@ -96,6 +96,8 @@ func GetData(doi string) ([]DOIData, error) {
 	var query string
 	if strings.Contains(doi, "%") {
 		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois WHERE doi LIKE ?`
+	} else if doi == "" {
+		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois`
 	} else {
 		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois WHERE doi = ?`
 	}
