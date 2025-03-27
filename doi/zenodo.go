@@ -2,6 +2,7 @@ package doi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -29,12 +30,16 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 		return doi, doiLink, err
 	}
 	docId := doc.Id
+	if docId == 0 {
+		log.Println("ERROR: unable to create Zenodo document, docId=0")
+		return doi, doiLink, errors.New("unable to create Zenodo document, docId=0")
+	}
 	doi = doc.MetaData.PrereserveDoi.Doi
 	if doi != "" {
 		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 	}
 	if z.Verbose > 0 {
-		log.Println("Created new Zenodo record docId=%s doi=%s", docId, doi)
+		log.Printf("Created new Zenodo record docId=%v doi=%v", docId, doi)
 	}
 
 	// add foxden record
