@@ -1,9 +1,11 @@
 package doi
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
+	datacite "github.com/CHESSComputing/golib/datacite"
 	"github.com/CHESSComputing/golib/zenodo"
 )
 
@@ -20,17 +22,30 @@ func (z *ZenodoProvider) Init() {
 func (z *ZenodoProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
 	var doi, doiLink string
 	var err error
-	docId, err := zenodo.CreateRecord()
+
+	// get new Zenodo record of CreateRespones data-type
+	doc, err := zenodo.CreateRecord([]byte("{}"))
 	if err != nil {
 		return doi, doiLink, err
 	}
+	docId := doc.Id
+	doi = doc.MetaData.PrereserveDoi.Doi
+	if doi != "" {
+		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
+	}
 	if z.Verbose > 0 {
-		log.Println("Created zenodo record", docId)
+		log.Println("Created new Zenodo record docId=%s doi=%s", docId, doi)
 	}
 
 	// add foxden record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: record}
-	err = zenodo.AddRecord(docId, "foxden-metadata.json", frec)
+	if payload, err := datacite.DataCiteMetadata(did, description, record, publish); err == nil {
+		var rec map[string]any
+		if err := json.Unmarshal(payload, &rec); err == nil {
+			frec = zenodo.FoxdenRecord{Did: did, MetaData: rec}
+		}
+	}
+	err = zenodo.AddRecord(docId, "foxden.json", frec)
 	if err != nil {
 		return doi, doiLink, err
 	}
@@ -45,9 +60,10 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 		UploadType:      "dataset",
 		Description:     description,
 		Keywords:        []string{"FOXDEN"},
-		Title:           fmt.Sprintf("FOXDEN dataset did=%s", did),
+		Title:           fmt.Sprintf("FOXDEN did=%s", did),
 		Licences:        []string{"MIT"},
 		Creators:        []zenodo.Creator{creator},
+		PreserveDoi:     true,
 	}
 
 	err = zenodo.UpdateRecord(docId, mrec)
@@ -56,6 +72,11 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	}
 	if z.Verbose > 0 {
 		log.Println("Updated doi record")
+	}
+
+	if !publish {
+		log.Println("Zenodo record has been created with docId, but it is not published", docId)
+		return doi, doiLink, nil
 	}
 
 	// publish record

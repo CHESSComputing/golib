@@ -42,33 +42,32 @@ func checkResponse(resp *http.Response) error {
 }
 
 // CreateRecord provides create record API
-func CreateRecord() (int64, error) {
+func CreateRecord(payload []byte) (CreateResponse, error) {
 	// init reader/writer and srv config
 	initSrv()
 
-	var docId int64
+	var doc CreateResponse
 	// create new DOI resource
 	rurl := fmt.Sprintf("%s/create", srvConfig.Config.Services.PublicationURL)
-	resp, err := _httpWriteRequest.Post(rurl, "application/json", bytes.NewBuffer([]byte{}))
+	resp, err := _httpWriteRequest.Post(rurl, "application/json", bytes.NewBuffer(payload))
 	defer resp.Body.Close()
 	if err != nil {
-		return docId, err
+		return doc, err
 	}
 	if err := checkResponse(resp); err != nil {
-		return docId, err
+		return doc, err
 	}
 
 	// capture response and extract document id (did)
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return docId, err
+		return doc, err
 	}
-	var doc CreateResponse
 	err = json.Unmarshal(data, &doc)
 	if err != nil {
-		return docId, err
+		return doc, err
 	}
-	return doc.Id, nil
+	return doc, nil
 }
 
 func getBid(did int64) (string, error) {
@@ -121,12 +120,13 @@ func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 		return err
 	}
 	rurl := fmt.Sprintf("%s/update/%d", srvConfig.Config.Services.PublicationURL, docId)
-	metaResp, err := _httpWriteRequest.Put(rurl, "application/json", bytes.NewBuffer(data))
-	defer metaResp.Body.Close()
+	resp, err := _httpWriteRequest.Put(rurl, "application/json", bytes.NewBuffer(data))
+	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
-	if err := checkResponse(metaResp); err != nil {
+	data, err = io.ReadAll(resp.Body)
+	if err := checkResponse(resp); err != nil {
 		return err
 	}
 	return nil

@@ -32,6 +32,8 @@ type MetaDataRecord struct {
 	Publisher       string    `json:"publisher,omitempty"`
 	Contributors    []Creator `json:"contributors,omitempty"`
 	Creators        []Creator `json:"creators"`
+	Doi             string    `json:"doi"`
+	PreserveDoi     bool      `json:"preserve_doi"` // set to true to force Zenodo to create DOI
 }
 
 // Validate provides validation of meta data record
