@@ -1,5 +1,8 @@
 package zenodo
 
+// based on information collected from
+// https://developers.zenodo.org/?shell#quickstart-upload
+
 import (
 	"bytes"
 	"encoding/json"

@@ -4,8 +4,9 @@ import "errors"
 
 // Some info are reverse engineered from the followin resources:
 // https://felipecrp.com/2021/01/01/uploading-to-zenodo-through-api.html
-// Zenodo REST API: https://developers.zenodo.org/
-// snd, some discussion about zenodo APIs:
+// Zenodo REST API: https://developers.zenodo.org/ and
+// https://developers.zenodo.org/?shell#quickstart-upload
+// and, some discussion about zenodo APIs:
 // https://github.com/zenodo/zenodo/issues/2168
 
 // FoxdenRecord represents foxden upload record
