@@ -24,8 +24,27 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	var doi, doiLink string
 	var err error
 
-	// get new Zenodo record of CreateRespones data-type
-	doc, err := zenodo.CreateRecord([]byte("{}"))
+	// create new meta-data record
+	creator := zenodo.Creator{Name: "FOXDEN", Affiliation: "Cornell University"}
+	rec := zenodo.MetaDataRecord{
+		PublicationType: "deliverable",
+		UploadType:      "dataset",
+		Description:     description,
+		Keywords:        []string{"FOXDEN"},
+		Title:           fmt.Sprintf("FOXDEN did=%s", did),
+		Licences:        []string{"MIT"},
+		Creators:        []zenodo.Creator{creator},
+		PreserveDoi:     true,
+	}
+	mrec := make(map[string]any)
+	mrec["metadata"] = rec
+	payload, err := json.Marshal(mrec)
+	if err != nil {
+		return doi, doiLink, err
+	}
+
+	// create new Zenodo record
+	doc, err := zenodo.CreateRecord(payload)
 	if err != nil {
 		return doi, doiLink, err
 	}
@@ -42,7 +61,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 		log.Printf("Created new Zenodo record docId=%v doi=%v", docId, doi)
 	}
 
-	// add foxden record
+	// add foxden datacite metadata record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: record}
 	if payload, err := datacite.DataCiteMetadata(did, description, record, publish); err == nil {
 		var rec map[string]any
@@ -50,33 +69,10 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 			frec = zenodo.FoxdenRecord{Did: did, MetaData: rec}
 		}
 	}
-	err = zenodo.AddRecord(docId, "foxden.json", frec)
+	err = zenodo.AddRecord(docId, "foxden-datacite.json", frec)
 	if err != nil {
+		log.Println("ERROR: unable to add foxden-datacite.json record", err)
 		return doi, doiLink, err
-	}
-	if z.Verbose > 0 {
-		log.Println("Created foxden record")
-	}
-
-	// create new meta-data record
-	creator := zenodo.Creator{Name: "FOXDEN", Affiliation: "Cornell University"}
-	mrec := zenodo.MetaDataRecord{
-		PublicationType: "deliverable",
-		UploadType:      "dataset",
-		Description:     description,
-		Keywords:        []string{"FOXDEN"},
-		Title:           fmt.Sprintf("FOXDEN did=%s", did),
-		Licences:        []string{"MIT"},
-		Creators:        []zenodo.Creator{creator},
-		PreserveDoi:     true,
-	}
-
-	err = zenodo.UpdateRecord(docId, mrec)
-	if err != nil {
-		return doi, doiLink, err
-	}
-	if z.Verbose > 0 {
-		log.Println("Updated doi record")
 	}
 
 	if !publish {
@@ -90,7 +86,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 		return doi, doiLink, err
 	}
 	if z.Verbose > 0 {
-		log.Println("Published doi record")
+		log.Printf("Published doi record %+v", doiRecord)
 	}
 	return doiRecord.Doi, doiRecord.DoiUrl, nil
 }
