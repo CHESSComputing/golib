@@ -90,3 +90,8 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	}
 	return doiRecord.Doi, doiRecord.DoiUrl, nil
 }
+
+// MakePublic provides publication of draft DOI
+func (m *ZenodoProvider) MakePublic(doi string) error {
+	return zenodo.MakePublic(doi)
+}

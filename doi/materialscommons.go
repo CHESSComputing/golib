@@ -21,3 +21,8 @@ func (m *MCProvider) Publish(did, description string, record map[string]any, pub
 	doi, doiLink, err := materialscommons.Publish(did, description, record, publish)
 	return doi, doiLink, err
 }
+
+// MakePublic provides publication of draft DOI
+func (m *MCProvider) MakePublic(doi string) error {
+	return materialscommons.MakePublic(doi)
+}

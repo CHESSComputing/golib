@@ -77,3 +77,8 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 
 	return doi, doiLink, err
 }
+
+// MakePublic implements logic of publishing draft DOI
+func MakePublic(doi string) error {
+	return errors.New("not implemented")
+}

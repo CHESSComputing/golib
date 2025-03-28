@@ -2,6 +2,7 @@ package MaterialsCommons
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -127,4 +128,9 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 	}
 	return doi, doiLink, err
+}
+
+// MakePublic implements logic of publishing draft DOI
+func MakePublic(doi string) error {
+	return errors.New("not implemented")
 }

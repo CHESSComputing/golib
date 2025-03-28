@@ -196,3 +196,8 @@ func DoiRecords(docId int64) ([]DoiRecord, error) {
 	records = append(records, record)
 	return records, nil
 }
+
+// MakePublic implements logic of publishing draft DOI
+func MakePublic(doi string) error {
+	return errors.New("not implemented")
+}

@@ -20,3 +20,8 @@ func (d *DataciteProvider) Publish(did, description string, record map[string]an
 	doi, doiLink, err := datacite.Publish(did, description, record, publish)
 	return doi, doiLink, err
 }
+
+// MakePublic provides publication of draft DOI
+func (m *DataciteProvider) MakePublic(doi string) error {
+	return datacite.MakePublic(doi)
+}
