@@ -323,7 +323,7 @@ type Authz struct {
 	ClientID     string `mapstructure:"ClientId"`
 	ClientSecret string `mapstructure:"ClientSecret"`
 	Domain       string `mapstructure:"Domain"`
-	TokenExpires int64  `mapstructure:TokenExpires` // expiration of token
+	TokenExpires int64  `mapstructure:TokenExpires` // token expiration in seconds
 }
 
 // Services represents services structure
