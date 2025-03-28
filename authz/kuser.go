@@ -19,7 +19,7 @@ type Kerberos struct {
 	User    string
 	Scope   string
 	Ticket  []byte
-	Expires int64
+	Expires int64 // in seconds
 }
 
 // helper function to check user credentials for POST requests
