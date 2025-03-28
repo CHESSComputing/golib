@@ -23,13 +23,14 @@ type Provider interface {
 
 // DOIData represents structure of public DOI attributes which will be written to DOI record
 type DOIData struct {
-	Doi            string
-	DoiUrl         string
-	Did            string
-	Description    string
-	Published      int64
-	Public         bool
-	AccessMetadata bool
+	Doi            string `json:"doi"`
+	Provider       string `json:"provider"`
+	DoiUrl         string `json:"doi_url"`
+	Did            string `json:"did"`
+	Description    string `json:"description"`
+	Published      int64  `json:"published"`
+	Public         bool   `json:"public"`
+	AccessMetadata bool   `json:"access_metadata"`
 }
 
 // Init function for this module
@@ -46,7 +47,7 @@ func Init() {
 }
 
 // CreateEntry creates DOI entry for DOIService
-func CreateEntry(doi string, rec map[string]any, description string, accessMetadata bool) error {
+func CreateEntry(doi, provider string, rec map[string]any, description string, accessMetadata bool) error {
 	Init()
 	doiData := DOIData{Doi: doi, Published: time.Now().Unix()}
 	if val, ok := rec["did"]; ok {
@@ -80,8 +81,8 @@ func InsertData(d DOIData) error {
 		return err
 	}
 	defer tx.Rollback()
-	query := `INSERT INTO dois (doi,doiurl,did,description,public,metadata,published) VALUES (?,?,?,?,?,?,?)`
-	_, err = tx.Exec(query, d.Doi, d.DoiUrl, d.Did, d.Description, d.Public, d.AccessMetadata, d.Published)
+	query := `INSERT INTO dois (doi,provider,doiurl,did,description,public,metadata,published) VALUES (?,?,?,?,?,?,?,?)`
+	_, err = tx.Exec(query, d.Doi, d.Provider, d.DoiUrl, d.Did, d.Description, d.Public, d.AccessMetadata, d.Published)
 	if err != nil {
 		log.Printf("Could not insert record to dois table; error: %v", err)
 		return err
@@ -95,11 +96,11 @@ func GetData(doi string) ([]DOIData, error) {
 	Init()
 	var query string
 	if strings.Contains(doi, "%") {
-		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois WHERE doi LIKE ?`
+		query = `SELECT doi, provider, doiurl, did, description, public, metadata, published FROM dois WHERE doi LIKE ?`
 	} else if doi == "" {
-		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois`
+		query = `SELECT doi, provider, doiurl, did, description, public, metadata, published FROM dois`
 	} else {
-		query = `SELECT doi, doiurl, did, description, public, metadata, published FROM dois WHERE doi = ?`
+		query = `SELECT doi, provider, doiurl, did, description, public, metadata, published FROM dois WHERE doi = ?`
 	}
 	rows, err := _db.Query(query, doi)
 	if err != nil {
@@ -110,7 +111,7 @@ func GetData(doi string) ([]DOIData, error) {
 	var results []DOIData
 	for rows.Next() {
 		var d DOIData
-		if err := rows.Scan(&d.Doi, &d.DoiUrl, &d.Did, &d.Description, &d.Public, &d.AccessMetadata, &d.Published); err != nil {
+		if err := rows.Scan(&d.Doi, &d.Provider, &d.DoiUrl, &d.Did, &d.Description, &d.Public, &d.AccessMetadata, &d.Published); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)
 		}
 		// if public metadata we retrieve its record from MetaData service
