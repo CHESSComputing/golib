@@ -9,82 +9,107 @@ package datacite
 
 // RequestPayload represents request payload
 type RequestPayload struct {
-	Data RequestData `json:"data"`
+	Data RequestData `json:"data,omitempty"`
 }
 
 // RequestData represents request data
 type RequestData struct {
-	Type       string     `json:"type"`
-	Attributes Attributes `json:"attributes"`
+	Type       string     `json:"type,omitempty"`
+	Attributes Attributes `json:"attributes,omitempty"`
+}
+
+// ResponsePayload represents request payload
+type ResponsePayload struct {
+	Data ResponseData `json:"data,omitempty"`
 }
 
 // ResponseData represents response payload
-type ResposeData struct {
-	ID         string     `json:"id"`
-	Type       string     `json:"type"`
-	Attributes Attributes `json:"attributes"`
+// NOTE: the Attributes of response is slightly different from Request Attributes,
+// for instance Publisher is a string instead of Publisher struct in Request Attributes.
+type ResponseData struct {
+	ID         string             `json:"id,omitempty"`
+	Type       string             `json:"type,omitempty"`
+	Attributes ResponseAttributes `json:"attributes,omitempty"`
 }
 
 // RelatedIdentifier represents related identifier meta-data
 type RelatedIdentifier struct {
-	RelationType          string `json:"relationType"`
-	RelatedTypeGeneral    string `json:"relatedTypeGeneral"`
-	RelatedIdentifier     string `json:"relatedIdentifier"`
-	RelatedIdentifierType string `json:"relatedIdentifierType"`
+	RelationType          string `json:"relationType,omitempty"`
+	RelatedTypeGeneral    string `json:"relatedTypeGeneral,omitempty"`
+	RelatedIdentifier     string `json:"relatedIdentifier,omitempty"`
+	RelatedIdentifierType string `json:"relatedIdentifierType,omitempty"`
 }
 
 // Publisher represents publisher info
 type Publisher struct {
-	Name                      string `json:"name"`
-	PublisherIdentifier       string `json:"publisherIdentifier"`
-	PublisherIdentifierScheme string `json:"publisherIdentifier"`
-	SchemeUri                 string `json:"schemeUri"`
-	Lang                      string `json:"lang"`
+	Name                      string `json:"name,omitempty"`
+	PublisherIdentifier       string `json:"publisherIdentifier,omitempty"`
+	PublisherIdentifierScheme string `json:"publisherIdentifier,omitempty"`
+	SchemeUri                 string `json:"schemeUri,omitempty"`
+	Lang                      string `json:"lang,omitempty"`
 }
 
 // Description represents description info
 type Description struct {
-	Description     string `json:"description"`
-	DescriptionType string `json:"descriptionType"`
-	Lang            string `json:"lang"`
+	Description     string `json:"description,omitempty"`
+	DescriptionType string `json:"descriptionType,omitempty"`
+	Lang            string `json:"lang,omitempty"`
 }
 
 // Attributes represent attributes
+// NOTE1: we use pointers to Publisher and Types structs to ensure that they will not be included if nil
+// NOTE2: we don't need points for lists since they will be properly omitted
 type Attributes struct {
-	Doi                string              `json:"doi"`
-	Prefix             string              `json:"prefix"`
-	Event              string              `json:"event"`
-	Creators           []Creator           `json:"creators"`
-	Titles             []Title             `json:"titles"`
-	Publisher          Publisher           `json:"publisher"`
-	PublicationYear    int                 `json:"publicationYear"`
-	Types              Types               `json:"types"`
-	RelatedIdentifiers []RelatedIdentifier `json:"relatedIdentifiers"`
-	Descriptions       []Description       `json:"descriptions"`
-	URL                string              `json:"url"`
+	Doi                string              `json:"doi,omitempty"`
+	Prefix             string              `json:"prefix,omitempty"`
+	Event              string              `json:"event,omitempty"`
+	Creators           []Creator           `json:"creators,omitempty"`
+	Titles             []Title             `json:"titles,omitempty"`
+	Publisher          *Publisher          `json:"publisher,omitempty"` // omitempty ensures it's not included if nil
+	PublicationYear    int                 `json:"publicationYear,omitempty"`
+	Types              *Types              `json:"types,omitempty"` // omitempty ensures it's not included if nil
+	RelatedIdentifiers []RelatedIdentifier `json:"relatedIdentifiers,omitempty"`
+	Descriptions       []Description       `json:"descriptions,omitempty"`
+	URL                string              `json:"url,omitempty"`
+}
+
+// ResponseAttributes represent attributes
+type ResponseAttributes struct {
+	Doi                string              `json:"doi,omitempty"`
+	Prefix             string              `json:"prefix,omitempty"`
+	Event              string              `json:"event,omitempty"`
+	Creators           []Creator           `json:"creators,omitempty"`
+	Titles             []Title             `json:"titles,omitempty"`
+	Publisher          string              `json:"publisher,omitempty"`
+	PublicationYear    int                 `json:"publicationYear,omitempty"`
+	Types              Types               `json:"types,omitempty"`
+	State              string              `json:"state,omitempty"`
+	RelatedIdentifiers []RelatedIdentifier `json:"relatedIdentifiers,omitempty"`
+	Descriptions       []Description       `json:"descriptions,omitempty"`
+	URL                string              `json:"url,omitempty"`
 }
 
 // Creator represents creator struct
 type Creator struct {
-	Name            string           `json:"name"`
-	NameType        string           `json:"nameType"`
-	NameIdentifiers []NameIdentifier `json:"nameIdentifiers"`
+	Name            string           `json:"name,omitempty"`
+	NameType        string           `json:"nameType,omitempty"`
+	NameIdentifiers []NameIdentifier `json:"nameIdentifiers,omitempty"`
 }
 
 // NameIdentifier represents name identifier info
 type NameIdentifier struct {
-	AffiliationIdentifier       string `json:"affiliationIdentifier"`
-	AffiliationIdentifierScheme string `json:"affiliationIdentifierScheme"`
-	SchemeUri                   string `json:"schemeUri"`
+	AffiliationIdentifier       string `json:"affiliationIdentifier,omitempty"`
+	AffiliationIdentifierScheme string `json:"affiliationIdentifierScheme,omitempty"`
+	SchemeUri                   string `json:"schemeUri,omitempty"`
 }
 
 // Title represents title
 type Title struct {
-	Title string `json:"title"`
+	Title string `json:"title,omitempty"`
 }
 
 // Types represents types
 type Types struct {
-	ResourceType        string `json:"resourceType"`
-	ResourceTypeGeneral string `json:"resourceTypeGeneral"`
+	ResourceType        string `json:"resourceType,omitempty"`
+	ResourceTypeGeneral string `json:"resourceTypeGeneral,omitempty"`
 }

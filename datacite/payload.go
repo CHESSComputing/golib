@@ -34,16 +34,19 @@ func creatorsInfo() []Creator {
 	}
 }
 
-// helper function to provide DOI Types
-func typesInfo() Types {
-	return Types{
+// helper function to provide DOI Types, return pointer since our Attributes.Types is a pointer
+// type (to ensure it will be ommitted if nil)
+func typesInfo() *Types {
+	return &Types{
 		ResourceType:        "FOXDEN",
 		ResourceTypeGeneral: "Dataset",
 	}
 }
 
-func publisherInfo() Publisher {
-	return Publisher{
+// helper function to provide DOI Publisher, return pointer since our Attributes.Publisher is a pointer
+// type (to ensure it will be ommitted if nil)
+func publisherInfo() *Publisher {
+	return &Publisher{
 		Name:                      "DataCite",
 		PublisherIdentifier:       "https://ror.org/04wxnsj81",
 		PublisherIdentifierScheme: "ROR",

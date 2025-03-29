@@ -78,7 +78,124 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	return doi, doiLink, err
 }
 
+// GetRecord fetches DOI record for given doi
+func GetRecord(doi string) (ResponsePayload, error) {
+	var record ResponsePayload
+	rurl := fmt.Sprintf("%s/dois/%s", srvConfig.Config.DOI.Datacite.Url, doi)
+	req, err := http.NewRequest("GET", rurl, nil)
+	if err != nil {
+		log.Println("ERROR: unable to create PUT request", err)
+		return record, err
+	}
+
+	// Set authentication and headers
+	if srvConfig.Config.DOI.Datacite.Username != "" && srvConfig.Config.DOI.Datacite.Password != "" {
+		req.SetBasicAuth(srvConfig.Config.DOI.Datacite.Username, srvConfig.Config.DOI.Datacite.Password)
+	}
+	if srvConfig.Config.DOI.Datacite.AccessToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", srvConfig.Config.DOI.Datacite.AccessToken))
+	}
+	req.Header.Set("Accept", "application/json")
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("ERROR: unable to make HTTP request", err)
+		return record, err
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	body, err := io.ReadAll(resp.Body)
+	log.Println("### receive", string(body), err)
+	if err != nil {
+		log.Println("ERROR: unable to read HTTP response", err)
+		return record, err
+	}
+	err = json.Unmarshal(body, &record)
+	return record, err
+}
+
 // MakePublic implements logic of publishing draft DOI
+// curl -X PUT -H "Content-Type: application/vnd.api+json" --user YOUR_REPOSITORY_ID:YOUR_PASSWORD -d @my_doi_update.json https://api.test.datacite.org/dois/:id
 func MakePublic(doi string) error {
-	return errors.New("not implemented")
+	// first we should check if we already has Public DOI
+	if rec, err := GetRecord(doi); err == nil {
+		if rec.Data.Attributes.State == "findable" {
+			log.Printf("WARNING: our doi record %s is already findable", doi)
+			return nil
+		}
+	}
+
+	// update record
+	rurl := fmt.Sprintf("%s/%s", srvConfig.Config.Services.DOIServiceURL, doi)
+
+	rid := RelatedIdentifier{
+		RelationType:          "HasMetadata",
+		RelatedIdentifier:     rurl,
+		RelatedTypeGeneral:    "Dataset",
+		RelatedIdentifierType: "URL",
+	}
+
+	attrs := Attributes{
+		RelatedIdentifiers: []RelatedIdentifier{rid},
+		Types:              &Types{ResourceType: "FOXDEN", ResourceTypeGeneral: "Dataset"},
+		Event:              "publish",
+		URL:                rurl,
+	}
+
+	// Convert payload to JSON
+	payload := RequestPayload{
+		Data: RequestData{
+			Type:       "dois",
+			Attributes: attrs,
+		},
+	}
+	data, err := json.MarshalIndent(payload, "", "  ")
+	log.Printf("update DOI record %+v", string(data))
+	if err != nil {
+		log.Println("ERROR: unable to create JSON payload", err)
+		return err
+	}
+	// make HTTP PUT request to update our record
+	url := fmt.Sprintf("%s/dois/%s", srvConfig.Config.Datacite.Url, doi)
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(data))
+	if err != nil {
+		log.Println("ERROR: unable to create PUT request", err)
+		return err
+	}
+
+	// Set authentication and headers
+	if srvConfig.Config.DOI.Datacite.Username != "" && srvConfig.Config.DOI.Datacite.Password != "" {
+		req.SetBasicAuth(srvConfig.Config.DOI.Datacite.Username, srvConfig.Config.DOI.Datacite.Password)
+	}
+	if srvConfig.Config.DOI.Datacite.AccessToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", srvConfig.Config.DOI.Datacite.AccessToken))
+	}
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("ERROR: unable to make HTTP request", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("ERROR: unable to read HTTP response", err)
+		return err
+	}
+	// Check if the request was successful
+	if resp.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("unable to update DOI document, status %v response %+v", resp.StatusCode, string(body))
+		log.Println("ERROR:", msg)
+		return errors.New(msg)
+	}
+	return nil
+
 }
