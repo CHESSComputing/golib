@@ -117,11 +117,12 @@ func get(collname string, spec map[string]interface{}) ([]map[string]interface{}
 }
 
 // Update records in BadgerDB
-func Update(dbname, collname string, spec, newdata map[string]any) {
+func Update(dbname, collname string, spec, newdata map[string]any) error {
 	err := update(collname, spec, newdata)
 	if err != nil {
 		log.Println("ERROR:", err)
 	}
+	return err
 }
 func update(collname string, spec map[string]interface{}, newdata map[string]interface{}) error {
 	return db.Update(func(txn *badger.Txn) error {

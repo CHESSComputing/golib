@@ -16,7 +16,7 @@ type DocDB interface {
 	Insert(dbname, collname string, records []map[string]any)
 	Upsert(dbname, collname, attr string, records []map[string]any) error
 	Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any
-	Update(dbname, collname string, spec, newdata map[string]any)
+	Update(dbname, collname string, spec, newdata map[string]any) error
 	Count(dbname, collname string, spec map[string]any) int
 	Remove(dbname, collname string, spec map[string]any) error
 	Distinct(dbname, collname, field string) ([]any, error)

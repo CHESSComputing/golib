@@ -372,7 +372,7 @@ func sel(q ...string) (r map[string]any) {
 }
 
 // Update inplace for given spec
-func Update(dbname, collname string, spec, newdata map[string]any) {
+func Update(dbname, collname string, spec, newdata map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
@@ -380,6 +380,7 @@ func Update(dbname, collname string, spec, newdata map[string]any) {
 	if err != nil {
 		log.Printf("Unable to update record, spec %v, data %v, error %v\n", spec, newdata, err)
 	}
+	return err
 }
 
 // Count gets number records from MongoDB

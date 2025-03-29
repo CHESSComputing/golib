@@ -25,8 +25,8 @@ func (d *MongoDB) Get(dbname, collname string, spec map[string]any, idx, limit i
 }
 
 // Update updates data into given database/collection
-func (d *MongoDB) Update(dbname, collname string, spec, newdata map[string]any) {
-	Update(dbname, collname, spec, newdata)
+func (d *MongoDB) Update(dbname, collname string, spec, newdata map[string]any) error {
+	return Update(dbname, collname, spec, newdata)
 }
 
 // Count returns total number of records within database/collection and given spec

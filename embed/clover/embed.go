@@ -110,7 +110,7 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 }
 
 // Update inplace for given spec
-func Update(dbname, collname string, spec, newdata map[string]any) {
+func Update(dbname, collname string, spec, newdata map[string]any) error {
 	if err := db.CreateCollection(collname); err != nil && err != clover.ErrCollectionExist {
 		log.Fatalf("Failed to create collection: %v", err)
 	}
@@ -125,6 +125,7 @@ func Update(dbname, collname string, spec, newdata map[string]any) {
 	if err != nil {
 		log.Printf("Failed to update document: %v", err)
 	}
+	return err
 }
 
 // Count gets number of records from document-oriented db

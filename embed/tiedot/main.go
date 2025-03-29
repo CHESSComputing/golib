@@ -43,7 +43,8 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 }
 
 // Update inplace for given spec
-func Update(dbname, collname string, spec, newdata map[string]any) {
+func Update(dbname, collname string, spec, newdata map[string]any) error {
+	return nil
 }
 
 // Count gets number records from document-oriented db
