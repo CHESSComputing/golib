@@ -73,7 +73,7 @@ func CreateEntry(doi, provider string, rec map[string]any, description string, a
 	return err
 }
 
-// helper function to insert data into DOI database
+// InsertData insert record into DOI database
 func InsertData(d DOIData) error {
 	Init()
 	tx, err := _db.Begin()
@@ -83,6 +83,27 @@ func InsertData(d DOIData) error {
 	defer tx.Rollback()
 	query := `INSERT INTO dois (doi,provider,doiurl,did,description,public,metadata,published) VALUES (?,?,?,?,?,?,?,?)`
 	_, err = tx.Exec(query, d.Doi, d.Provider, d.DoiUrl, d.Did, d.Description, d.Public, d.AccessMetadata, d.Published)
+	if err != nil {
+		log.Printf("Could not insert record to dois table; error: %v", err)
+		return err
+	}
+	err = tx.Commit()
+	return err
+}
+
+// UpdateRecord updates DOI record
+func UpdateRecord(doi string, public bool) error {
+	Init()
+	tx, err := _db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	query := `UPDATE dois set public = 0 WHERE doi = ?`
+	if public {
+		query = `UPDATE dois set public = 1 WHERE doi = ?`
+	}
+	_, err = tx.Exec(query, doi)
 	if err != nil {
 		log.Printf("Could not insert record to dois table; error: %v", err)
 		return err
