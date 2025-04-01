@@ -20,8 +20,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 
 	// Set the DOI creation endpoint
 	url := fmt.Sprintf("%s/dois", srvConfig.Config.DOI.Datacite.Url)
-
-	payloadBytes, err := DataCiteMetadata(did, description, record, publish)
+	payloadBytes, err := DataciteMetadata("", did, description, record, publish)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to marshal metadata payload: %v", err)
 	}

@@ -2,13 +2,11 @@ package datacite
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
+	"path/filepath"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
-	utils "github.com/CHESSComputing/golib/utils"
 )
 
 /*
@@ -63,35 +61,20 @@ func descriptionInfo(d string) Description {
 	}
 }
 
-// helper function to publish foxden metadata in FOXDEN DOI service
-func publishFoxdenRecord(record map[string]any) ([]RelatedIdentifier, error) {
-	// publish given record in DOIService and obtain its URL
-	_, url, err := utils.Publish2DOIService(record)
-	if err != nil {
-		log.Println("ERROR: fail to obtain DOIService url, error", err)
-		return []RelatedIdentifier{}, err
+// DataciteMetadata provides datacite metadata record for given did and FOXDEN record
+func DataciteMetadata(doi, did, description string, record map[string]any, publish bool) ([]byte, error) {
+	url := srvConfig.Config.Services.DOIServiceURL
+	if doi != "" {
+		url += "/doi" // http://DOIServiceURL/doi/<10.xxx/...>
+		url = filepath.Join(url, doi)
 	}
-	if url == "" {
-		log.Println("ERROR: empty DOIService url")
-		return []RelatedIdentifier{}, errors.New("fail to obtain DOIService url")
-	}
-	out := []RelatedIdentifier{
+	relatedIds := []RelatedIdentifier{
 		RelatedIdentifier{
 			RelationType:          "HasMetadata",
 			RelatedIdentifier:     url,
 			RelatedTypeGeneral:    "Dataset",
 			RelatedIdentifierType: "URL",
 		},
-	}
-	return out, nil
-}
-
-// DataCiteMetadata provides datacite metadata record for given did and FOXDEN record
-func DataCiteMetadata(did, description string, record map[string]any, publish bool) ([]byte, error) {
-	foxdenMeta, err := publishFoxdenRecord(record)
-	if err != nil {
-		log.Println("ERROR: fail to publish foxden record", err)
-		return []byte{}, fmt.Errorf("failed to publish foxden record into DOIService: %v", err)
 	}
 	event := ""
 	if publish {
@@ -108,8 +91,8 @@ func DataCiteMetadata(did, description string, record map[string]any, publish bo
 		PublicationYear:    time.Now().Year(),
 		Descriptions:       []Description{descriptionInfo(description)},
 		Types:              typesInfo(),
-		RelatedIdentifiers: foxdenMeta,
-		URL:                srvConfig.Config.Services.DOIServiceURL,
+		RelatedIdentifiers: relatedIds,
+		URL:                url,
 	}
 
 	// Convert payload to JSON
