@@ -198,16 +198,25 @@ func DoiRecords(docId int64) ([]DoiRecord, error) {
 	return records, nil
 }
 
+// GetRecordId extracts from our doi record id (last part of doi)
+func GetRecordId(doi string) string {
+	arr := strings.Split(doi, ".")
+	recid := arr[len(arr)-1]
+	return recid
+}
+
 // DepositRecords returns list of Zenodo Deposit records
+/*
+ curl 'https://zenodo.org/api/deposit/depositions?access_token=<KEY>'
+ curl 'https://zenodo.org/api/deposit/depositions/<123>?access_token=<KEY>' where 123 is record id (last part of doi)
+*/
 func DepositRecords(doi string) ([]DepositRecord, error) {
-	/*
-	 curl 'https://zenodo.org/api/deposit/depositions?access_token=<KEY>'
-	 curl 'https://zenodo.org/api/deposit/depositions/<123>?access_token=<KEY>'
-	*/
 	var records []DepositRecord
+	// extract from our doi record id
+	recid := GetRecordId(doi)
 	zurl := srvConfig.Config.DOI.Zenodo.Url
 	token := srvConfig.Config.DOI.Zenodo.AccessToken
-	rurl := fmt.Sprintf("%s/deposit/depositions?access_token=%s", zurl, token)
+	rurl := fmt.Sprintf("%s/deposit/depositions?access_token=%s&q=recid:%s", zurl, token, recid)
 	if Verbose > 0 {
 		log.Println("request", rurl)
 	}
