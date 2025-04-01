@@ -274,7 +274,7 @@ func MakePublic(rid string) error {
 	}
 	if resp.StatusCode >= 400 && resp.StatusCode < 200 {
 		log.Println("MakePublic received response", string(data))
-		return errors.New(fmt.Sprintf("fail to make public DOI record, status code=%s", resp.StatusCode))
+		return errors.New(fmt.Sprintf("fail to make public DOI record, status code=%v", resp.StatusCode))
 	}
 	return err
 }
