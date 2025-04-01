@@ -63,7 +63,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 
 	// add foxden datacite metadata record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: record}
-	if payload, err := datacite.DataCiteMetadata(did, description, record, publish); err == nil {
+	if payload, err := datacite.DataciteMetadata(doi, did, description, record, publish); err == nil {
 		var rec map[string]any
 		if err := json.Unmarshal(payload, &rec); err == nil {
 			frec = zenodo.FoxdenRecord{Did: did, MetaData: rec}
@@ -99,16 +99,6 @@ func (m *ZenodoProvider) MakePublic(doi string) error {
 	}
 	rec := records[0]
 	rid := fmt.Sprintf("%d", rec.Id)
-	/*
-		// TODO: update foxden part of doi record with new DOI
-		mrec := zenodo.MetaDataRecord{}
-		err = zenodo.UpdateRecord(rec.Id, mrec)
-		if err != nil {
-			log.Printf("ERROR: unable to update zenodo record %+v, error=%v", rec, err)
-			return err
-		}
-	*/
-
 	// make public DOI record
 	return zenodo.MakePublic(rid)
 }
