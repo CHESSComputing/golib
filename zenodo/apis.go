@@ -187,17 +187,85 @@ func DoiRecords(docId int64) ([]DoiRecord, error) {
 			return records, err
 		}
 		return records, nil
+	} else {
+		var record DoiRecord
+		if err := dec.Decode(&record); err != nil {
+			log.Println("ERROR: unable to decode JSON response", err)
+			return records, err
+		}
+		records = append(records, record)
 	}
-	var record DoiRecord
-	if err := dec.Decode(&record); err != nil {
+	return records, nil
+}
+
+// DepositRecords returns list of Zenodo Deposit records
+func DepositRecords(doi string) ([]DepositRecord, error) {
+	/*
+	 curl 'https://zenodo.org/api/deposit/depositions?access_token=<KEY>'
+	 curl 'https://zenodo.org/api/deposit/depositions/<123>?access_token=<KEY>'
+	*/
+	var records []DepositRecord
+	zurl := srvConfig.Config.DOI.Zenodo.Url
+	token := srvConfig.Config.DOI.Zenodo.AccessToken
+	rurl := fmt.Sprintf("%s/deposit/depositions?access_token=%s", zurl, token)
+	if Verbose > 0 {
+		log.Println("request", rurl)
+	}
+	resp, err := http.Get(rurl)
+	if err != nil {
+		log.Println("ERROR: in GET request", err)
+		return records, err
+	}
+	defer resp.Body.Close()
+	dec := json.NewDecoder(resp.Body)
+	if err := dec.Decode(&records); err != nil {
 		log.Println("ERROR: unable to decode JSON response", err)
 		return records, err
 	}
-	records = append(records, record)
+	// if doi is provided filter out records with this doi
+	if doi != "" {
+		var out []DepositRecord
+		for _, r := range records {
+			if r.MetaDataResponseRecord.PrereserveDoi.Doi == doi {
+				out = append(out, r)
+			}
+		}
+		return out, nil
+	}
 	return records, nil
 }
 
 // MakePublic implements logic of publishing draft DOI
-func MakePublic(doi string) error {
-	return errors.New("not implemented")
+/*
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+     -X POST "https://zenodo.org/api/deposit/depositions/1234567/actions/publish"
+
+*/
+func MakePublic(rid string) error {
+	zurl := srvConfig.Config.DOI.Zenodo.Url
+	token := srvConfig.Config.DOI.Zenodo.AccessToken
+	rurl := fmt.Sprintf("%s/deposit/depositions/%s/actions/publish", zurl, rid)
+	if Verbose > 0 {
+		log.Println("request", rurl)
+	}
+	log.Println("MakePublic POST to", rurl)
+	req, err := http.NewRequest("POST", rurl, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("ERROR: unable to post request to zenodo", err)
+		return err
+	}
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if Verbose > 0 {
+		log.Println("MakePublic received response", string(data))
+	}
+	if resp.StatusCode >= 400 && resp.StatusCode < 200 {
+		log.Println("MakePublic received response", string(data))
+		return errors.New(fmt.Sprintf("fail to make public DOI record, status code=%s", resp.StatusCode))
+	}
+	return err
 }

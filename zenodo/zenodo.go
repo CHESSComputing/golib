@@ -140,3 +140,16 @@ type DoiRecord struct {
 	Files  []File `json:"files,omitempty"`
 	Links  Links  `json:"links"`
 }
+
+// DepositRecord represents part of deposit record from Zenodo
+type DepositRecord struct {
+	MetaDataResponseRecord MetaDataResponseRecord `json:"metadata"`
+	State                  string                 `json:"state"`
+	Id                     int64                  `json:"id"`
+	Owner                  int64                  `json:"owner"`
+}
+
+// MetaDataResponseRecord represents part of meta-data record
+type MetaDataResponseRecord struct {
+	PrereserveDoi PrereserveDoi `json:"prereserve_doi"`
+}
