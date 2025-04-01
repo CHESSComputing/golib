@@ -93,5 +93,22 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 
 // MakePublic provides publication of draft DOI
 func (m *ZenodoProvider) MakePublic(doi string) error {
-	return zenodo.MakePublic(doi)
+	records, err := zenodo.DepositRecords(doi)
+	if err != nil {
+		return err
+	}
+	rec := records[0]
+	rid := fmt.Sprintf("%d", rec.Id)
+	/*
+		// TODO: update foxden part of doi record with new DOI
+		mrec := zenodo.MetaDataRecord{}
+		err = zenodo.UpdateRecord(rec.Id, mrec)
+		if err != nil {
+			log.Printf("ERROR: unable to update zenodo record %+v, error=%v", rec, err)
+			return err
+		}
+	*/
+
+	// make public DOI record
+	return zenodo.MakePublic(rid)
 }
