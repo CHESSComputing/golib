@@ -2,7 +2,6 @@ package MaterialsCommons
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -121,16 +120,67 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		return doi, doiLink, err
 	}
 
-	// Mint DOI using our project and dataset ids
-	ds, err = mcClient.MintDOIForDataset(projectID, datasetID)
-	if err == nil {
-		doi = ds.DOI
-		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
+	// make findable DOI
+	if publish {
+		// Mint DOI using our project and dataset ids
+		ds, err = mcClient.MintDOIForDataset(projectID, datasetID)
+		if err == nil {
+			doi = ds.DOI
+			doiLink = fmt.Sprintf("https://doi.org/%s", doi)
+		}
 	}
 	return doi, doiLink, err
 }
 
+// FindProjectDatastIDs finds both projectID and datasetID for a given doi
+func FindProjectDatasetIDs(doi string) (int, int, error) {
+	var projectID, datasetID int
+
+	// get MaterialsCommons client
+	getMcClient()
+
+	// find out project ID to use
+	projectName := srvConfig.Config.MaterialsCommons.ProjectName
+	if projectName == "" {
+		projectName = "FOXDEN datasets"
+	}
+	records, err := mcClient.ListProjects()
+	if err != nil {
+		log.Println("ERROR: unable to list projects, error", err)
+		return projectID, datasetID, err
+	}
+	for _, r := range records {
+		if r.Name == projectName {
+			projectID = r.ID
+			break
+		}
+	}
+	// get list of datasets within our projectID
+	datasets, err := mcClient.ListDatasets(projectID)
+	if err != nil {
+		log.Println("ERROR: unable to list datasets for projectID", projectID, "error:", err)
+		return projectID, datasetID, err
+	}
+	for _, d := range datasets {
+		if d.DOI == doi {
+			datasetID = d.ID
+		}
+	}
+	return projectID, datasetID, err
+}
+
 // MakePublic implements logic of publishing draft DOI
 func MakePublic(doi string) error {
-	return errors.New("not implemented")
+	// get MaterialsCommons client
+	getMcClient()
+
+	projectID, datasetID, err := FindProjectDatasetIDs(doi)
+	if err != nil {
+		log.Println("ERROR: unable to find project and datasetID for doi", doi, "error:", err)
+		return err
+	}
+
+	// Mint DOI using our project and dataset ids
+	_, err = mcClient.MintDOIForDataset(projectID, datasetID)
+	return err
 }
