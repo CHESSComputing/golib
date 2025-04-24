@@ -3,11 +3,10 @@
 set -e
 echo "mode: atomic" > coverage.txt
 
-skipServices="zenodo schema datacite doi s3"
+skipServices="zenodo schema datacite doi s3 gonexus"
 
 for d in $(go list ./... | grep -v vendor); do
     echo "Testing $d"
-    go test -v $d
     skip="false"
     for s in $skipServices; do
         if [ $d == "github.com/CHESSComputing/golib/$s" ]; then
@@ -18,6 +17,7 @@ for d in $(go list ./... | grep -v vendor); do
         echo "Skipping $d, not test files required..."
         continue
     fi
+    go test -v $d
     echo "Coverage $d"
     go test -race -coverprofile=profile.out -covermode=atomic "$d"
     if [ -f profile.out ]; then

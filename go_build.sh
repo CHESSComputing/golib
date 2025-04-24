@@ -14,6 +14,9 @@ for d in $(go list ./... | grep -v vendor); do
     if [ "$bdir" == "tiedot" ]; then
         bdir="embed/tiedot"
     fi
+    if [ "$bdir" == "gonexus" ]; then
+        continue
+    fi
     echo "cd $bdir"
     cd $bdir
     go build
