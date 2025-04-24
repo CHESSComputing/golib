@@ -1,0 +1,5 @@
+# local files we should ignore
+.venv/
+main
+reader.o
+sample.h5
