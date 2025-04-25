@@ -4,15 +4,6 @@
 #include "content.h"
 
 int main() {
-/*
- * int main(int argc, char **argv) {
-    if (argc < 2) {
-        printf("Usage: %s <file.h5>\n", argv[0]);
-        return 1;
-    }
-
-    const char *filename = argv[1];
-*/
     const char *filename = "sample.h5";
 
 
