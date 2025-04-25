@@ -2,7 +2,7 @@ package gonexus
 
 /*
 #cgo CFLAGS: -I/opt/local/include
-#cgo LDFLAGS: -L/opt/local/lib -lreader -lhdf5
+#cgo LDFLAGS: -L/opt/local/lib -lnexus -lhdf5
 #include <stdlib.h>
 #include "reader.h"
 */

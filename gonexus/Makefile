@@ -14,12 +14,13 @@ PYTHON_SCRIPT = generate_h5.py
 .PHONY: h5file clean_venv venv_setup
 
 # all targets to execute under `make`
-all: libreader.so build-go
+all: libnexus.so build-go
 
 # target to build reader C library
-libreader.so: reader.c reader.h
+libnexus.so: reader.c reader.h content.c content.h
 	gcc -c -fPIC -I/opt/local/include reader.c -o reader.o
-	gcc -o libreader.so reader.o -shared -L/opt/local/lib -lhdf5
+	gcc -c -fPIC -I/opt/local/include content.c -o content.o
+	gcc -o libnexus.so reader.o content.o -shared -L/opt/local/lib -lhdf5
 
 # target to build go code with C library
 build-go:
@@ -30,15 +31,16 @@ test-go:
 	CGO_CFLAGS="-I/opt/local/include" CGO_LDFLAGS="-L/opt/local/lib -L./" go test -v
 
 # target to build C main executable (located at ctest)
-main: ctest/main.c reader.h libreader.so
-	gcc -I. -I/opt/local/include ctest/main.c -L. -lreader -L/opt/local/lib -lhdf5 -o main
+main: ctest/main.c reader.h libnexus.so
+	gcc -I. -I/opt/local/include ctest/main.c -L. -lnexus -L/opt/local/lib -lhdf5 -o main
 
 # target to run main C executable with our h5 file
 run-main: main h5file
 	LD_LIBRARY_PATH=. ./main
 
 # target to run Go tests
-test: all h5file test-go run-main
+test: all h5file test-go
+	@echo "To perform ctest please do: make run-main"
 
 # target to generate the HDF5 file
 h5file: venv_setup $(PYTHON_SCRIPT)
