@@ -37,4 +37,9 @@ clean_venv:
 
 # target to clean up our area
 clean: clean_venv
-	rm $(H5FILE)
+	@if [ -f "$(H5FILE)" ]; then \
+		echo "Removing $(H5FILE)"; \
+		rm "$(H5FILE)"; \
+	else \
+		echo "$(H5FILE) does not exist, skipping."; \
+	fi
