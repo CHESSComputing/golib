@@ -4,6 +4,9 @@ set -e
 
 for d in $(go list ./... | grep -v vendor); do
     echo "Building $d"
+    if [ "$d" == "github.com/CHESSComputing/golib/gonexus/integration/gotest" ]; then
+        continue
+    fi
     bdir=`echo $d | awk '{z=split($0,a,"/"); print a[z]}'`
     if [ "$bdir" == "badger" ]; then
         bdir="embed/badger"
