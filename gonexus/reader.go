@@ -1,8 +1,8 @@
 package gonexus
 
 /*
-#cgo CFLAGS: -I/opt/local/include
-#cgo LDFLAGS: -L/opt/local/lib -lnexus -lhdf5
+#cgo CFLAGS: -I/opt/local/include -I/usr/local/include
+#cgo LDFLAGS: -L/opt/local/lib -L/usr/local/lib -lnexus -lhdf5
 #include <stdlib.h>
 #include "reader.h"
 */

@@ -9,7 +9,7 @@ setup:
 	ln -s $(IDIR)/libnexus.so
 
 build:
-	gcc -I$(IDIR) -I/opt/local/include ./main.c -L$(IDIR) -lnexus -L/opt/local/lib -lhdf5 -o $(EXE)
+	gcc -I$(IDIR) -I/opt/local/include -I/usr/local/include ./main.c -L$(IDIR) -lnexus -L/opt/local/lib -L/usr/local/lib -lhdf5 -o $(EXE)
 
 run:
 	@echo

@@ -18,21 +18,21 @@ all: libnexus.so build-go
 
 # target to build reader C library
 libnexus.so: reader.c reader.h content.c content.h
-	gcc -c -fPIC -I/opt/local/include reader.c -o reader.o
-	gcc -c -fPIC -I/opt/local/include content.c -o content.o
-	gcc -o libnexus.so reader.o content.o -shared -L/opt/local/lib -lhdf5
+	gcc -c -fPIC -I/opt/local/include -I/usr/local/include reader.c -o reader.o
+	gcc -c -fPIC -I/opt/local/include -I/usr/local/include content.c -o content.o
+	gcc -o libnexus.so reader.o content.o -shared -L/opt/local/lib -L/usr/local/lib -lhdf5
 
 # target to build go code with C library
 build-go:
-	CGO_CFLAGS="-I/opt/local/include" CGO_LDFLAGS="-L/opt/local/lib" go build
+	CGO_CFLAGS="-I/opt/local/include -I/usr/local/include" CGO_LDFLAGS="-L/opt/local/lib -L/usr/local/lib" go build
 
 # target to test go code
 test-go:
-	CGO_CFLAGS="-I/opt/local/include" CGO_LDFLAGS="-L/opt/local/lib -L./" go test -v
+	CGO_CFLAGS="-I/opt/local/include -I/usr/local/include" CGO_LDFLAGS="-L/opt/local/lib -L/usr/local/lib -L./" go test -v
 
 # target to build C main executable (located at ctest)
 main: ctest/main.c reader.h libnexus.so
-	gcc -I. -I/opt/local/include ctest/main.c -L. -lnexus -L/opt/local/lib -lhdf5 -o main
+	gcc -I. -I/opt/local/include -I/usr/local/include ctest/main.c -L. -lnexus -L/opt/local/lib -L/usr/local/lib -lhdf5 -o main
 
 # target to run main C executable with our h5 file
 run-main: main h5file

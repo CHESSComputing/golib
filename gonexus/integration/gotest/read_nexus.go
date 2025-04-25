@@ -1,8 +1,8 @@
 package main
 
 /*
-#cgo CFLAGS: -I/opt/local/include
-#cgo LDFLAGS: -L/opt/local/lib -lhdf5
+#cgo CFLAGS: -I/opt/local/include -I/usr/local/include
+#cgo LDFLAGS: -L/opt/local/lib -L/usr/local/lib -lhdf5
 #include "hdf5.h"
 
 // Disable automatic HDF5 error printing
