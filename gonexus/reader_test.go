@@ -5,16 +5,17 @@ import (
 )
 
 func TestReadHDF5(t *testing.T) {
-	meta, data, err := ReadHDF5("sample.h5", "mydata")
+	filename := "sample.h5"
+	dataset := "mydata"
+	h5data, err := ReadHDF5(filename, dataset)
 	if err != nil {
 		t.Fatalf("Failed to read HDF5: %v", err)
 	}
-
-	if len(meta) == 0 {
-		t.Errorf("Expected metadata, got none")
+	if h5data == nil {
+		t.Fatalf("unable to get data from %s", filename)
 	}
 
-	if len(data) != 100 {
-		t.Errorf("Expected 100 data points, got %d", len(data))
+	if len(h5data.Data) != 100 {
+		t.Errorf("Expected 100 data points, got %d", len(h5data.Data))
 	}
 }

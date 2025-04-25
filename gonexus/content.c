@@ -28,7 +28,7 @@ static herr_t dataset_info_cb(hid_t loc_id, const char *name, const H5L_info_t *
     hid_t dset_id = H5Dopen2(loc_id, name, H5P_DEFAULT);
     if (dset_id < 0) return 0;
 
-    HDF5Data* item = &content->datasets[content->count];
+    HDF5MetaData* item = &content->datasets[content->count];
     item->name = copy_string(name);
 
     hid_t space = H5Dget_space(dset_id);
@@ -54,7 +54,7 @@ static herr_t dataset_info_cb(hid_t loc_id, const char *name, const H5L_info_t *
 
 HDF5Content get_hdf5_content(const char* filename) {
     HDF5Content content;
-    content.datasets = malloc(MAX_DATASETS * sizeof(HDF5Data));
+    content.datasets = malloc(MAX_DATASETS * sizeof(HDF5MetaData));
     content.count = 0;
 
     hid_t file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);

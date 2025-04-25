@@ -11,10 +11,10 @@ typedef struct {
     int* shape;
     int ndim;
     long size;
-} HDF5Data;
+} HDF5MetaData;
 
 typedef struct {
-    HDF5Data* datasets;
+    HDF5MetaData* datasets;
     int count;
 } HDF5Content;
 

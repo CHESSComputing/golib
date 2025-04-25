@@ -12,40 +12,57 @@ import (
 	"unsafe"
 )
 
+// HDF5Data represents HDF5 data
+type HDF5Data struct {
+	Data  []float64
+	Shape []int
+	Rank  int
+	Size  int
+}
+
 // ReadHDF5 function reads a given dataset from a file path and returns
 // medata (as a map), data array (as floats64) and error
-func ReadHDF5(filePath, dataset string) (map[string]string, []float64, error) {
-	cfile := C.CString(filePath)
-	cdset := C.CString(dataset)
+func ReadHDF5(filename, dataset string) (*HDF5Data, error) {
+	cfile := C.CString(filename)
+	cdataset := C.CString(dataset)
 	defer C.free(unsafe.Pointer(cfile))
-	defer C.free(unsafe.Pointer(cdset))
+	defer C.free(unsafe.Pointer(cdataset))
 
-	result := C.read_hdf5(cfile, cdset)
-	defer C.free_result(result)
-
-	if result.error != nil {
-		return nil, nil, errors.New(C.GoString(result.error))
+	var result C.HDF5Result
+	if C.read_hdf5(cfile, cdataset, &result) != 0 {
+		defer C.free_hdf5_result(&result)
+		return nil, errors.New(C.GoString(result.error))
 	}
 
-	count := int(result.metadata.count)
+	defer C.free_hdf5_result(&result)
 
-	// Convert C **char to Go []string
-	keysPtr := unsafe.Pointer(result.metadata.keys)
-	keys := (*[1 << 30]*C.char)(keysPtr)[:count:count]
-
-	valsPtr := unsafe.Pointer(result.metadata.values)
-	vals := (*[1 << 30]*C.char)(valsPtr)[:count:count]
-
-	meta := make(map[string]string)
-	for i := 0; i < count; i++ {
-		key := C.GoString(keys[i])
-		val := C.GoString(vals[i])
-		meta[key] = val
+	// Convert C.int* to Go []int
+	shapeSlice := unsafe.Slice(result.shape, result.rank)
+	shape := make([]int, result.rank)
+	size := 1
+	for i := 0; i < int(result.rank); i++ {
+		dim := int(shapeSlice[i])
+		shape[i] = dim
+		size *= dim
 	}
 
-	// Convert C array to Go slice
-	dataLen := int(result.dataset.length)
-	data := (*[1 << 30]float64)(unsafe.Pointer(result.dataset.data))[:dataLen:dataLen]
+	data := make([]float64, size)
+	cData := (*[1 << 30]C.double)(unsafe.Pointer(result.data))[:size:size]
+	for i := range data {
+		data[i] = float64(cData[i])
+	}
 
-	return meta, data, nil
+	/*
+		// Convert data buffer to Go []float64
+		dataSlice := unsafe.Slice(result.data, size)
+		data := make([]float64, size)
+		copy(data, dataSlice)
+	*/
+
+	return &HDF5Data{
+		Data:  data,
+		Shape: shape,
+		Rank:  int(result.rank),
+		Size:  size,
+	}, nil
 }

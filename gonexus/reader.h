@@ -1,33 +1,25 @@
 #ifndef READER_H
 #define READER_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stddef.h>
 
 typedef struct {
     char **keys;
     char **values;
-    int count;
-} MetaData;
+    size_t length;
+} Metadata;
 
 typedef struct {
     double *data;
-    int length;
-} DataArray;
-
-typedef struct {
-    MetaData metadata;
-    DataArray dataset;
+    int *shape;
+    int rank;
+    size_t total_size;
+    Metadata metadata;
     char *error;
 } HDF5Result;
 
-HDF5Result read_hdf5(const char *filename, const char *dataset_name);
-void free_result(HDF5Result result);
+int read_hdf5(const char *filename, const char *dataset_path, HDF5Result *result);
+void free_hdf5_result(HDF5Result *result);
 
-#ifdef __cplusplus
-}
 #endif
-
-#endif // READER_H
 

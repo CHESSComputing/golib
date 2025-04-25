@@ -11,16 +11,16 @@ import (
 	"unsafe"
 )
 
-// HDF5Data represents content of single dataset within HDF5 file
-type HDF5Data struct {
+// HDF5MetaData represents content of single dataset within HDF5 file
+type HDF5MetaData struct {
 	Name  string
 	DType string
 	Shape []int
 	Size  int64
 }
 
-// Content provides content of the given HDF5 file and return list of HDF5Data structs
-func Content(fileName string) ([]HDF5Data, error) {
+// Content provides content of the given HDF5 file and return list of HDF5MetaData structs
+func Content(fileName string) ([]HDF5MetaData, error) {
 	cFile := C.CString(fileName)
 	defer C.free(unsafe.Pointer(cFile))
 
@@ -29,8 +29,8 @@ func Content(fileName string) ([]HDF5Data, error) {
 		return nil, errors.New("no datasets found")
 	}
 
-	var datasets []HDF5Data
-	cDatasets := (*[1 << 30]C.HDF5Data)(unsafe.Pointer(result.datasets))[:result.count:result.count]
+	var datasets []HDF5MetaData
+	cDatasets := (*[1 << 30]C.HDF5MetaData)(unsafe.Pointer(result.datasets))[:result.count:result.count]
 	for _, cdata := range cDatasets {
 		shape := (*[1 << 10]C.int)(unsafe.Pointer(cdata.shape))[:cdata.ndim:cdata.ndim]
 		dims := make([]int, cdata.ndim)
@@ -38,7 +38,7 @@ func Content(fileName string) ([]HDF5Data, error) {
 			dims[i] = int(shape[i])
 		}
 
-		data := HDF5Data{
+		data := HDF5MetaData{
 			Name:  C.GoString(cdata.name),
 			DType: C.GoString(cdata.dtype),
 			Shape: dims,
