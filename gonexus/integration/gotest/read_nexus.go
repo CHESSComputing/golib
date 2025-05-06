@@ -37,7 +37,7 @@ func main() {
 	if err == nil {
 		fmt.Println("METADATA:")
 		for _, c := range content {
-			fmt.Println("metadata: %+v", c)
+			fmt.Printf("metadata: %+v\n", c)
 		}
 	}
 	// read actual data
