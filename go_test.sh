@@ -3,7 +3,7 @@
 set -e
 echo "mode: atomic" > coverage.txt
 
-skipServices="zenodo schema datacite doi s3 gonexus"
+skipServices="zenodo schema datacite doi s3 gonexus gonexus/integration/gotest"
 
 for d in $(go list ./... | grep -v vendor); do
     echo "Testing $d"
