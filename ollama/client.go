@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -59,7 +60,7 @@ func (c *Client) StreamPrompt(ctx context.Context, prompt string, callback func(
 func (c *Client) sendWithRetry(ctx context.Context, prompt string, stream bool, callback func(string)) (string, error) {
 	var lastErr error
 	for attempt := 0; attempt <= c.config.MaxRetry; attempt++ {
-		resp, err := c.sendRequest(ctx, prompt, stream, callback)
+		resp, err := c.SendRequest(ctx, prompt, stream, callback)
 		if err == nil {
 			return resp, nil
 		}
@@ -69,7 +70,7 @@ func (c *Client) sendWithRetry(ctx context.Context, prompt string, stream bool, 
 	return "", fmt.Errorf("all retries failed: %w", lastErr)
 }
 
-func (c *Client) sendRequest(ctx context.Context, prompt string, stream bool, callback func(string)) (string, error) {
+func (c *Client) SendRequest(ctx context.Context, prompt string, stream bool, callback func(string)) (string, error) {
 	reqBody := Request{
 		Model:  c.config.Model,
 		Prompt: prompt,
@@ -92,6 +93,7 @@ func (c *Client) sendRequest(ctx context.Context, prompt string, stream bool, ca
 	}
 
 	if stream {
+		var out []string
 		reader := bufio.NewReader(resp.Body)
 		for {
 			line, err := reader.ReadBytes('\n')
@@ -107,12 +109,14 @@ func (c *Client) sendRequest(ctx context.Context, prompt string, stream bool, ca
 			}
 			if callback != nil {
 				callback(res.Response)
+			} else {
+				out = append(out, res.Response)
 			}
 			if res.Done {
 				break
 			}
 		}
-		return "", nil
+		return strings.Join(out, ""), nil
 	}
 
 	var res Response
