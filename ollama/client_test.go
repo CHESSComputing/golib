@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 )
 
 func TestSendPrompt(t *testing.T) {
@@ -32,4 +31,3 @@ func TestSendPrompt(t *testing.T) {
 		t.Errorf("expected 'hello world', got '%s'", resp)
 	}
 }
-
