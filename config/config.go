@@ -13,11 +13,18 @@ import (
 	"github.com/spf13/viper"
 )
 
+// AIChat configuration
+type AIChat struct {
+	Host  string `mapstructure:"host"`
+	Port  int    `mapstructure:"port"`
+	Model string `mapstructure:"model"`
+}
+
 // TrustedUser represents single trusted user information
 type TrustedUser struct {
-	User string `json:"user"`
-	IP   string `json:"ip"`
-	MAC  string `json:"mac"`
+	User string `mapstructure:"user"`
+	IP   string `mapstructure:"ip"`
+	MAC  string `mapstructure:"mac"`
 }
 
 // Globug represents globus information
@@ -50,9 +57,9 @@ type DOI struct {
 
 // DID structure
 type DID struct {
-	Attributes string `mapstructure:attributes` // did attributes, comma separated, default beamline,btr,cycle,sample
-	Separator  string `mapstructure:separator`  // did separator, default "/"
-	Divider    string `mapstructure:divider`    // did key-value divider, default "="
+	Attributes string `mapstructure:"attributes"` // did attributes, comma separated, default beamline,btr,cycle,sample
+	Separator  string `mapstructure:"separator"`  // did separator, default "/"
+	Divider    string `mapstructure:"divider"`    // did key-value divider, default "="
 }
 
 // Embed structure
@@ -63,9 +70,9 @@ type Embed struct {
 
 // QL structure
 type QL struct {
-	ServiceMapFile string `mapstructure:ServiceMapFile` // service map file name
-	Separator      string `mapstructure:separator`      // ql separator, default ":"
-	Verbose        int    `mapstructure:verbose`        // verbosity level
+	ServiceMapFile string `mapstructure:"ServiceMapFile"` // service map file name
+	Separator      string `mapstructure:"separator"`      // ql separator, default ":"
+	Verbose        int    `mapstructure:"verbose"`        // verbosity level
 }
 
 // OAuthRecord defines OAuth provider's credentials
@@ -78,31 +85,31 @@ type OAuthRecord struct {
 
 // MLAPI defines ML API structure
 type MLApi struct {
-	Name     string `json:"name"`
-	Method   string `json:"method"`
-	Endpoint string `json:"endpoint"`
-	Accept   string `json:"accept"`
+	Name     string `mapstructure:"name"`
+	Method   string `mapstructure:"method"`
+	Endpoint string `mapstructure:"endpoint"`
+	Accept   string `mapstructure:"accept"`
 }
 
 // MLBackend represents ML backend engine
 type MLBackend struct {
-	Name string  `json:"name"` // ML backend name, e.g. TFaaS
-	Type string  `json:"type"` // ML backebd type, e.g. TensorFlow
-	URI  string  `json:"uri"`  // ML backend URI, e.g. http://localhost:port
+	Name string  `mapstructure:"name"` // ML backend name, e.g. TFaaS
+	Type string  `mapstructure:"type"` // ML backebd type, e.g. TensorFlow
+	URI  string  `mapstructure:"uri"`  // ML backend URI, e.g. http://localhost:port
 	Apis []MLApi // ML APIs
 }
 
 // ML defines ML configuration options
 type ML struct {
-	MLBackends []MLBackend `json:"MLBackends"` // ML backends
-	StorageDir string      `json:"StorageDir"`
+	MLBackends []MLBackend `mapstructure:"MLBackends"` // ML backends
+	StorageDir string      `mapstructure:"StorageDir"`
 }
 
 // Kerberos defines kerberos optinos
 type Kerberos struct {
-	Krb5Conf string `mapstructure:Krb5Conf`
-	Keytab   string `mapstructure:Keytab`
-	Realm    string `mapstructure:Realm`
+	Krb5Conf string `mapstructure:"Krb5Conf"`
+	Keytab   string `mapstructure:"Keytab"`
+	Realm    string `mapstructure:"Realm"`
 }
 
 // GinOptions controls go-gin specific options
@@ -126,14 +133,14 @@ type WebServer struct {
 	LogLongFile bool   `mapstructure:"LogLongFile"` // server log structure
 
 	// middleware server parts
-	LimiterPeriod   string   `mapstructure:"Rate"`      // limiter rate value
-	LimiterHeader   string   `json:"limiter_header"`    // limiter header to use
-	LimiterSkipList []string `json:"limiter_skip_list"` // limiter skip list
-	MetricsPrefix   string   `json:"metrics_prefix"`    // metrics prefix used for Prometheus
+	LimiterPeriod   string   `mapstructure:"Rate"`              // limiter rate value
+	LimiterHeader   string   `mapstructure:"limiter_header"`    // limiter header to use
+	LimiterSkipList []string `mapstructure:"limiter_skip_list"` // limiter skip list
+	MetricsPrefix   string   `mapstructure:"metrics_prefix"`    // metrics prefix used for Prometheus
 
 	// etag options
-	Etag         string `json:"etag"`          // etag value to use for ETag generation
-	CacheControl string `json:"cache_control"` // Cache-Control value, e.g. max-age=300
+	Etag         string `mapstructure:"etag"`          // etag value to use for ETag generation
+	CacheControl string `mapstructure:"cache_control"` // Cache-Control value, e.g. max-age=300
 
 	// proxy parts
 	XForwardedHost      string `mapstructure:"X-Forwarded-Host"`       // X-Forwarded-Host field of HTTP request
@@ -222,14 +229,14 @@ type MetaData struct {
 type CHESSMetaData struct {
 	WebServer              `mapstructure:"WebServer"`
 	MongoDB                `mapstructure:"MongoDB"`
-	SchemaRenewInterval    int      `json:"SchemaRenewInterval"`            // schema renew interval
+	SchemaRenewInterval    int      `mapstructure:"SchemaRenewInterval"`    // schema renew interval
 	WebSectionsFile        string   `mapstructure:"WebSectionsFile"`        // file for web form sections
 	LexiconFile            string   `mapstructure:"LexiconFile"`            // lexicon file
-	TestMode               bool     `mapstructure:TestMode`                 // test mode
+	TestMode               bool     `mapstructure:"TestMode"`               // test mode
 	DataLocationAttributes []string `mapstructure:"DataLocationAttributes"` // data location attributes to use
-	SchemaFiles            []string `json:"SchemaFiles"`                    // schema files
-	OrderedSections        []string `mapstructure:OrderedSections`          // ordered sections for web UI
-	SkipKeys               []string `mapstructure:SkipKeys`                 // keys to skip for web forms
+	SchemaFiles            []string `mapstructure:"SchemaFiles"`            // schema files
+	OrderedSections        []string `mapstructure:"OrderedSections"`        // ordered sections for web UI
+	SkipKeys               []string `mapstructure:"SkipKeys"`               // keys to skip for web forms
 }
 
 // OreCastMetaData represents OreCast MetaData configuration
@@ -315,13 +322,13 @@ type Authz struct {
 	WebServer  `mapstructure:"WebServer"`
 	Encryption `mapstructure:"Encryption"`
 
-	TestMode     bool   `mapstructure:TestMode`  // test mode
-	CheckLDAP    bool   `mapstructure:CheckLDAP` // check users scope in LDAP
+	TestMode     bool   `mapstructure:"TestMode"`  // test mode
+	CheckLDAP    bool   `mapstructure:"CheckLDAP"` // check users scope in LDAP
 	DBFile       string `mapstructure:"DBFile"`
 	ClientID     string `mapstructure:"ClientId"`
 	ClientSecret string `mapstructure:"ClientSecret"`
 	Domain       string `mapstructure:"Domain"`
-	TokenExpires int64  `mapstructure:TokenExpires` // token expiration in seconds
+	TokenExpires int64  `mapstructure:"TokenExpires"` // token expiration in seconds
 }
 
 // Services represents services structure
@@ -341,6 +348,7 @@ type Services struct {
 
 // SrvConfig represents configuration structure
 type SrvConfig struct {
+	AIChat          `mapstructure:"AIChat"`
 	S3              `mapstructure:"S3"`
 	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
