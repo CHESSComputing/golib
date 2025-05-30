@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"log"
@@ -16,6 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	logging "github.com/vkuznet/http-logging"
+
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 var _routes gin.RoutesInfo
@@ -225,6 +228,20 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	r.Use(CounterMiddleware())
 	r.Use(LimiterMiddleware)
 	r.Use(HeaderMiddleware(webServer))
+
+	// open telemetry middlewares
+	tp, err := InitTracer()
+	if err == nil {
+		defer func() {
+			if tp != nil {
+				_ = tp.Shutdown(context.Background())
+			}
+		}()
+		r.Use(otelgin.Middleware("FOXDEN"))
+		r.Use(TracingMiddleware())
+	} else {
+		log.Println("WARNING: failed to initialize tracer: %v", err)
+	}
 
 	return r
 }
