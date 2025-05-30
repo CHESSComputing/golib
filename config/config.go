@@ -13,6 +13,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// OpenTelemetry configuration
+type OpenTelemetry struct {
+	ServiceName    string `mapstructure:"ServiceName"`
+	JaegerEndpoint string `mapstructure:"JaegerEndpoint"`
+	OTLPEndpoint   string `mapstructure:"OtlpEndpoint"`
+	EnableStdout   bool   `mapstructure:"EnableStdout"`
+}
+
 // AIChat configuration
 type AIChat struct {
 	Host  string `mapstructure:"host"`
@@ -370,6 +378,7 @@ type SrvConfig struct {
 	Globus          `mapstructure:"Globus"`
 	DOI             `mapstructure:"DOI"`
 	Embed           `mapstructure:"Embed"`
+	OpenTelemetry   `mapstructure:"OpenTelemetry"`
 
 	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
 }
