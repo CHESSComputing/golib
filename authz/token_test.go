@@ -12,7 +12,7 @@ func TestToken(t *testing.T) {
 	expiresAt := int64(100)
 	tokenStr, err := JWTAccessToken(secretKey, expiresAt, customClaims)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 	token := Token{AccessToken: tokenStr, Expires: expiresAt, Scope: scope}
 	if err := token.Validate(secretKey); err != nil {
@@ -23,6 +23,6 @@ func TestToken(t *testing.T) {
 		t.Errorf("invalid scope")
 	}
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 }

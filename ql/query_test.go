@@ -11,7 +11,7 @@ func TestParseQuery(t *testing.T) {
 	query := "bla:1 foo:2"
 	spec, err := ParseQuery(query)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 	t.Logf("input query %s spec=%+v\n", query, spec)
 	for _, k := range []string{"bla", "foo"} {
@@ -24,7 +24,7 @@ func TestParseQuery(t *testing.T) {
 	querySpec := `{"bla":1, "foo": 2}`
 	spec, err = ParseQuery(querySpec)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 	t.Logf("input query %s spec=%+v\n", querySpec, spec)
 
@@ -32,20 +32,20 @@ func TestParseQuery(t *testing.T) {
 	query = `{"did":" /beamline*"}`
 	spec, err = ParseQuery(query)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 	if val, ok := spec["did"]; ok {
 		vvv := fmt.Sprintf("%v", val)
 		if vvv != "map[$regex: /beamline.*]" {
 			msg := fmt.Sprintf("parsed query %s does not fit regexp", vvv)
-			t.Errorf(msg)
+			t.Error(msg)
 		}
 	}
 	// test 4: use complex regex query
 	query = `{"$or":[{"beamline":".*val.*"},{"btr":".*val.*"}]}`
 	spec, err = ParseQuery(query)
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 	fmt.Println("query", query)
 	fmt.Println("spec", spec)

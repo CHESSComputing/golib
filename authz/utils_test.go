@@ -13,12 +13,12 @@ func TestRandomString(t *testing.T) {
 	s1 := RandomString(size, seed)
 	s2 := RandomString(size, seed)
 	if s1 != s2 {
-		t.Error("RandomString generator is not persistent")
+		t.Errorf("RandomString generator is not persistent, s1=%v, s2=%v\n", s1, s2)
 	}
 	fmt.Println("random strings:", s1, len(s1), size)
 	fmt.Println("random strings:", s2, len(s2), size)
 	if len(s1) != size {
-		t.Error("RandomString string size test failure")
+		t.Errorf("RandomString string size test failure: len(s1)=%v, size=%v\n", len(s1), size)
 	}
 }
 
