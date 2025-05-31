@@ -11,10 +11,11 @@ import (
 
 // RandomBytes generates random bytes from given size and seed
 func RandomBytes(size int, seed int64) []byte {
-	rand.Seed(seed)
+	src := rand.NewSource(seed)
+	r := rand.New(src)
 	bytes := make([]byte, size)
 	for i := 0; i < size; i++ {
-		bytes[i] = byte(rand.Intn(256))
+		bytes[i] = byte(r.Intn(256))
 	}
 	return bytes
 }
@@ -24,12 +25,11 @@ func RandomString(size int, seed int64) string {
 	if size == 0 {
 		size = 16
 	}
-	// Generate a seed from the current time
 	var iseed int64
 	if seed == 0 {
 		binary.Read(cryptorand.Reader, binary.LittleEndian, &iseed)
 	} else {
-		iseed = 123456789
+		iseed = seed
 	}
 	return fmt.Sprintf("%x", RandomBytes(size, iseed))[:size]
 }
