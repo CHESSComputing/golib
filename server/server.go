@@ -240,7 +240,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 		r.Use(otelgin.Middleware("FOXDEN"))
 		r.Use(TracingMiddleware())
 	} else {
-		log.Println("WARNING: failed to initialize tracer: %v", err)
+		log.Printf("WARNING: failed to initialize tracer: %v", err)
 	}
 
 	return r
