@@ -168,7 +168,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 			r.Proto,
 			statusCode,
 			r.Method,
-			c.Request.URL.Path,
+			c.Request.URL.RequestURI(),
 			clientIP,
 			dataIn,
 			dataOut,
