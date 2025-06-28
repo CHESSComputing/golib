@@ -121,12 +121,14 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 
 	// loop over routes and creates necessary router structure
 	var authGroup bool
-	var readRoutes, writeRoutes []Route
+	var readRoutes, writeRoutes, deleteRoutes []Route
 	for _, route := range routes {
 		if route.Authorized {
 			authGroup = true
 			if route.Scope == "write" {
 				writeRoutes = append(writeRoutes, route)
+			} else if route.Scope == "delete" {
+				deleteRoutes = append(deleteRoutes, route)
 			} else {
 				readRoutes = append(readRoutes, route)
 			}
@@ -181,7 +183,20 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 				} else if route.Method == "PUT" {
 					authorizedWrite.PUT(route.Path, route.Handler)
 				} else if route.Method == "DELETE" {
-					authorizedWrite.DELETE(route.Path, route.Handler)
+					authorizedRead.DELETE(route.Path, route.Handler)
+				}
+			}
+		}
+		authorizedDelete := r.Group("/")
+		authorizedDelete.Use(authz.ScopeTokenMiddleware("delete", srvConfig.Config.Authz.ClientID, verbose))
+		{
+			for _, route := range deleteRoutes {
+				if !route.Authorized {
+					continue
+				}
+				log.Printf("method %s path %s auth %v scope '%s'", route.Method, route.Path, route.Authorized, route.Scope)
+				if route.Method == "DELETE" {
+					authorizedDelete.DELETE(route.Path, route.Handler)
 				}
 			}
 		}
