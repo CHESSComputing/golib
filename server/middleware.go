@@ -16,6 +16,7 @@ import (
 	limiter "github.com/ulule/limiter/v3"
 	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
 	memory "github.com/ulule/limiter/v3/drivers/store/memory"
+	"golang.org/x/time/rate"
 )
 
 // TotalGetRequests counts total number of GET requests received by the server
@@ -176,5 +177,25 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		// Restore the original log flags
 		log.SetFlags(originalFlags)
+	}
+}
+
+// RateLimitMiddleware provides limiter middleware
+/* Here is an example how to use RateLimitMiddleware function with gin framework
+	r := gin.Default()
+	// Apply rate limit globally (e.g., 5 requests/sec burst up to 10)
+	r.Use(RateLimitMiddleware(rate.Every(200*time.Millisecond), 10))
+
+*/
+func RateLimitMiddleware(r rate.Limit, b int) gin.HandlerFunc {
+	limiter := rate.NewLimiter(r, b)
+	return func(c *gin.Context) {
+		if !limiter.Allow() {
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
+				"error": "Rate limit exceeded",
+			})
+			return
+		}
+		c.Next()
 	}
 }
