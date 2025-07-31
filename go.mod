@@ -15,6 +15,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/gomarkdown/markdown v0.0.0-20250311123330-531bef5e742b
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/materials-commons/gomcapi v0.0.5
@@ -39,6 +40,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.36.0
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b
 	golang.org/x/oauth2 v0.30.0
+	golang.org/x/time v0.8.0
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0
 	gopkg.in/yaml.v2 v2.4.0
 )
@@ -139,10 +141,11 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.17.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/image v0.29.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/grpc v1.72.1 // indirect
