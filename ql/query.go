@@ -60,7 +60,7 @@ func ParseQuery(query string) (map[string]any, error) {
 
 	// query as key:value
 	if strings.Contains(query, Separator) {
-		arr := strings.Split(query, Separator)
+		arr := strings.SplitN(query, Separator, 2)
 		var vals []string
 		key := arr[0]
 		last := arr[len(arr)-1]
