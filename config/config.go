@@ -477,7 +477,7 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		config.MetaData.DataLocationAttributes = []string{"data_location_raw"}
 	}
 	if len(config.CHESSMetaData.SpecScanBeamlines) == 0 {
-		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "3A", "3B"}
+		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "1A3", "3A", "3B", "4B"}
 	}
 	return config, nil
 }
