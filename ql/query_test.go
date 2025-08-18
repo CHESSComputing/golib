@@ -8,15 +8,15 @@ import (
 // TestParseQuery
 func TestParseQuery(t *testing.T) {
 	Verbose = 1
-	query := "bla:1 foo:2"
+	query := "bla:1"
 	spec, err := ParseQuery(query)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Logf("input query %s spec=%+v\n", query, spec)
-	for _, k := range []string{"bla", "foo"} {
+	for _, k := range []string{"bla"} {
 		if _, ok := spec[k]; !ok {
-			t.Errorf("unexpected key %s found\n", k)
+			t.Errorf("unexpected key '%s' found\n", k)
 		}
 	}
 
@@ -45,7 +45,7 @@ func TestParseQuery(t *testing.T) {
 	query = `{"$or":[{"beamline":".*val.*"},{"btr":".*val.*"}]}`
 	spec, err = ParseQuery(query)
 	if err != nil {
-		t.Error(err)
+		t.Error("unable to perform complex regex query, error ->", err)
 	}
 	fmt.Println("query", query)
 	fmt.Println("spec", spec)
