@@ -245,6 +245,7 @@ type CHESSMetaData struct {
 	SchemaFiles            []string `mapstructure:"SchemaFiles"`            // schema files
 	OrderedSections        []string `mapstructure:"OrderedSections"`        // ordered sections for web UI
 	SkipKeys               []string `mapstructure:"SkipKeys"`               // keys to skip for web forms
+	SpecScanBeamlines      []string `mapstructure:"SpecScanBeamlines"`      // list of beamlines that uses spec scan service
 }
 
 // OreCastMetaData represents OreCast MetaData configuration
@@ -474,6 +475,9 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 	}
 	if len(config.MetaData.DataLocationAttributes) == 0 {
 		config.MetaData.DataLocationAttributes = []string{"data_location_raw"}
+	}
+	if len(config.CHESSMetaData.SpecScanBeamlines) == 0 {
+		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "3A", "3B"}
 	}
 	return config, nil
 }
