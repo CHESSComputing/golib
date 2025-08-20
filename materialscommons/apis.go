@@ -114,7 +114,8 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	datasetID = ds.ID
 
 	// publish deposit within project and dataset ids
-	_, err = mcClient.PublishDataset(projectID, datasetID)
+	draft := true
+	_, err = mcClient.PublishDataset(projectID, datasetID, draft)
 	if err != nil {
 		log.Println("unable to publish dataset, error", err)
 		return doi, doiLink, err
@@ -123,7 +124,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	// make findable DOI
 	if publish {
 		// Mint DOI using our project and dataset ids
-		ds, err = mcClient.MintDOIForDataset(projectID, datasetID)
+		ds, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
 		if err == nil {
 			doi = ds.DOI
 			doiLink = fmt.Sprintf("https://doi.org/%s", doi)
@@ -181,6 +182,7 @@ func MakePublic(doi string) error {
 	}
 
 	// Mint DOI using our project and dataset ids
-	_, err = mcClient.MintDOIForDataset(projectID, datasetID)
+	draft := false
+	_, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
 	return err
 }
