@@ -19,11 +19,15 @@ for d in $(go list ./... | grep -v vendor); do
     fi
     go test -v $d
     echo "Coverage $d"
-    go test -race -coverprofile=profile.out -covermode=atomic "$d"
-    if [ -f profile.out ]; then
-        cat profile.out | grep -v "mode: atomic" >> coverage.txt
-        rm profile.out
+    if [ "`hostname`" == "vkarm" ]; then
+      go test -race -coverprofile=profile.out -covermode=atomic "$d"
+      if [ -f profile.out ]; then
+          cat profile.out | grep -v "mode: atomic" >> coverage.txt
+          rm profile.out
+      fi
     fi
 done
-echo "Run the following command to see coverage:"
-echo "go tool cover -html=coverage.txt"
+if [ "`hostname`" == "vkarm" ]; then
+  echo "Run the following command to see coverage:"
+  echo "go tool cover -html=coverage.txt"
+fi
