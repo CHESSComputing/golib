@@ -113,23 +113,30 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	}
 	datasetID = ds.ID
 
+	// publish flag instructs that we should make public DOI
+	// while MintDOIForDataset and PublishDataset APIs uses publishAsTestDataset flag
+	draft := !publish
+
 	// publish deposit within project and dataset ids
-	draft := true
 	_, err = mcClient.PublishDataset(projectID, datasetID, draft)
 	if err != nil {
 		log.Println("unable to publish dataset, error", err)
 		return doi, doiLink, err
 	}
+	log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v draft=%v", projectID, datasetID, ds, err, draft)
 
-	// make findable DOI
-	if publish {
-		// Mint DOI using our project and dataset ids
-		ds, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
-		if err == nil {
+	// Mint DOI using our project and dataset ids
+	ds, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
+	if err == nil {
+		if draft {
+			doi = ds.TestDOI
+		} else {
 			doi = ds.DOI
-			doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 		}
+		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 	}
+	log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
+
 	return doi, doiLink, err
 }
 
