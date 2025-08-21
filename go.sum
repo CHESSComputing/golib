@@ -244,10 +244,10 @@ github.com/lestrrat-go/strftime v1.0.5/go.mod h1:E1nN3pCbtMSu1yjSVeyuRFVm/U0xoR7
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/materials-commons/config v0.0.0-20180218183642-ed5747ab2e08 h1:FzO5l9bjVdaOAPiIxb4IxQ4JLsCCyIoGXAIbiXnUOmg=
 github.com/materials-commons/config v0.0.0-20180218183642-ed5747ab2e08/go.mod h1:c9dBikK6Lklxb29WJiN2AS0KicT2LgmgnexTmrNjuqE=
-github.com/materials-commons/gomcapi v0.0.6 h1:Ty3EQjNsmjKTBMpP0CQirPTBnRXiDCC3uHXInwqcSvM=
-github.com/materials-commons/gomcapi v0.0.6/go.mod h1:Cggn5CnVE+kCK/fMfPJeUB+624pCgSKN2AEFI9BzFrE=
-github.com/materials-commons/hydra v1.0.0 h1:kx/y1aj+yJ2rgXP5Ufy/9A/vHif2VziPjInFZBZLoDY=
-github.com/materials-commons/hydra v1.0.0/go.mod h1:iRFa7Tnec1TsCtXCHdg04Pzd2N+nydSFPWV3OqAKSuk=
+github.com/materials-commons/gomcapi v0.0.7 h1:VQHcRUtLLx2AF0Iw5Ymq5BmtsAIKJkbQ4MFfjZDGBLw=
+github.com/materials-commons/gomcapi v0.0.7/go.mod h1:Qp7+FjSuV5ErWYHuLr1JEba1rkoDPGJuFsTziBvjuqs=
+github.com/materials-commons/hydra v1.0.1 h1:OMQwBh7Y5kGJDvVFu0ARrXrdPTUEh6NilgMy0sZ56ts=
+github.com/materials-commons/hydra v1.0.1/go.mod h1:iRFa7Tnec1TsCtXCHdg04Pzd2N+nydSFPWV3OqAKSuk=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-sqlite3 v1.14.32 h1:JD12Ag3oLy1zQA+BNn74xRgaBbdhbNIDYvQUEuuErjs=

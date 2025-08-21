@@ -18,7 +18,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
-	github.com/materials-commons/gomcapi v0.0.6
+	github.com/materials-commons/gomcapi v0.0.7
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/ostafen/clover/v2 v2.0.0-alpha.3
@@ -101,7 +101,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/materials-commons/config v0.0.0-20180218183642-ed5747ab2e08 // indirect
-	github.com/materials-commons/hydra v1.0.0 // indirect
+	github.com/materials-commons/hydra v1.0.1 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/crc64nvme v1.0.2 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
