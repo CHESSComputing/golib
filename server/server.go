@@ -58,9 +58,18 @@ func InitServer(webServer srvConfig.WebServer) {
 	rotateLogs(webServer.LogFile)
 
 	// setup log options
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	/*
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+		if webServer.LogLongFile {
+			log.SetFlags(log.LstdFlags | log.Llongfile)
+		}
+	*/
+	// only use short/long file option of standard logger and do not use
+	// log.LstdFlags (which is shortcut for log.Ldate | log.Ltime)
+	// because we rely on our own logging module which provides timestamp
+	log.SetFlags(log.Lshortfile)
 	if webServer.LogLongFile {
-		log.SetFlags(log.LstdFlags | log.Llongfile)
+		log.SetFlags(log.Llongfile)
 	}
 
 	// setup limiter
