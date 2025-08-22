@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 	mcapi "github.com/materials-commons/gomcapi"
@@ -133,7 +134,11 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		} else {
 			doi = ds.DOI
 		}
-		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
+		mcUrl := strings.Replace(srvConfig.Config.MaterialsCommons.Url, "/api", "", -1)
+		if strings.HasSuffix(mcUrl, "/") {
+			mcUrl = strings.TrimSuffix(mcUrl, "/")
+		}
+		doiLink = fmt.Sprintf("%s/doi/%s", mcUrl, doi)
 	}
 	log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
 
