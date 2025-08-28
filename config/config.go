@@ -225,6 +225,12 @@ type Discovery struct {
 	Encryption `mapstructure:"Encryption"`
 }
 
+// Sync represents Sync service configuration
+type Sync struct {
+	WebServer `mapstructure:"WebServer"`
+	MongoDB   `mapstructure:"MongoDB"`
+}
+
 // MetaData represents metadata service configuration
 type MetaData struct {
 	WebServer              `mapstructure:"WebServer"`
@@ -353,6 +359,7 @@ type Services struct {
 	PublicationURL     string `mapstructure:"PublicationUrl"`
 	CHAPBookURL        string `mapstructure:"CHAPBookUrl"`
 	DOIServiceURL      string `mapstructure:"DOIServiceUrl"`
+	SyncServiceURL     string `mapstructure:"SyncServiceUrl"`
 }
 
 // SrvConfig represents configuration structure
@@ -378,6 +385,7 @@ type SrvConfig struct {
 	Publication     `mapstructure:"PublicationService"`
 	Globus          `mapstructure:"Globus"`
 	DOI             `mapstructure:"DOI"`
+	Sync            `mapstructure:"Sync"`
 	Embed           `mapstructure:"Embed"`
 	OpenTelemetry   `mapstructure:"OpenTelemetry"`
 
