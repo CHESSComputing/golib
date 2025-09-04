@@ -138,7 +138,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		if strings.HasSuffix(mcUrl, "/") {
 			mcUrl = strings.TrimSuffix(mcUrl, "/")
 		}
-		doiLink = fmt.Sprintf("%s/doi/%s", mcUrl, doi)
+		doiLink = fmt.Sprintf("%s/dois/%s", mcUrl, doi)
 	}
 	log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
 
