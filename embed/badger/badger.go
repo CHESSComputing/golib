@@ -63,6 +63,25 @@ func upsert(collname string, records []map[string]interface{}) error {
 	})
 }
 
+// GetProjection records from BadgerDB
+func GetProjection(dbname, collname string, spec map[string]any, projection map[string]int, idx, limit int) []map[string]any {
+	records := Get(dbname, collname, spec, idx, limit)
+	// extract projections
+	var out []map[string]any
+	for _, rec := range records {
+		for k, v := range projection {
+			if v == 1 {
+				if _, ok := rec[k]; ok {
+					nrec := make(map[string]any)
+					nrec[k] = rec[k]
+					out = append(out, nrec)
+				}
+			}
+		}
+	}
+	return out
+}
+
 // Get records from BadgerDB
 func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any {
 	var out []map[string]any

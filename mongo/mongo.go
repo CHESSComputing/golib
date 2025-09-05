@@ -301,6 +301,39 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	return nil
 }
 
+// GetProjection records from MongoDB
+func GetProjection(dbname, collname string, spec map[string]any, projection map[string]int, idx, limit int) []map[string]any {
+	out := []map[string]any{}
+	client := Mongo.Connect()
+	ctx := context.TODO()
+	c := client.Database(dbname).Collection(collname)
+	var err error
+	proj := bson.M{}
+	for k, v := range projection {
+		proj[k] = v
+	}
+	proj["_id"] = 0
+	if limit > 0 {
+		opts := options.Find().SetSkip(int64(idx)).SetLimit(int64(limit)).SetProjection(proj)
+		cur, err := c.Find(ctx, spec, opts)
+		if err != nil {
+			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+		}
+		cur.All(ctx, &out)
+	} else {
+		opts := options.Find().SetSkip(int64(idx)).SetProjection(proj)
+		cur, err := c.Find(ctx, spec, opts)
+		if err != nil {
+			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+		}
+		cur.All(ctx, &out)
+	}
+	if err != nil {
+		log.Printf("Unable to get records, error %v\n", err)
+	}
+	return out
+}
+
 // Get records from MongoDB
 func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[string]any {
 	out := []map[string]any{}

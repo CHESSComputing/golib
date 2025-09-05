@@ -28,6 +28,11 @@ func (d *EmbedDB) Get(dbname, collname string, spec map[string]any, idx, limit i
 	return Get(dbname, collname, spec, idx, limit)
 }
 
+// GetProjection fetches data from underlying database/collection
+func (d *EmbedDB) GetProjection(dbname, collname string, spec map[string]any, projection map[string]int, idx, limit int) []map[string]any {
+	return GetProjection(dbname, collname, spec, projection, idx, limit)
+}
+
 // Update updates data into given database/collection
 func (d *EmbedDB) Update(dbname, collname string, spec, newdata map[string]any) error {
 	return Update(dbname, collname, spec, newdata)
