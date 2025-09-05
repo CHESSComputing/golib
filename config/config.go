@@ -227,8 +227,9 @@ type Discovery struct {
 
 // Sync represents Sync service configuration
 type Sync struct {
-	WebServer `mapstructure:"WebServer"`
-	MongoDB   `mapstructure:"MongoDB"`
+	WebServer     `mapstructure:"WebServer"`
+	MongoDB       `mapstructure:"MongoDB"`
+	SleepInterval int `mapstructure:"SleepInterval"`
 }
 
 // MetaData represents metadata service configuration
@@ -483,6 +484,9 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 	}
 	if len(config.MetaData.DataLocationAttributes) == 0 {
 		config.MetaData.DataLocationAttributes = []string{"data_location_raw"}
+	}
+	if config.Sync.SleepInterval == 0 {
+		config.Sync.SleepInterval = 600 // sync daemon interval in seconds
 	}
 	if len(config.CHESSMetaData.SpecScanBeamlines) == 0 {
 		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "1A3", "3A", "3B", "4B"}
