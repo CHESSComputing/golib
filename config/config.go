@@ -230,6 +230,7 @@ type Sync struct {
 	WebServer     `mapstructure:"WebServer"`
 	MongoDB       `mapstructure:"MongoDB"`
 	SleepInterval int `mapstructure:"SleepInterval"`
+	NWorkers      int `mapstructure:"NumberOfWorkers"`
 }
 
 // MetaData represents metadata service configuration
