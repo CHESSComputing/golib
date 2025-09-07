@@ -84,7 +84,7 @@ func (h *HttpRequest) GetToken() {
 			log.Println("ERROR", err)
 			return
 		}
-		if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 0 {
+		if os.Getenv("FOXDEN_DEBUG") != "" || h.Verbose > 2 {
 			log.Printf("INFO: Authz response %+v, error %v", response, err)
 		}
 		h.Token = response.AccessToken
