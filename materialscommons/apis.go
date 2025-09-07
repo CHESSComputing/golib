@@ -175,7 +175,7 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 		return projectID, datasetID, err
 	}
 	for _, d := range datasets {
-		if d.DOI == doi {
+		if d.DOI == doi || d.TestDOI == doi {
 			datasetID = d.ID
 		}
 	}
