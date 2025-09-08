@@ -119,6 +119,9 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	// setup router logger middleware (it should comes before we setup routes)
 	r.Use(LoggerMiddleware())
 
+	// explicitly add recovery mode
+	r.Use(gin.Recovery())
+
 	// initialize cookie store (used by authz module and oauth)
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("server_session", store))
