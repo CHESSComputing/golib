@@ -21,6 +21,9 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Verbose control verbosity printout level
+var Verbose int
+
 // SkipKeys
 var SkipKeys = []string{"User", "Date", "Description", "SchemaName", "SchemaFile", "Schema"}
 
@@ -72,11 +75,15 @@ func (m *SchemaManager) Load(fname string) (*Schema, error) {
 		log.Println("unable to load schema from", fname, " error", err)
 		return schema, err
 	}
-	log.Println("renew schema:", fname)
+	if Verbose > 1 {
+		log.Println("renew schema:", fname)
+	}
 	// reset map if it is expired
 	if sobj, ok := m.Map[fname]; ok {
 		if sobj.Schema != nil && time.Since(sobj.LoadTime) > SchemaRenewInterval {
-			log.Println("reset schema manager")
+			if Verbose > 1 {
+				log.Println("reset schema manager")
+			}
 			m.Map = nil
 		}
 	}
