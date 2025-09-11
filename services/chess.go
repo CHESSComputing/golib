@@ -1,8 +1,11 @@
 package services
 
 import (
+	"strings"
+
 	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/CHESSComputing/golib/ldap"
+	"github.com/CHESSComputing/golib/utils"
 )
 
 // CHESSUser represents chess user with UserAttributes interface APIs
@@ -42,7 +45,7 @@ func (c *CHESSUser) GetUsers() ([]string, error) {
 
 // GetGroups implements UserAttributes Get API
 func (c *CHESSUser) GetGroups() ([]string, error) {
-	return ldap.GetUsers(c.URL, c.Login, c.Password, c.BaseDN)
+	return ldap.GetGroups(c.URL, c.Login, c.Password, c.BaseDN)
 }
 
 // Get implements UserAttributes Get API
@@ -54,6 +57,31 @@ func (c *CHESSUser) Get(name string) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	user.Groups = entry.Btrs
+	var groups []string
+	for _, rec := range entry.Groups {
+		if strings.Contains(rec, "BTR") {
+			// this is BTR entry and not user's group
+			continue
+		}
+		for _, a := range strings.Split(rec, ",") {
+			if strings.HasPrefix(a, "CN=") {
+				grp := strings.Replace(a, "CN=", "", -1)
+				groups = append(groups, grp)
+			}
+		}
+	}
+	user.Groups = utils.List2Set(groups)
+	user.Btrs = entry.Btrs
+	// add default scope
+	user.Scopes = append(user.Scopes, "read")
+	// add more scopes based on user's groups
+	for _, grp := range user.Groups {
+		if grp == "foxdenadmin" {
+			user.Scopes = append(user.Scopes, "delete")
+		}
+		if grp == "foxdenrw" {
+			user.Scopes = append(user.Scopes, "write")
+		}
+	}
 	return user, nil
 }

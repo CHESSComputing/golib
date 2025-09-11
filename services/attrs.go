@@ -5,6 +5,7 @@ type User struct {
 	Name   string
 	Groups []string
 	Scopes []string
+	Btrs   []string
 }
 
 // UserAttributes defines generic interface of Foxden user attributes

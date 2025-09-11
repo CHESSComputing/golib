@@ -42,7 +42,7 @@ func (c *MaglabUser) GetUsers() ([]string, error) {
 
 // GetGroups implements UserAttributes Get API
 func (c *MaglabUser) GetGroups() ([]string, error) {
-	return ldap.GetUsers(c.URL, c.Login, c.Password, c.BaseDN)
+	return ldap.GetGroups(c.URL, c.Login, c.Password, c.BaseDN)
 }
 
 // Get implements UserAttributes Get API
