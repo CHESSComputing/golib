@@ -33,8 +33,11 @@ type CustomClaims struct {
 	User        string   `json:"user"`
 	Scope       string   `json:"scope"`
 	Kind        string   `json:"kind"`
-	Roles       []string `json:"roles"`
 	Application string   `json:"application"`
+	Roles       []string `json:"roles"`
+	Btrs        []string `json:"btrs"`
+	Groups      []string `json:"groups"`
+	Scopes      []string `json:"scopes"`
 }
 
 // String provides string representations of Custom claims
@@ -54,6 +57,15 @@ func (c *CustomClaims) String() string {
 	}
 	if c.Application != "" {
 		out = append(out, fmt.Sprintf("Application:%s", c.Application))
+	}
+	if len(c.Btrs) != 0 {
+		out = append(out, fmt.Sprintf("Btrs:%s", c.Btrs))
+	}
+	if len(c.Groups) != 0 {
+		out = append(out, fmt.Sprintf("Groups:%s", c.Groups))
+	}
+	if len(c.Scopes) != 0 {
+		out = append(out, fmt.Sprintf("Scopes:%s", c.Scopes))
 	}
 	return strings.Join(out, ", ")
 }
