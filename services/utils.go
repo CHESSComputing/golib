@@ -9,8 +9,8 @@ import (
 	"github.com/CHESSComputing/golib/ldap"
 )
 
-// UserAttributes function gets CHESS user attributes
-func UserAttributes(user string) (ldap.Entry, error) {
+// LDAPUserAttributes function gets CHESS user attributes
+func LDAPUserAttributes(user string) (ldap.Entry, error) {
 	var attrs ldap.Entry
 
 	// obtain valid token
