@@ -250,6 +250,7 @@ type MetaData struct {
 
 // CHESSMetaData represents CHESS MetaData configuration
 type CHESSMetaData struct {
+	FoxdenUser             `mapstructure:"FoxdenUser"`
 	WebServer              `mapstructure:"WebServer"`
 	MongoDB                `mapstructure:"MongoDB"`
 	SchemaRenewInterval    int      `mapstructure:"SchemaRenewInterval"`    // schema renew interval
