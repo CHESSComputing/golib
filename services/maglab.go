@@ -1,6 +1,9 @@
 package services
 
-import "github.com/CHESSComputing/golib/ldap"
+import (
+	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/CHESSComputing/golib/ldap"
+)
 
 // MaglabUser represents Maglab user with UserAttributes interface APIs
 type MaglabUser struct {
@@ -13,6 +16,22 @@ type MaglabUser struct {
 
 // Init function initialize MaglabUser ldap cache
 func (c *MaglabUser) Init() {
+	if c.URL == "" {
+		c.URL = srvConfig.Config.LDAP.URL
+
+	}
+	if c.Login == "" {
+		c.Login = srvConfig.Config.LDAP.Login
+
+	}
+	if c.Password == "" {
+		c.Password = srvConfig.Config.LDAP.Password
+
+	}
+	if c.BaseDN == "" {
+		c.BaseDN = srvConfig.Config.LDAP.BaseDN
+
+	}
 	c.ldapCache = &ldap.Cache{Map: make(map[string]ldap.Entry)}
 }
 

@@ -9,6 +9,8 @@ type User struct {
 
 // UserAttributes defines generic interface of Foxden user attributes
 type UserAttributes interface {
+	// Init function initialize foxden user
+	Init()
 	// GetUsers should return all Foxden user names
 	GetUsers() ([]string, error)
 	// GetGroups should return all existing groups

@@ -1,6 +1,9 @@
 package services
 
-import "github.com/CHESSComputing/golib/ldap"
+import (
+	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/CHESSComputing/golib/ldap"
+)
 
 // CHESSUser represents chess user with UserAttributes interface APIs
 type CHESSUser struct {
@@ -13,6 +16,22 @@ type CHESSUser struct {
 
 // Init function initialize CHESSUser ldap cache
 func (c *CHESSUser) Init() {
+	if c.URL == "" {
+		c.URL = srvConfig.Config.LDAP.URL
+
+	}
+	if c.Login == "" {
+		c.Login = srvConfig.Config.LDAP.Login
+
+	}
+	if c.Password == "" {
+		c.Password = srvConfig.Config.LDAP.Password
+
+	}
+	if c.BaseDN == "" {
+		c.BaseDN = srvConfig.Config.LDAP.BaseDN
+
+	}
 	c.ldapCache = &ldap.Cache{Map: make(map[string]ldap.Entry)}
 }
 
