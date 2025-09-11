@@ -28,6 +28,11 @@ type AIChat struct {
 	Model string `mapstructure:"model"`
 }
 
+// FoxdenUser represents foxden user interface to use
+type FoxdenUser struct {
+	User string `mapstructure:"User"`
+}
+
 // TrustedUser represents single trusted user information
 type TrustedUser struct {
 	User string `mapstructure:"user"`
@@ -172,7 +177,8 @@ func (w *WebServer) String() string {
 
 // Frontend stores frontend configuration parameters
 type Frontend struct {
-	WebServer `mapstructure:"WebServer"`
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
 
 	// Aggregate results from all FOXDEN services
 	AggregateResults bool `mapstructure:"AggregateResults`
@@ -235,6 +241,7 @@ type Sync struct {
 
 // MetaData represents metadata service configuration
 type MetaData struct {
+	FoxdenUser             `mapstructure:"FoxdenUser"`
 	WebServer              `mapstructure:"WebServer"`
 	MongoDB                `mapstructure:"MongoDB"`
 	LexiconFile            string   `mapstructure:"LexiconFile"`            // lexicon file
