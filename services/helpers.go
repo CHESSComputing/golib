@@ -20,8 +20,8 @@ import (
 // Token represents response from OAuth server call
 type Token struct {
 	AccessToken string `json:"access_token"`
-	TokenType   string `token_type`
-	Expires     int64  `expires_in`
+	TokenType   string `json:"token_type"`
+	Expires     int64  `json:"expires_in"`
 }
 
 // HttpRequest manage http requests
@@ -68,7 +68,8 @@ func (h *HttpRequest) SetToken(token string) {
 
 // GetToken obtains token from OAuth server
 func (h *HttpRequest) GetToken() {
-	if h.Token == "" || h.Expires.Before(time.Now()) {
+	// we check if we have token or if it is 10 seconds before now to allow to use it across services
+	if h.Token == "" || h.Expires.Before(time.Now().Add(-10*time.Second)) {
 		// make a call to Authz service to obtain access token
 		rurl := fmt.Sprintf(
 			"%s/oauth/token?client_id=%s&response&client_secret=%s&grant_type=client_credentials&scope=%s",
