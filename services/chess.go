@@ -57,6 +57,8 @@ func (c *CHESSUser) Get(name string) (User, error) {
 	if err != nil {
 		return user, err
 	}
+	// add default scope
+	user.Scopes = append(user.Scopes, "read")
 	var groups []string
 	for _, rec := range entry.Groups {
 		if strings.Contains(rec, "BTR") {
@@ -67,22 +69,19 @@ func (c *CHESSUser) Get(name string) (User, error) {
 			if strings.HasPrefix(a, "CN=") {
 				grp := strings.Replace(a, "CN=", "", -1)
 				groups = append(groups, grp)
+				// add more scopes based on user's groups
+				if grp == "foxdenadmin" {
+					user.Scopes = append(user.Scopes, "delete")
+				}
+				if grp == "foxdenrw" {
+					user.Scopes = append(user.Scopes, "write")
+				}
 			}
 		}
 	}
 	user.Groups = utils.List2Set(groups)
 	user.Btrs = entry.Btrs
 	user.FoxdenGroups = entry.Foxdens
-	// add default scope
-	user.Scopes = append(user.Scopes, "read")
-	// add more scopes based on user's groups
-	for _, grp := range user.Groups {
-		if grp == "foxdenadmin" {
-			user.Scopes = append(user.Scopes, "delete")
-		}
-		if grp == "foxdenrw" {
-			user.Scopes = append(user.Scopes, "write")
-		}
-	}
+
 	return user, nil
 }
