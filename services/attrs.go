@@ -2,10 +2,11 @@ package services
 
 // User defines FOXDEN user
 type User struct {
-	Name   string
-	Groups []string
-	Scopes []string
-	Btrs   []string
+	Name         string
+	Groups       []string
+	Scopes       []string
+	Btrs         []string
+	FoxdenGroups []string
 }
 
 // UserAttributes defines generic interface of Foxden user attributes

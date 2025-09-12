@@ -72,6 +72,7 @@ func (c *CHESSUser) Get(name string) (User, error) {
 	}
 	user.Groups = utils.List2Set(groups)
 	user.Btrs = entry.Btrs
+	user.FoxdenGroups = entry.Foxdens
 	// add default scope
 	user.Scopes = append(user.Scopes, "read")
 	// add more scopes based on user's groups
