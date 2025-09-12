@@ -27,7 +27,7 @@ func getMcClient() {
 }
 
 // Publish function pulishes FOXDEN dataset with did and description in MaterialsCommons
-func Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
+func Publish(did, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
 	var err error
 	var doi, doiLink string
 	var projectID, datasetID int
@@ -42,7 +42,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	}
 	records, err := mcClient.ListProjects()
 	if err != nil {
-		log.Println("unable to list projects, error", err)
+		log.Println("ERROR: unable to list projects, error", err)
 		return doi, doiLink, err
 	}
 	for _, r := range records {
@@ -59,7 +59,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		}
 		proj, err := mcClient.CreateProject(req)
 		if err != nil {
-			log.Println("unable to create project, error", err)
+			log.Println("ERROR: unable to create project, error", err)
 			return doi, doiLink, err
 		}
 		projectID = proj.ID
@@ -68,23 +68,23 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	// Create a temporary file with out record
 	tempFile, err := os.CreateTemp("", "foxden-metadata.json")
 	if err != nil {
-		log.Println("unable to create temp foxden.json file, error", err)
+		log.Println("ERROR: unable to create temp foxden.json file, error", err)
 		return doi, doiLink, err
 	}
 	defer os.Remove(tempFile.Name())
 	content, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
-		log.Println("unable to marshal record, error", err)
+		log.Println("ERROR: unable to marshal record, error", err)
 		return doi, doiLink, err
 	}
 	_, err = tempFile.Write(content)
 	if err != nil {
-		log.Println("unable to write record, error", err)
+		log.Println("ERROR: unable to write record, error", err)
 		return doi, doiLink, err
 	}
 	err = tempFile.Close()
 	if err != nil {
-		log.Println("unable to close temp file, error", err)
+		log.Println("ERROR: unable to close temp file, error", err)
 		return doi, doiLink, err
 	}
 
@@ -109,7 +109,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	}
 	ds, err := mcClient.DepositDataset(projectID, deposit)
 	if err != nil {
-		log.Println("unable to deposit dataset, error", err)
+		log.Println("ERROR: unable to deposit dataset, error", err)
 		return doi, doiLink, err
 	}
 	datasetID = ds.ID
@@ -121,10 +121,12 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	// publish deposit within project and dataset ids
 	_, err = mcClient.PublishDataset(projectID, datasetID, draft)
 	if err != nil {
-		log.Println("unable to publish dataset, error", err)
+		log.Println("ERROR: unable to publish dataset, error", err)
 		return doi, doiLink, err
 	}
-	log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v draft=%v", projectID, datasetID, ds, err, draft)
+	if verbose > 1 {
+		log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v draft=%v", projectID, datasetID, ds, err, draft)
+	}
 
 	// Mint DOI using our project and dataset ids
 	ds, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
@@ -140,7 +142,9 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 		}
 		doiLink = fmt.Sprintf("%s/dois/%s", mcUrl, doi)
 	}
-	log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
+	if verbose > 1 {
+		log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
+	}
 
 	return doi, doiLink, err
 }
@@ -183,7 +187,7 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 }
 
 // MakePublic implements logic of publishing draft DOI
-func MakePublic(doi string) error {
+func MakePublic(doi string, verbose int) error {
 	// get MaterialsCommons client
 	getMcClient()
 

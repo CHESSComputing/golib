@@ -57,7 +57,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	if doi != "" {
 		doiLink = fmt.Sprintf("https://doi.org/%s", doi)
 	}
-	if z.Verbose > 0 {
+	if z.Verbose > 1 {
 		log.Printf("Created new Zenodo record docId=%v doi=%v", docId, doi)
 	}
 
@@ -85,7 +85,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	if err != nil {
 		return doi, doiLink, err
 	}
-	if z.Verbose > 0 {
+	if z.Verbose > 1 {
 		log.Printf("Published doi record %+v", doiRecord)
 	}
 	return doiRecord.Doi, doiRecord.DoiUrl, nil

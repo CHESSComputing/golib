@@ -13,7 +13,7 @@ import (
 )
 
 // Publish provides publication of did into datacite
-func Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
+func Publish(did, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
 	if srvConfig.Config.Services.DOIServiceURL == "" {
 		return "", "", errors.New("Missing DOIService url in FOXDEN configuration")
 	}
@@ -24,7 +24,9 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 	if err != nil {
 		return "", "", fmt.Errorf("failed to marshal metadata payload: %v", err)
 	}
-	log.Println("Publish\n", string(payloadBytes))
+	if verbose > 1 {
+		log.Println("Publish\n", string(payloadBytes))
+	}
 
 	// Create HTTP request
 	req, err := http.NewRequest("POST", url, bytes.NewReader(payloadBytes))
@@ -78,7 +80,7 @@ func Publish(did, description string, record map[string]any, publish bool) (stri
 }
 
 // GetRecord fetches DOI record for given doi
-func GetRecord(doi string) (ResponsePayload, error) {
+func GetRecord(doi string, verbose int) (ResponsePayload, error) {
 	var record ResponsePayload
 	rurl := fmt.Sprintf("%s/dois/%s", srvConfig.Config.DOI.Datacite.Url, doi)
 	req, err := http.NewRequest("GET", rurl, nil)
@@ -107,7 +109,9 @@ func GetRecord(doi string) (ResponsePayload, error) {
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)
-	log.Println("### receive", string(body), err)
+	if verbose > 2 {
+		log.Println("receive", string(body), err)
+	}
 	if err != nil {
 		log.Println("ERROR: unable to read HTTP response", err)
 		return record, err
@@ -118,9 +122,9 @@ func GetRecord(doi string) (ResponsePayload, error) {
 
 // MakePublic implements logic of publishing draft DOI
 // curl -X PUT -H "Content-Type: application/vnd.api+json" --user YOUR_REPOSITORY_ID:YOUR_PASSWORD -d @my_doi_update.json https://api.test.datacite.org/dois/:id
-func MakePublic(doi string) error {
+func MakePublic(doi string, verbose int) error {
 	// first we should check if we already has Public DOI
-	if rec, err := GetRecord(doi); err == nil {
+	if rec, err := GetRecord(doi, verbose); err == nil {
 		if rec.Data.Attributes.State == "findable" {
 			log.Printf("WARNING: our doi record %s is already findable", doi)
 			return nil
@@ -152,7 +156,9 @@ func MakePublic(doi string) error {
 		},
 	}
 	data, err := json.MarshalIndent(payload, "", "  ")
-	log.Printf("update DOI record %+v", string(data))
+	if verbose > 1 {
+		log.Printf("update DOI record %+v", string(data))
+	}
 	if err != nil {
 		log.Println("ERROR: unable to create JSON payload", err)
 		return err

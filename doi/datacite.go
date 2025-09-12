@@ -17,11 +17,11 @@ func (d *DataciteProvider) Init() {
 
 // Publish provides publication of dataset with did and description
 func (d *DataciteProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
-	doi, doiLink, err := datacite.Publish(did, description, record, publish)
+	doi, doiLink, err := datacite.Publish(did, description, record, publish, d.Verbose)
 	return doi, doiLink, err
 }
 
 // MakePublic provides publication of draft DOI
-func (m *DataciteProvider) MakePublic(doi string) error {
-	return datacite.MakePublic(doi)
+func (d *DataciteProvider) MakePublic(doi string) error {
+	return datacite.MakePublic(doi, d.Verbose)
 }

@@ -18,11 +18,11 @@ func (m *MCProvider) Init() {
 
 // Publish provides publication of dataset with did and description
 func (m *MCProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
-	doi, doiLink, err := materialscommons.Publish(did, description, record, publish)
+	doi, doiLink, err := materialscommons.Publish(did, description, record, publish, m.Verbose)
 	return doi, doiLink, err
 }
 
 // MakePublic provides publication of draft DOI
 func (m *MCProvider) MakePublic(doi string) error {
-	return materialscommons.MakePublic(doi)
+	return materialscommons.MakePublic(doi, m.Verbose)
 }
