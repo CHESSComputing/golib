@@ -3,6 +3,7 @@ package ldap
 import (
 	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -30,7 +31,8 @@ func (e *Entry) Belong(group string) bool {
 
 // Cache represent LDAP cache
 type Cache struct {
-	Map map[string]Entry
+	mutex sync.RWMutex
+	Map   map[string]Entry
 }
 
 // Search provides cached search results
@@ -46,7 +48,10 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	expireDuration := time.Duration(srvConfig.Config.LDAP.Expire) * time.Second
 
 	// Check if the entry exists in the cache and is still valid
-	if cacheEntry, ok := c.Map[user]; ok {
+	c.mutex.RLock()
+	cacheEntry, ok := c.Map[user]
+	c.mutex.RUnlock()
+	if ok {
 		if time.Now().Before(cacheEntry.Expire) {
 			return cacheEntry, nil
 		}
@@ -107,7 +112,9 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 			cacheEntry.Btrs = btrs
 
 			// Store in cache
+			c.mutex.Lock()
 			c.Map[user] = cacheEntry
+			c.mutex.Unlock()
 			return cacheEntry, nil
 		}
 	}

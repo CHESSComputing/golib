@@ -30,7 +30,9 @@ func TestCacheEntryExpiration(t *testing.T) {
 	}
 
 	// Store entry in cache
+	cache.mutex.Lock()
 	cache.Map["testuser"] = entry
+	cache.mutex.Unlock()
 
 	// Initially, the entry should be valid
 	retrievedEntry, err := cache.Search("testuser", "testpassword", "testuser")
@@ -68,7 +70,9 @@ func TestLDAPSearch(t *testing.T) {
 		Groups: []string{"CN=Users"},
 		Expire: time.Now().Add(5 * time.Second),
 	}
+	cache.mutex.Lock()
 	cache.Map["testuser"] = entry
+	cache.mutex.Unlock()
 
 	retrievedEntry, err := cache.Search("testuser", "testpassword", "testuser")
 	assert.Nil(t, err, "Expected successful cache retrieval")
@@ -86,7 +90,9 @@ func TestCacheExpirationAndRefresh(t *testing.T) {
 		Groups: []string{"CN=Admins"},
 		Expire: time.Now().Add(1 * time.Second),
 	}
+	cache.mutex.Lock()
 	cache.Map["expireduser"] = entry
+	cache.mutex.Unlock()
 
 	// Verify it's retrievable
 	retrievedEntry, err := cache.Search("testuser", "testpassword", "expireduser")
