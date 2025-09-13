@@ -89,12 +89,7 @@ func Publish(did, description string, record map[string]any, publish bool, verbo
 	}
 
 	// compose dataset file
-	datasetFiles := []mcapi.DatasetFileUpload{
-		mcapi.DatasetFileUpload{
-			File:        tempFile.Name(),
-			Description: "FOXDEN MetaData",
-		},
-	}
+	datasetFiles := []mcapi.DatasetFileUpload{{File: tempFile.Name(), Description: "FOXDEN MetaData"}}
 
 	// create new deposit
 	name := fmt.Sprintf("FOXDEN dataset %s", did)
@@ -114,42 +109,41 @@ func Publish(did, description string, record map[string]any, publish bool, verbo
 	}
 	datasetID = ds.ID
 
-	// publish flag instructs that we should make public DOI
-	// while MintDOIForDataset and PublishDataset APIs uses publishAsTestDataset flag
-	draft := !publish
-
-	// publish deposit within project and dataset ids
-	_, err = mcClient.PublishDataset(projectID, datasetID, draft)
-	if err != nil {
-		log.Println("ERROR: unable to publish dataset, error", err)
-		return doi, doiLink, err
-	}
-	if verbose > 1 {
-		log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v draft=%v", projectID, datasetID, ds, err, draft)
-	}
+	// check FOXDEN configuration to determine if we should use production or test instance of MaterialsCommons
+	testInstance := !srvConfig.Config.MaterialsCommons.ProductionInstance
 
 	// Mint DOI using our project and dataset ids
-	ds, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
+	ds, err = mcClient.MintDOIForDataset(projectID, datasetID, testInstance)
 	if err == nil {
-		if draft {
+		if testInstance {
 			doi = ds.TestDOI
 		} else {
 			doi = ds.DOI
 		}
-		mcUrl := strings.Replace(srvConfig.Config.MaterialsCommons.Url, "/api", "", -1)
-		if strings.HasSuffix(mcUrl, "/") {
-			mcUrl = strings.TrimSuffix(mcUrl, "/")
-		}
-		doiLink = fmt.Sprintf("%s/dois/%s", mcUrl, doi)
+		mcURL := strings.ReplaceAll(srvConfig.Config.MaterialsCommons.Url, "/api", "")
+		mcURL = strings.TrimSuffix(mcURL, "/")
+		doiLink = fmt.Sprintf("%s/dois/%s", mcURL, doi)
 	}
 	if verbose > 1 {
 		log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
 	}
 
+	// publish deposit within project and dataset ids
+	if publish {
+		_, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
+		if err != nil {
+			log.Println("ERROR: unable to publish dataset, error", err)
+			return doi, doiLink, err
+		}
+		if verbose > 1 {
+			log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", projectID, datasetID, ds, err, testInstance)
+		}
+	}
+
 	return doi, doiLink, err
 }
 
-// FindProjectDatastIDs finds both projectID and datasetID for a given doi
+// FindProjectDatasetIDs finds both projectID and datasetID for a given doi
 func FindProjectDatasetIDs(doi string) (int, int, error) {
 	var projectID, datasetID int
 
@@ -197,8 +191,10 @@ func MakePublic(doi string, verbose int) error {
 		return err
 	}
 
+	// check FOXDEN configuration to determine if we should use production or test instance of MaterialsCommons
+	testInstance := !srvConfig.Config.MaterialsCommons.ProductionInstance
+
 	// Mint DOI using our project and dataset ids
-	draft := false
-	_, err = mcClient.MintDOIForDataset(projectID, datasetID, draft)
+	_, err = mcClient.MintDOIForDataset(projectID, datasetID, testInstance)
 	return err
 }
