@@ -283,9 +283,10 @@ type Zenodo struct {
 
 // MaterialsCommons represents MaterialsCommons service configuration
 type MaterialsCommons struct {
-	Url         string `mapstructure:"Url"`
-	AccessToken string `mapstructure:"AccessToken"`
-	ProjectName string `mapstructure:"ProjectName"` // name of the project (only valid for MaterialsCommons)
+	Url                string `mapstructure:"Url"`
+	AccessToken        string `mapstructure:"AccessToken"`
+	ProjectName        string `mapstructure:"ProjectName"`        // name of the project (only valid for MaterialsCommons)
+	ProductionInstance bool   `mapstructure:"ProductionInstance"` // specify to use production instance
 }
 
 // Datacite represents Datacite service configuration
