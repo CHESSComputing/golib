@@ -31,7 +31,7 @@ func TokenMiddleware(clientId string, verbose int) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, rec)
 			return
 		}
-		if verbose > 0 {
+		if verbose > 2 {
 			log.Println("INFO: token is validated")
 		}
 		c.Next()
@@ -51,7 +51,7 @@ func ScopeTokenMiddleware(scope, clientId string, verbose int) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, rec)
 			return
 		}
-		if verbose > 0 {
+		if verbose > 2 {
 			log.Println("INFO: write token is validated")
 		}
 		// check if token has proper write scope
