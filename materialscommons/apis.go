@@ -125,18 +125,18 @@ func Publish(did, description string, record map[string]any, publish bool, verbo
 		doiLink = fmt.Sprintf("%s/dois/%s", mcURL, doi)
 	}
 	if verbose > 1 {
-		log.Printf("MaterialsCommons::MintDOIForDataset API: projectID=%v datasetID=%v ds=%+v doi=%v err=%v", projectID, datasetID, ds, doi, err)
+		log.Printf("mint DOI with did=%s doi=%v projectID=%v datasetID=%v ds=%+v err=%v", did, doi, projectID, datasetID, ds, err)
 	}
 
 	// publish deposit within project and dataset ids
 	if publish {
-		_, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
+		ds, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
 		if err != nil {
 			log.Println("ERROR: unable to publish dataset, error", err)
 			return doi, doiLink, err
 		}
 		if verbose > 1 {
-			log.Printf("MaterialsCommons::PublishDataset API: projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", projectID, datasetID, ds, err, testInstance)
+			log.Printf("publish dataset with did=%s doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", did, doi, projectID, datasetID, ds, err, testInstance)
 		}
 	}
 
@@ -195,6 +195,14 @@ func MakePublic(doi string, verbose int) error {
 	testInstance := !srvConfig.Config.MaterialsCommons.ProductionInstance
 
 	// Mint DOI using our project and dataset ids
-	_, err = mcClient.MintDOIForDataset(projectID, datasetID, testInstance)
+	ds, err := mcClient.MintDOIForDataset(projectID, datasetID, testInstance)
+	if verbose > 1 {
+		log.Printf("mint DOI with doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", doi, projectID, datasetID, ds, err, testInstance)
+	}
+	ds, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
+	if verbose > 1 {
+		log.Printf("publish dataset with doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", doi, projectID, datasetID, ds, err, testInstance)
+	}
+
 	return err
 }
