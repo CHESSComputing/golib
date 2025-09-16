@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -95,6 +96,33 @@ func (m *SchemaManager) Load(fname string) (*Schema, error) {
 	return schema, nil
 }
 
+// MetaDetails returns list of schema unit maps, each map contains schema attribute and its units key-value pairs
+func (m *SchemaManager) MetaDetails() []SchemaDetails {
+	var out []SchemaDetails
+	for _, sobj := range m.Map {
+		smap := make(map[string]string)
+		dmap := make(map[string]string)
+		tmap := make(map[string]string)
+		for _, rec := range sobj.Schema.Map {
+			smap[rec.Key] = rec.Units
+			dmap[rec.Key] = rec.Description
+			tmap[rec.Key] = rec.Type
+		}
+		sname := SchemaName(sobj.Schema.FileName)
+		sunits := SchemaDetails{Schema: sname, Units: smap, Descriptions: dmap, DataTypes: tmap}
+		out = append(out, sunits)
+	}
+	return out
+}
+
+// SchemaDetails represents individual FOXDEN schema units dictionary
+type SchemaDetails struct {
+	Schema       string            `json:"schema"`
+	Units        map[string]string `json:"units"`
+	Descriptions map[string]string `json:"descriptions"`
+	DataTypes    map[string]string `json:"types"`
+}
+
 // SchemaRecord provide schema record structure
 type SchemaRecord struct {
 	Key         string `json:"key"`
@@ -104,7 +132,9 @@ type SchemaRecord struct {
 	Section     string `json:"section"`
 	Value       any    `json:"value"`
 	Placeholder string `json:"placeholder"`
+	Units       string `json:"units"`
 	Description string `json:"description"`
+	File        string `json:"file,omitempty"` // Used for inclusion
 }
 
 // Schema provides structure of schema file
@@ -181,7 +211,33 @@ func (s *Schema) Load() error {
 	s.FileName = fname
 	smap := make(map[string]SchemaRecord)
 	for _, r := range records {
+		if r.File != "" {
+			// check if provided nested record file name is relative or absolute
+			nestedFileName := r.File
+			if _, err := os.Stat(nestedFileName); err == nil {
+				// do nothing as file exsti
+			} else if os.IsNotExist(err) {
+				// use file directory of schema file fname as directory for embeded schema file
+				fdir := filepath.Dir(fname)
+				nestedFileName = fmt.Sprintf("%s/%s", fdir, r.File)
+			}
+			if nestedRecords, err := loadNestedRecords(nestedFileName); err == nil {
+				for _, nr := range nestedRecords {
+					if nr.Key != "" {
+						smap[nr.Key] = nr
+					}
+				}
+			} else {
+				log.Printf("ERROR: unable to load nested schema from file %s, error=%v", r.File, err)
+			}
+		}
 		smap[r.Key] = r
+	}
+	// discard map record with embeded schema file
+	if r, ok := smap[""]; ok {
+		if r.File != "" {
+			delete(smap, "")
+		}
 	}
 	// update schema map
 	s.Map = smap
@@ -235,8 +291,8 @@ func (s *Schema) Validate(rec map[string]any) error {
 	// hidden mandatory keys we add to each form
 	var mkeys []string
 	for k, v := range rec {
-		// skip user key
-		if utils.InList(k, SkipKeys) {
+		// skip user key if it does not belong to schema
+		if utils.InList(k, SkipKeys) && !utils.InList(k, keys) {
 			continue
 		}
 		// check if our record key belong to the schema keys
@@ -263,7 +319,7 @@ func (s *Schema) Validate(rec map[string]any) error {
 			// check data value
 			if !validDataValue(m, v, s.Verbose) {
 				// check if provided data type can be converted to m.Type
-				msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v", k, m.Type, m.Multiple, v)
+				msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v valuetype=%T", k, m.Type, m.Multiple, v, v)
 				log.Printf("ERROR: %s", msg)
 				return errors.New(msg)
 			}
@@ -301,7 +357,9 @@ func (s *Schema) Keys() ([]string, error) {
 		return keys, err
 	}
 	for k, _ := range s.Map {
-		keys = append(keys, k)
+		if k != "" {
+			keys = append(keys, k)
+		}
 	}
 	sort.Sort(utils.StringList(keys))
 	return keys, nil
@@ -403,17 +461,29 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 // helper function to validate given value with respect to schema one
 // only valid for value of list type
 func validDataValue(rec SchemaRecord, v any, verbose int) bool {
+	vtype := fmt.Sprintf("%T", v)
+	if rec.Type == vtype {
+		// if data types of schema record and passed value are the same we declare that it is valid data
+		return true
+	}
+	// special treatement for list data types
 	if strings.HasPrefix(rec.Type, "list") {
 		var values []string
 		if rec.Value == nil {
 			return true
 		}
 		for _, v := range rec.Value.([]any) {
-			values = append(values, strings.Trim(fmt.Sprintf("%v", v), " "))
+			vvv := strings.Trim(fmt.Sprintf("%v", v), " ")
+			if !utils.InList(vvv, values) {
+				values = append(values, vvv)
+			}
 		}
 		matched := false
 		if verbose > 0 {
 			log.Printf("checking %v of type %T against %+v", v, v, rec)
+		}
+		if verbose > 0 {
+			log.Printf("checking v=%v of type %T vtype=%v", v, v, vtype)
 		}
 		vtype := fmt.Sprintf("%T", v)
 		if strings.HasPrefix(vtype, "[]") {
@@ -442,9 +512,9 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 				}
 			}
 			if verbose > 0 {
-				log.Println("values list", values, len(values))
-				log.Println("matched list", matchArr, len(matchArr))
-				log.Println("expected list", rvalues, len(rvalues))
+				log.Printf("values list %v type=%T total=%d", values, values, len(values))
+				log.Printf("matched list %v type=%T total=%d", matchArr, matchArr, len(matchArr))
+				log.Printf("expected list %v type=%T total=%d", rvalues, rvalues, len(rvalues))
 			}
 			// all matched values
 			if len(matchArr) == len(rvalues) {
@@ -460,6 +530,28 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 		}
 		if !matched {
 			return false
+		}
+	} else {
+		if rec.Value != nil {
+			sv := fmt.Sprintf("%v", v)
+			matched := false
+			switch vvv := rec.Value.(type) {
+			case []any:
+				for _, val := range vvv {
+					sval := fmt.Sprintf("%v", val)
+					if sv == sval {
+						matched = true
+					}
+				}
+			case any:
+				sval := fmt.Sprintf("%v", vvv)
+				if sv == sval {
+					matched = true
+				}
+			}
+			if !matched {
+				return false
+			}
 		}
 	}
 	return true
@@ -510,8 +602,8 @@ func validSchemaType(stype string, v interface{}, verbose int) bool {
 		etype = "list_float"
 	case []float32:
 		etype = "list_float"
-	case map[string]interface{}, map[string]float64, map[string]int, map[string]string:
-		etype = "dict"
+	default:
+		etype = "any"
 	}
 	sv := fmt.Sprintf("%v", v)
 	vtype := fmt.Sprintf("%T", v)
@@ -550,4 +642,59 @@ func convertYaml(m map[interface{}]interface{}) map[string]interface{} {
 		}
 	}
 	return res
+}
+
+// helper function to load nested schema records
+func loadNestedRecords(filename string) ([]SchemaRecord, error) {
+	var records []SchemaRecord
+	_, err := os.Stat(filename)
+	if err != nil {
+		return records, err
+	}
+	file, err := os.Open(filename)
+	if err != nil {
+		return records, err
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return records, err
+	}
+	if strings.HasSuffix(filename, "json") {
+		err = json.Unmarshal(data, &records)
+		if err != nil {
+			return records, err
+		}
+	} else if strings.HasSuffix(filename, "yaml") || strings.HasSuffix(filename, "yml") {
+		var yrecords []map[interface{}]interface{}
+		err = yaml.Unmarshal(data, &yrecords)
+		if err != nil {
+			return records, err
+		}
+		for _, yr := range yrecords {
+			m := convertYaml(yr)
+			smap := SchemaRecord{}
+			for k, v := range m {
+				if k == "key" {
+					smap.Key = v.(string)
+				} else if k == "type" {
+					smap.Type = v.(string)
+				} else if k == "optional" {
+					smap.Optional = v.(bool)
+				} else if k == "description" {
+					smap.Description = v.(string)
+				} else if k == "placeholder" {
+					smap.Placeholder = v.(string)
+				}
+			}
+			records = append(records, smap)
+		}
+	}
+	if Verbose > 1 {
+		log.Printf("### loading %s", filename)
+		for _, r := range records {
+			log.Printf("### record %+v", r)
+		}
+	}
+	return records, nil
 }
