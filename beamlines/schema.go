@@ -25,8 +25,8 @@ import (
 // Verbose control verbosity printout level
 var Verbose int
 
-// SkipKeys
-var SkipKeys = []string{"User", "Date", "Description", "SchemaName", "SchemaFile", "Schema"}
+// SkipKeys defines list of schema keys to skip validation process
+var SkipKeys = []string{}
 
 // SchemaKeys represents full collection of schema keys across all schemas
 type SchemaKeys map[string]string
@@ -34,7 +34,7 @@ type SchemaKeys map[string]string
 // schema keys map
 var _schemaKeys SchemaKeys
 
-// SchemaRenewInterval setup interal to update schema cache
+// SchemaRenewInterval setup internal to update schema cache
 var SchemaRenewInterval time.Duration
 
 // SchemaObject holds current MetaData schema
