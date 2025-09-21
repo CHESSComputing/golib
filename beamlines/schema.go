@@ -461,12 +461,57 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 // helper function to validate given value with respect to schema one
 // only valid for value of list type
 func validDataValue(rec SchemaRecord, v any, verbose int) bool {
-	vtype := fmt.Sprintf("%T", v)
-	if rec.Type == vtype {
-		// if data types of schema record and passed value are the same we declare that it is valid data
-		return true
+	vtype := simpleType(v)
+	// check for non list data-types
+	if !strings.HasPrefix(rec.Type, "list") {
+		// check if data-types are different for non-list data-types
+		if !strings.Contains(rec.Type, vtype) {
+			return false
+		}
+		// check if data-value are the same
+		if fmt.Sprintf("%v", rec.Value) == fmt.Sprintf("%v", v) {
+			// if data types of schema record and passed value are the same we declare that it is valid data
+			return true
+		}
+
+		// compare values for schema fields with types other than "list_*"
+		if rec.Value != nil {
+			sv := fmt.Sprintf("%v", v)
+			matched := false
+			log.Printf("rec=%+v, type(rec.Value)=%T v=%v type(v)=%T", rec, rec.Value, v, v)
+			switch vvv := rec.Value.(type) {
+			case []any:
+				for _, val := range vvv {
+					sval := fmt.Sprintf("%v", val)
+					if sv == sval {
+						matched = true
+					}
+				}
+			case []int:
+				for _, val := range vvv {
+					if v == val {
+						matched = true
+					}
+				}
+			case []float64:
+				for _, val := range vvv {
+					if v == val {
+						matched = true
+					}
+				}
+			case any:
+				sval := fmt.Sprintf("%v", vvv)
+				if sv == sval {
+					matched = true
+				}
+			}
+			if !matched {
+				return false
+			}
+		}
 	}
-	// special treatement for list data types
+
+	// checks for list data type
 	if strings.HasPrefix(rec.Type, "list") {
 		var values []string
 		if rec.Value == nil {
@@ -531,30 +576,17 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 		if !matched {
 			return false
 		}
-	} else {
-		if rec.Value != nil {
-			sv := fmt.Sprintf("%v", v)
-			matched := false
-			switch vvv := rec.Value.(type) {
-			case []any:
-				for _, val := range vvv {
-					sval := fmt.Sprintf("%v", val)
-					if sv == sval {
-						matched = true
-					}
-				}
-			case any:
-				sval := fmt.Sprintf("%v", vvv)
-				if sv == sval {
-					matched = true
-				}
-			}
-			if !matched {
-				return false
-			}
-		}
 	}
 	return true
+}
+
+// helper function to return simple data-type, int64->int, float32 -> float
+func simpleType(v any) string {
+	vtype := fmt.Sprintf("%T", v)
+	for _, s := range []string{"8", "16", "32", "64"} {
+		vtype = strings.Replace(vtype, s, "", -1)
+	}
+	return vtype
 }
 
 // helper function to validate schema type of given value with respect to schema
