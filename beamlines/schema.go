@@ -283,7 +283,6 @@ func (s *Schema) Validate(rec map[string]any) error {
 	if err := s.Load(); err != nil {
 		return err
 	}
-	log.Println("INFO: ", s.String())
 	keys, err := s.Keys()
 	if err != nil {
 		return err
@@ -478,7 +477,9 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 		if rec.Value != nil {
 			sv := fmt.Sprintf("%v", v)
 			matched := false
-			log.Printf("rec=%+v, type(rec.Value)=%T v=%v type(v)=%T", rec, rec.Value, v, v)
+			if verbose > 0 {
+				log.Printf("rec=%+v, type(rec.Value)=%T v=%v type(v)=%T", rec, rec.Value, v, v)
+			}
 			switch vvv := rec.Value.(type) {
 			case []any:
 				for _, val := range vvv {
