@@ -460,6 +460,9 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 // helper function to validate given value with respect to schema one
 // only valid for value of list type
 func validDataValue(rec SchemaRecord, v any, verbose int) bool {
+	if rec.Type == "any" {
+		return true
+	}
 	vtype := simpleType(v)
 	// check for non list data-types
 	if !strings.HasPrefix(rec.Type, "list") {

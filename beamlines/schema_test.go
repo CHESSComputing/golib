@@ -230,6 +230,10 @@ func TestValidDataValue(t *testing.T) {
 		{"list_str_slice_partial_fail", SchemaRecord{Type: "list_str", Value: []any{"a", "b"}}, []string{"a", "c"}, false},
 		{"list_str_slice_[]any_ok", SchemaRecord{Type: "list_str", Value: []any{"x", "y"}}, []any{"x"}, true},
 		{"list_str_slice_[]any_fail", SchemaRecord{Type: "list_str", Value: []any{"x", "y"}}, []any{"z"}, false},
+
+		// === any type ====
+		{"any_map_string_float64_ok", SchemaRecord{Type:"any"}, map[string]float64{"m123": 1.23, "m456": 4.56}, true},
+		{"any_map_string_string_ok", SchemaRecord{Type:"any"}, map[string]string{"key": "value"}, true},
 	}
 
 	// loop over all defined tests and validate function outcome
