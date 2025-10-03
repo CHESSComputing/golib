@@ -189,6 +189,7 @@ func TestLoadSchemaWithInclude(t *testing.T) {
 
 // TestValidDataValue defines table driven unit tests for validDataValue function
 func TestValidDataValue(t *testing.T) {
+	var floatZero float64
 	tests := []struct {
 		name     string       // name of the test
 		rec      SchemaRecord // schema record
@@ -203,6 +204,7 @@ func TestValidDataValue(t *testing.T) {
 		{"string_type_vs_int_value", SchemaRecord{Type: "string"}, 123, false},
 		{"int_type_vs_string_value", SchemaRecord{Type: "int", Value: 1}, "1", false},
 		{"int64_type_vs_string_value", SchemaRecord{Type: "int64", Value: 1}, "1", false},
+		{"int64_type_vs_float_value", SchemaRecord{Type: "int64", Value: 0}, floatZero, true},
 
 		// === Non list_str with allowed values ===
 		{"string_match_ok", SchemaRecord{Type: "string", Value: "yes"}, "yes", true},
@@ -232,8 +234,8 @@ func TestValidDataValue(t *testing.T) {
 		{"list_str_slice_[]any_fail", SchemaRecord{Type: "list_str", Value: []any{"x", "y"}}, []any{"z"}, false},
 
 		// === any type ====
-		{"any_map_string_float64_ok", SchemaRecord{Type:"any"}, map[string]float64{"m123": 1.23, "m456": 4.56}, true},
-		{"any_map_string_string_ok", SchemaRecord{Type:"any"}, map[string]string{"key": "value"}, true},
+		{"any_map_string_float64_ok", SchemaRecord{Type: "any"}, map[string]float64{"m123": 1.23, "m456": 4.56}, true},
+		{"any_map_string_string_ok", SchemaRecord{Type: "any"}, map[string]string{"key": "value"}, true},
 	}
 
 	// loop over all defined tests and validate function outcome

@@ -466,8 +466,22 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 	vtype := simpleType(v)
 	// check for non list data-types
 	if !strings.HasPrefix(rec.Type, "list") {
+		// special case of zero float value and int schema record data-type
+		if strings.Contains(rec.Type, "int") && strings.Contains(vtype, "float") {
+			switch vvv := v.(type) {
+			case float32:
+				if vvv == 0 {
+					return true
+				}
+			case float64:
+				if vvv == 0 {
+					return true
+				}
+			}
+		}
 		// check if data-types are different for non-list data-types
 		if !strings.Contains(rec.Type, vtype) {
+			log.Printf("ERROR: record type %s differ from value data-type %s", rec.Type, vtype)
 			return false
 		}
 		// check if data-value are the same
@@ -510,6 +524,7 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 				}
 			}
 			if !matched {
+				log.Printf("ERROR: no match found for record value %+v", rec)
 				return false
 			}
 		}
