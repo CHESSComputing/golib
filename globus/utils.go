@@ -3,9 +3,11 @@ package globus
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 )
@@ -67,13 +69,17 @@ func ChessGlobusLink(collection, path string) (string, error) {
 		return GlobusLink(srvConfig.Config.Globus.OriginID, path)
 	}
 
+	var cid string
 	// check if globusCache has our collection
-	if cid, ok := globusCache[collection]; ok {
+	mu := sync.Mutex{}
+	mu.Lock()
+	cid, ok := globusCache[collection]
+	mu.Unlock()
+	if ok {
 		return GlobusLink(cid, path)
 	}
 
 	// obtain collection id from globus
-	var cid string
 	scopes := []string{"urn:globus:auth:scope:transfer.api.globus.org:all"}
 	token, err := Token(scopes)
 	if err != nil {
