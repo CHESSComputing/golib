@@ -3,11 +3,9 @@ package globus
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
 )
