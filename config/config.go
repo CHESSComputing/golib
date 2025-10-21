@@ -42,11 +42,12 @@ type TrustedUser struct {
 
 // Globug represents globus information
 type Globus struct {
-	ClientID     string `mapstructure:"client_id"`     // client id
-	ClientSecret string `mapstructure:"client_secret"` // client secret
-	TransferURL  string `mapstructure:"transfer_url"`  // globus transfer url
-	AuthURL      string `mapstructure:"auth_url"`      // globus auth url
-	OriginID     string `mapstructure:"origin_id"`     // globus origin ID for CHESS Raw data collection
+	ClientID       string `mapstructure:"client_id"`       // client id
+	ClientSecret   string `mapstructure:"client_secret"`   // client secret
+	TransferURL    string `mapstructure:"transfer_url"`    // globus transfer url
+	AuthURL        string `mapstructure:"auth_url"`        // globus auth url
+	OriginID       string `mapstructure:"origin_id"`       // globus origin ID for CHESS Raw data collection
+	CollectionPath string `mapstructure:"collection_path"` // globus collection path
 }
 
 // LDAP attributes
