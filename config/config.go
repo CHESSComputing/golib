@@ -225,6 +225,13 @@ type MLHub struct {
 	ML         `mapstructure:"ML"`
 }
 
+// DataHub represents DataHub service configuration
+type DataHub struct {
+	WebServer  `mapstructure:"WebServer"`
+	Encryption `mapstructure:"Encryption"`
+	StorageDir string `mapstructure:"StorageDir"`
+}
+
 // Discovery represents discovery service configuration
 type Discovery struct {
 	WebServer  `mapstructure:"WebServer"`
@@ -364,6 +371,7 @@ type Services struct {
 	DiscoveryURL       string `mapstructure:"DiscoveryUrl"`
 	MetaDataURL        string `mapstructure:"MetaDataUrl"`
 	MLHubURL           string `mapstructure:"MLHubUrl"`
+	DataHubURL         string `mapstructure:"DataHubUrl"`
 	DataManagementURL  string `mapstructure:"DataManagementUrl"`
 	DataBookkeepingURL string `mapstructure:"DataBookkeepingUrl"`
 	AuthzURL           string `mapstructure:"AuthzUrl"`
@@ -385,6 +393,7 @@ type SrvConfig struct {
 	Discovery       `mapstructure:"Discovery"`
 	MetaData        `mapstructure:"MetaData"`
 	MLHub           `mapstructure:"MLHub"`
+	DataHub         `mapstructure:"DataHub"`
 	DataManagement  `mapstructure:"DataManagement"`
 	DataBookkeeping `mapstructure:"DataBookkeeping"`
 	Authz           `mapstructure:"Authz"`

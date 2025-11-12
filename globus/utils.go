@@ -47,7 +47,7 @@ func GlobusLink(cid, path string) (string, error) {
 	} else if strings.HasPrefix(path, "/nfs/chess/raw/") {
 		epath, err = rawPath(path)
 	} else {
-		return "", errors.New(fmt.Sprintf("Non chess path %s", path))
+		return "", errors.New(fmt.Sprintf("Not a chess path %s", path))
 	}
 	if err != nil {
 		return "", err
