@@ -23,9 +23,11 @@ type OpenTelemetry struct {
 
 // AIChat configuration
 type AIChat struct {
-	Host  string `mapstructure:"host"`
-	Port  int    `mapstructure:"port"`
-	Model string `mapstructure:"model"`
+	Host    string `mapstructure:"host"`
+	Port    int    `mapstructure:"port"`
+	Model   string `mapstructure:"model"`
+	Client  string `mapstructure:"client"`  // aichat client, e.g. ollaman or tichy
+	Timeout int    `mapstructure:"timeout"` // ai response timeout
 }
 
 // FoxdenUser represents foxden user interface to use
