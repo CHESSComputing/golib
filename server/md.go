@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
 	mhtml "github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
@@ -57,4 +58,19 @@ func MDToHTML(fsys fs.FS, fname string) (string, error) {
 	content := markdown.Render(doc, renderer)
 	//     return html.EscapeString(string(content)), nil
 	return string(content), nil
+}
+
+// MDStringToHTML converts given string to HTML
+func MDStringToHTML(md string) string {
+	// create markdown parser with extensions
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+	doc := p.Parse([]byte(md))
+
+	// create HTML renderer with extensions
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	return string(markdown.Render(doc, renderer))
 }
