@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -473,8 +474,14 @@ func validDataValue(rec SchemaRecord, v any, verbose int) bool {
 				if vvv == 0 {
 					return true
 				}
+				if Float64IsInt64Compatible(float64(vvv)) {
+					return true
+				}
 			case float64:
 				if vvv == 0 {
+					return true
+				}
+				if Float64IsInt64Compatible(vvv) {
 					return true
 				}
 			}
@@ -606,6 +613,14 @@ func simpleType(v any) string {
 		vtype = strings.Replace(vtype, s, "", -1)
 	}
 	return vtype
+}
+
+// helper function to check if float64 can be converted to int64 without precision lost
+func Float64IsInt64Compatible(v float64) bool {
+	if v > float64(math.MaxInt64) || v < float64(math.MinInt64) {
+		return false
+	}
+	return v == math.Trunc(v)
 }
 
 // helper function to validate schema type of given value with respect to schema
