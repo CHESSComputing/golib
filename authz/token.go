@@ -38,6 +38,7 @@ type CustomClaims struct {
 	Btrs        []string `json:"btrs"`
 	Groups      []string `json:"groups"`
 	Scopes      []string `json:"scopes"`
+	VectorDbs   []string `json:"vector_dbs,omitempty"`
 }
 
 // String provides string representations of Custom claims
