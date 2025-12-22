@@ -27,7 +27,7 @@ func getMcClient() {
 }
 
 // Publish function pulishes FOXDEN dataset with did and description in MaterialsCommons
-func Publish(did, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
+func Publish(did, projectName, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
 	var err error
 	var doi, doiLink string
 	var projectID, datasetID int
@@ -36,7 +36,6 @@ func Publish(did, description string, record map[string]any, publish bool, verbo
 	getMcClient()
 
 	// find out project ID to use
-	projectName := srvConfig.Config.MaterialsCommons.ProjectName
 	if projectName == "" {
 		projectName = "FOXDEN datasets"
 	}

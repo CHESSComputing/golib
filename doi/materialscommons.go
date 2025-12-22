@@ -7,18 +7,20 @@ import (
 
 // MCProvider represents Material Commons provider
 type MCProvider struct {
-	Name    string
-	Verbose int
+	ProjectName string
+	Verbose     int
 }
 
 // Init function initializes MaterialsCommons publisher
 func (m *MCProvider) Init() {
-	m.Name = srvConfig.Config.MaterialsCommons.ProjectName
+	if m.ProjectName == "" {
+		m.ProjectName = srvConfig.Config.MaterialsCommons.ProjectName
+	}
 }
 
 // Publish provides publication of dataset with did and description
 func (m *MCProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
-	doi, doiLink, err := materialscommons.Publish(did, description, record, publish, m.Verbose)
+	doi, doiLink, err := materialscommons.Publish(did, m.ProjectName, description, record, publish, m.Verbose)
 	return doi, doiLink, err
 }
 
