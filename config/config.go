@@ -258,6 +258,13 @@ type MetaData struct {
 	DataLocationAttributes []string `mapstructure:"DataLocationAttributes"` // data location attributes to use
 }
 
+// UserMetaData represents User MetaData configuration
+type UserMetaData struct {
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
+	MongoDB    `mapstructure:"MongoDB"`
+}
+
 // CHESSMetaData represents CHESS MetaData configuration
 type CHESSMetaData struct {
 	FoxdenUser             `mapstructure:"FoxdenUser"`
@@ -403,6 +410,7 @@ type SrvConfig struct {
 	Services        `mapstructure:"Services"`
 	Encryption      `mapstructure:"Encryption"`
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
+	UserMetaData    `mapstructure:"UserMetaData"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
