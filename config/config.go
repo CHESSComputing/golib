@@ -389,6 +389,7 @@ type Services struct {
 	CHAPBookURL        string `mapstructure:"CHAPBookUrl"`
 	DOIServiceURL      string `mapstructure:"DOIServiceUrl"`
 	SyncServiceURL     string `mapstructure:"SyncServiceUrl"`
+	UserMetaDataURL    string `mapstructure:"UserMetaDataUrl"`
 }
 
 // SrvConfig represents configuration structure
