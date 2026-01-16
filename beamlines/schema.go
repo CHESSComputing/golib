@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -139,6 +140,31 @@ type SchemaRecord struct {
 	File        string `json:"file,omitempty"` // Used for inclusion
 }
 
+// SchemaCacheManager provides cache for schema maps
+type SchemaCacheManager struct {
+	mu    sync.RWMutex
+	Cache map[string]*Schema
+}
+
+func NewSchemaCacheManager() *SchemaCacheManager {
+	return &SchemaCacheManager{Cache: make(map[string]*Schema)}
+}
+
+func (s *SchemaCacheManager) Get(k string) (*Schema, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	v, ok := s.Cache[k]
+	return v, ok
+}
+
+func (s *SchemaCacheManager) Set(k string, v *Schema) {
+	s.mu.Lock()
+	s.Cache[k] = v
+	s.mu.Unlock()
+}
+
+var _smgr *SchemaCacheManager
+
 // Schema provides structure of schema file
 type Schema struct {
 	FileName       string                  `json:"fileName`
@@ -158,6 +184,23 @@ func (s *Schema) String() string {
 // Load loads given schema file
 func (s *Schema) Load() error {
 	fname := s.FileName
+	if _smgr == nil {
+		_smgr = NewSchemaCacheManager()
+	}
+	if sv, ok := _smgr.Get(fname); ok {
+		// take schema from the cache
+		s.FileName = sv.FileName
+		s.Map = sv.Map
+		s.WebSectionKeys = sv.WebSectionKeys
+		s.Verbose = sv.Verbose
+		if sv.Verbose > 1 {
+			log.Printf("use cached schema %+v", s)
+		}
+		return nil
+	}
+	if s.Verbose > 1 {
+		log.Printf("loading new schema %+v from file=%s", s, fname)
+	}
 	file, err := os.Open(fname)
 	if err != nil {
 		msg := fmt.Sprintf("Unable to open %s, error=%v", fname, err)
@@ -256,6 +299,8 @@ func (s *Schema) Load() error {
 
 	filepath := srvConfig.Config.CHESSMetaData.WebSectionsFile
 	if filepath == "" {
+		// write schema to cache
+		_smgr.Set(fname, s)
 		return nil
 	}
 	if _, err := os.Stat(filepath); err == nil {
@@ -277,6 +322,9 @@ func (s *Schema) Load() error {
 		}
 		s.WebSectionKeys = rec
 	}
+
+	// write schema to cache
+	_smgr.Set(fname, s)
 	return nil
 }
 
