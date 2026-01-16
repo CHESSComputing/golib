@@ -250,8 +250,8 @@ func TestValidDataValue(t *testing.T) {
 	}
 }
 
-// TestLoadSchemaWithSubSchema tests loading a schema that includes another sub-schema records
-func TestLoadSchemaWithSubSchema(t *testing.T) {
+// TestLoadSchemaWithStruct tests loading a schema that includes another sub-schema records
+func TestLoadSchemaWithStruct(t *testing.T) {
 	// Create temporary directory for schema files
 	tempDir := t.TempDir()
 	schemaFile := filepath.Join(tempDir, "schema.json")
@@ -310,8 +310,79 @@ func TestLoadSchemaWithSubSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// let's test that we create list of structs and pass it as value
 	var subrecords []map[string]any
-	subrecords = append(subrecords, sub)
+	sub1 := make(map[string]any)
+	sub1["foo"] = 1
+	sub1["bla"] = "string_value"
+	subrecords = append(subrecords, sub1)
+	sub2 := make(map[string]any)
+	sub2["two"] = []int{1, 2, 3}
+	subrecords = append(subrecords, sub2)
+	nrec := make(map[string]any)
+	nrec["did"] = "/path=1/foo=2"
+	nrec["sub"] = subrecords
+	err = s.Validate(nrec)
+	t.Log("we should recieve ERROR from validataion")
+	if err == nil {
+		t.Fatalf("Used record=%+v with schema=\n%v, fail validation of list_struct type", rec, schemaRecords)
+	}
+}
+
+// TestLoadSchemaWithListStruct tests loading a schema that includes another sub-schema records
+func TestLoadSchemaWithListStruct(t *testing.T) {
+	// Create temporary directory for schema files
+	tempDir := t.TempDir()
+	schemaFile := filepath.Join(tempDir, "schema.json")
+	structFile := filepath.Join(tempDir, "struct.json")
+
+	// Content of schema_with_subschema.json
+	structRecords := `[
+		{
+			"key": "foo",
+			"type": "int"
+		},
+		{
+			"key": "bla",
+			"type": "string"
+		}
+	]`
+
+	// Write schema record to a file
+	if err := os.WriteFile(structFile, []byte(structRecords), 0644); err != nil {
+		t.Fatalf("Failed to write second schema: %v", err)
+	}
+
+	// Content of schema.json which will contain subschema
+	schemaRecords := `[
+		{
+			"key": "did",
+			"type": "string"
+		},
+		{
+			"key": "sub",
+			"type": "list_struct",
+			"schema": "struct.json"
+		}
+	]`
+
+	// Write schema record to a file
+	if err := os.WriteFile(schemaFile, []byte(schemaRecords), 0644); err != nil {
+		t.Fatalf("Failed to write second schema: %v", err)
+	}
+
+	// Load second schema (which includes the first)
+	s := &Schema{FileName: schemaFile}
+	err := s.Load()
+	if err != nil {
+		t.Fatalf("Failed to load schema: %v", err)
+	}
+
+	var subrecords []map[string]any
+	sub1 := make(map[string]any)
+	sub1["foo"] = 1
+	sub1["bla"] = "string_value"
+	subrecords = append(subrecords, sub1)
 	sub2 := make(map[string]any)
 	sub2["two"] = []int{1, 2, 3}
 	subrecords = append(subrecords, sub2)
@@ -322,4 +393,15 @@ func TestLoadSchemaWithSubSchema(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// assign wrong struct data-type
+	rec := make(map[string]any)
+	rec["did"] = "/path=1/foo=2"
+	rec["sub"] = sub1
+	err = s.Validate(rec)
+	t.Log("we should recieve ERROR from validataion")
+	if err == nil {
+		t.Fatalf("Used record=%+v with schema=\n%v, fail validation of list_struct type", rec, schemaRecords)
+	}
+
 }

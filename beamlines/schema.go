@@ -360,26 +360,8 @@ func (s *Schema) Validate(rec map[string]any) error {
 			}
 			if m.Schema != "" {
 				// we got record with another schema: it should be eitehr map or list of map records
-				valid := false
-				switch vt := v.(type) {
-				case []map[string]any:
-					for _, r := range vt {
-						valid = validateStruct(s.FileName, m, r, s.Verbose)
-						if !valid {
-							break
-						}
-					}
-				case map[string]any:
-					valid = validateStruct(s.FileName, m, v.(map[string]any), s.Verbose)
-				default:
-					msg := fmt.Sprintf("unsupported sub-schema record type=%T", v)
-					log.Printf("ERROR: %s", msg)
-					return errors.New(msg)
-				}
-				if !valid {
-					msg := fmt.Sprintf("invalid sub-struct record for key=%s, value=%v, subschema=%s, expect=%s", k, v, m.Schema, m.Type)
-					log.Printf("ERROR: %s", msg)
-					return errors.New(msg)
+				if e := validateStructs(s.FileName, m, v, s.Verbose); e != nil {
+					return e
 				}
 				// collect mandatory keys
 				if !m.Optional {
@@ -536,8 +518,46 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 	return smap, nil
 }
 
+// helper function to validate any structs within our record schema
+func validateStructs(path string, rec SchemaRecord, v any, verbose int) error {
+	var structType, listStructType bool
+	valid := false
+	switch vt := v.(type) {
+	case []map[string]any:
+		listStructType = true
+		for _, r := range vt {
+			valid = validateStruct(path, rec, r, verbose)
+			if !valid {
+				break
+			}
+		}
+	case map[string]any:
+		structType = true
+		valid = validateStruct(path, rec, v.(map[string]any), verbose)
+	default:
+		msg := fmt.Sprintf("unsupported sub-schema record type=%T", v)
+		log.Printf("ERROR: %s", msg)
+		return errors.New(msg)
+	}
+	if !valid {
+		msg := fmt.Sprintf("invalid sub-struct record=%v, subschema=%s, expect=%s", v, rec.Schema, rec.Type)
+		log.Printf("ERROR: %s", msg)
+		return errors.New(msg)
+	}
+	if rec.Type == "struct" && !structType {
+		msg := fmt.Sprintf("mismatch of record type and record value, expected type struct (generic map) but received %T", v)
+		log.Printf("ERROR: %s", msg)
+		return errors.New(msg)
+	}
+	if rec.Type == "list_struct" && !listStructType {
+		msg := fmt.Sprintf("mismatch of record type and record value, expected type list_struct (list of maps) but received %T", v)
+		log.Printf("ERROR: %s", msg)
+		return errors.New(msg)
+	}
+	return nil
+}
+
 // helper function to validate sub-structure within schema record
-// only valid for value of list type
 func validateStruct(path string, rec SchemaRecord, v map[string]any, verbose int) bool {
 	if verbose > 0 {
 		log.Printf("validate subschema record %+v value=%+v", rec, v)
@@ -598,6 +618,10 @@ func validateRecordValue(rec SchemaRecord, v any, verbose int) bool {
 
 	vtype := simpleType(v)
 	if rec.Type == "struct" {
+		log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		vtype = rec.Type
+	}
+	if rec.Type == "list_struct" {
 		log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
 		vtype = rec.Type
 	}
@@ -773,6 +797,12 @@ func validateSchemaType(stype string, v interface{}, verbose int) bool {
 		switch v.(type) {
 		case map[string]any:
 			return true
+		default:
+			return false
+		}
+	}
+	if stype == "list_struct" {
+		switch v.(type) {
 		case []map[string]any:
 			return true
 		default:
