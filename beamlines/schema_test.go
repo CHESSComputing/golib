@@ -187,7 +187,7 @@ func TestLoadSchemaWithInclude(t *testing.T) {
 	}
 }
 
-// TestValidDataValue defines table driven unit tests for validDataValue function
+// TestValidDataValue defines table driven unit tests for validateRecordValue function
 func TestValidDataValue(t *testing.T) {
 	var floatZero float64
 	tests := []struct {
@@ -241,11 +241,85 @@ func TestValidDataValue(t *testing.T) {
 	// loop over all defined tests and validate function outcome
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := validDataValue(tt.rec, tt.value, 0)
+			got := validateRecordValue(tt.rec, tt.value, 0)
 			if got != tt.expected {
-				t.Errorf("validDataValue(%+v, %v) = %v, want %v",
+				t.Errorf("validateRecordValue(%+v, %v) = %v, want %v",
 					tt.rec, tt.value, got, tt.expected)
 			}
 		})
+	}
+}
+
+// TestLoadSchemaWithSubSchema tests loading a schema that includes another sub-schema records
+func TestLoadSchemaWithSubSchema(t *testing.T) {
+	// Create temporary directory for schema files
+	tempDir := t.TempDir()
+	schemaFile := filepath.Join(tempDir, "schema.json")
+	structFile := filepath.Join(tempDir, "struct.json")
+
+	// Content of schema_with_subschema.json
+	structRecords := `[
+		{
+			"key": "foo",
+			"type": "int"
+		},
+		{
+			"key": "bla",
+			"type": "string"
+		}
+	]`
+
+	// Write schema record to a file
+	if err := os.WriteFile(structFile, []byte(structRecords), 0644); err != nil {
+		t.Fatalf("Failed to write second schema: %v", err)
+	}
+
+	// Content of schema.json which will contain subschema
+	schemaRecords := `[
+		{
+			"key": "did",
+			"type": "string"
+		},
+		{
+			"key": "sub",
+			"type": "struct",
+			"schema": "struct.json"
+		}
+	]`
+
+	// Write schema record to a file
+	if err := os.WriteFile(schemaFile, []byte(schemaRecords), 0644); err != nil {
+		t.Fatalf("Failed to write second schema: %v", err)
+	}
+
+	// Load second schema (which includes the first)
+	s := &Schema{FileName: schemaFile}
+	err := s.Load()
+	if err != nil {
+		t.Fatalf("Failed to load schema: %v", err)
+	}
+
+	sub := make(map[string]any)
+	sub["foo"] = 1
+	sub["bla"] = "string_value"
+	rec := make(map[string]any)
+	rec["did"] = "/path=1/foo=2"
+	rec["sub"] = sub
+	err = s.Validate(rec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var subrecords []map[string]any
+	subrecords = append(subrecords, sub)
+	sub2 := make(map[string]any)
+	sub2["two"] = []int{1, 2, 3}
+	subrecords = append(subrecords, sub2)
+	nrec := make(map[string]any)
+	nrec["did"] = "/path=1/foo=2"
+	nrec["sub"] = subrecords
+	err = s.Validate(nrec)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

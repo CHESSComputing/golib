@@ -132,6 +132,7 @@ type SchemaRecord struct {
 	Multiple    bool   `json:"multiple"`
 	Section     string `json:"section"`
 	Value       any    `json:"value"`
+	Schema      string `json:"schema"`
 	Placeholder string `json:"placeholder"`
 	Units       string `json:"units"`
 	Description string `json:"description"`
@@ -309,23 +310,52 @@ func (s *Schema) Validate(rec map[string]any) error {
 				log.Printf("ERROR: %s", msg)
 				return errors.New(msg)
 			}
-			// check data type
-			if !validSchemaType(m.Type, v, s.Verbose) {
-				// check if provided data type can be converted to m.Type
-				msg := fmt.Sprintf("invalid data type for key=%s, value=%v, type=%T, expect=%s", k, v, v, m.Type)
-				log.Printf("ERROR: %s", msg)
-				return errors.New(msg)
-			}
-			// check data value
-			if !validDataValue(m, v, s.Verbose) {
-				// check if provided data type can be converted to m.Type
-				msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v valuetype=%T", k, m.Type, m.Multiple, v, v)
-				log.Printf("ERROR: %s", msg)
-				return errors.New(msg)
-			}
-			// collect mandatory keys
-			if !m.Optional {
-				mkeys = append(mkeys, k)
+			if m.Schema != "" {
+				// we got record with another schema: it should be eitehr map or list of map records
+				valid := false
+				switch vt := v.(type) {
+				case []map[string]any:
+					for _, r := range vt {
+						valid = validateStruct(s.FileName, m, r, s.Verbose)
+						if !valid {
+							break
+						}
+					}
+				case map[string]any:
+					valid = validateStruct(s.FileName, m, v.(map[string]any), s.Verbose)
+				default:
+					msg := fmt.Sprintf("unsupported sub-schema record type=%T", v)
+					log.Printf("ERROR: %s", msg)
+					return errors.New(msg)
+				}
+				if !valid {
+					msg := fmt.Sprintf("invalid sub-struct record for key=%s, value=%v, subschema=%s, expect=%s", k, v, m.Schema, m.Type)
+					log.Printf("ERROR: %s", msg)
+					return errors.New(msg)
+				}
+				// collect mandatory keys
+				if !m.Optional {
+					mkeys = append(mkeys, k)
+				}
+			} else {
+				// check data type
+				if !validateSchemaType(m.Type, v, s.Verbose) {
+					// check if provided data type can be converted to m.Type
+					msg := fmt.Sprintf("invalid data type for key=%s, value=%v, type=%T, expect=%s", k, v, v, m.Type)
+					log.Printf("ERROR: %s", msg)
+					return errors.New(msg)
+				}
+				// check data value
+				if !validateRecordValue(m, v, s.Verbose) {
+					// check if provided data type can be converted to m.Type
+					msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v valuetype=%T", k, m.Type, m.Multiple, v, v)
+					log.Printf("ERROR: %s", msg)
+					return errors.New(msg)
+				}
+				// collect mandatory keys
+				if !m.Optional {
+					mkeys = append(mkeys, k)
+				}
 			}
 		}
 	}
@@ -458,13 +488,71 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 	return smap, nil
 }
 
+// helper function to validate sub-structure within schema record
+// only valid for value of list type
+func validateStruct(path string, rec SchemaRecord, v map[string]any, verbose int) bool {
+	if verbose > 0 {
+		log.Printf("validate subschema record %+v value=%+v", rec, v)
+	}
+	// load schema from given path and rec.Schema
+	dir := filepath.Dir(path)
+	s := &Schema{FileName: filepath.Join(dir, rec.Schema)}
+	err := s.Load()
+	if err != nil {
+		log.Printf("ERROR: unable to load sub-schema from record %+v filename=%s err=%v", rec, path, err)
+		return false
+	}
+	// loop over new schema records and validate our map value against them
+	for key, record := range s.Map {
+		if verbose > 0 {
+			log.Printf("### subschema key=%s schema=%+v value=%+v", key, record, v)
+		}
+		if val, ok := v[key]; ok {
+			// check data type
+			if verbose > 0 {
+				log.Printf("+++ validateSchemaType type=%s, value=%+v", record.Type, val)
+			}
+			if !validateSchemaType(record.Type, val, verbose) {
+				log.Printf("struct %+v has invalid schema type='%s' expect %T", record, record.Type, val)
+				return false
+			}
+			// check data value
+			if verbose > 0 {
+				log.Printf("+++ validateRecordValue record=%+v, value=%+v", record, val)
+			}
+			if !validateRecordValue(record, val, verbose) {
+				log.Printf("struct %+v has invalid record value %+v", record, val)
+				return false
+			}
+		}
+	}
+	/*
+		// check data type
+		if !validateSchemaType(rec.Type, v, verbose) {
+			log.Printf("struct %+v has invalid schema type='%s' expect %T", rec, rec.Type, v)
+			return false
+		}
+		// check data value
+		if !validateRecordValue(rec, v, verbose) {
+			log.Printf("struct %+v has invalid record value %+v", rec, v)
+			return false
+		}
+	*/
+	return true
+}
+
 // helper function to validate given value with respect to schema one
 // only valid for value of list type
-func validDataValue(rec SchemaRecord, v any, verbose int) bool {
+func validateRecordValue(rec SchemaRecord, v any, verbose int) bool {
 	if rec.Type == "any" {
 		return true
 	}
+
 	vtype := simpleType(v)
+	if rec.Type == "struct" {
+		log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		vtype = rec.Type
+	}
 	// check for non list data-types
 	if !strings.HasPrefix(rec.Type, "list") {
 		// special case of zero float value and int schema record data-type
@@ -624,13 +712,26 @@ func Float64IsInt64Compatible(v float64) bool {
 }
 
 // helper function to validate schema type of given value with respect to schema
-func validSchemaType(stype string, v interface{}, verbose int) bool {
+func validateSchemaType(stype string, v interface{}, verbose int) bool {
 	// on web form 0 will be int type, but we can allow it for any int's float's
 	if v == 0 || v == 0. {
 		if strings.Contains(stype, "int") || strings.Contains(stype, "float") {
 			return true
 		}
 	}
+
+	// check if stype is struct it should be either map or list of maps
+	if stype == "struct" {
+		switch v.(type) {
+		case map[string]any:
+			return true
+		case []map[string]any:
+			return true
+		default:
+			return false
+		}
+	}
+
 	// check actual value type and compare it to given schema type
 	var etype string
 	switch v.(type) {
@@ -674,7 +775,7 @@ func validSchemaType(stype string, v interface{}, verbose int) bool {
 	sv := fmt.Sprintf("%v", v)
 	vtype := fmt.Sprintf("%T", v)
 	if verbose > 1 {
-		log.Printf("### validSchemaType schema type=%v value type=%T value=%v", stype, v, sv)
+		log.Printf("### validateSchemaType schema type=%v value type=%T value=%v", stype, v, sv)
 	}
 	if stype == "int64" && vtype == "float64" && !strings.Contains(sv, ".") {
 		return true
