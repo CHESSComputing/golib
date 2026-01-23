@@ -256,19 +256,27 @@ func (s *Schema) Load() error {
 	s.FileName = fname
 	smap := make(map[string]SchemaRecord)
 	for _, r := range records {
-		if r.File != "" {
+		if r.File != "" || r.Schema != "" {
 			// check if provided nested record file name is relative or absolute
 			nestedFileName := r.File
+			if r.File == "" && r.Schema != "" {
+				nestedFileName = r.Schema
+			}
 			if _, err := os.Stat(nestedFileName); err == nil {
 				// do nothing as file exsti
 			} else if os.IsNotExist(err) {
 				// use file directory of schema file fname as directory for embeded schema file
 				fdir := filepath.Dir(fname)
-				nestedFileName = fmt.Sprintf("%s/%s", fdir, r.File)
+				nestedFileName = fmt.Sprintf("%s/%s", fdir, nestedFileName)
 			}
 			if nestedRecords, err := loadNestedRecords(nestedFileName); err == nil {
 				for _, nr := range nestedRecords {
 					if nr.Key != "" {
+						// check if nested record comes from nested schema and properly assign
+						// WebSectionKeys
+						if r.Schema != "" {
+							nr.Section = r.Key
+						}
 						smap[nr.Key] = nr
 					}
 				}
