@@ -260,11 +260,11 @@ func TestLoadSchemaWithStruct(t *testing.T) {
 	// Content of schema_with_subschema.json
 	structRecords := `[
 		{
-			"key": "foo",
+			"key": "int_key",
 			"type": "int"
 		},
 		{
-			"key": "bla",
+			"key": "str_key",
 			"type": "string"
 		}
 	]`
@@ -300,8 +300,8 @@ func TestLoadSchemaWithStruct(t *testing.T) {
 	}
 
 	sub := make(map[string]any)
-	sub["foo"] = 1
-	sub["bla"] = "string_value"
+	sub["int_key"] = 1
+	sub["str_key"] = "string_value"
 	rec := make(map[string]any)
 	rec["did"] = "/path=1/foo=2"
 	rec["sub"] = sub
@@ -313,11 +313,11 @@ func TestLoadSchemaWithStruct(t *testing.T) {
 	// let's test that we create list of structs and pass it as value
 	var subrecords []map[string]any
 	sub1 := make(map[string]any)
-	sub1["foo"] = 1
-	sub1["bla"] = "string_value"
+	sub1["int_key"] = 1
+	sub1["str_key"] = "string_value"
 	subrecords = append(subrecords, sub1)
 	sub2 := make(map[string]any)
-	sub2["two"] = []int{1, 2, 3}
+	sub2["nokey"] = []int{1, 2, 3}
 	subrecords = append(subrecords, sub2)
 	nrec := make(map[string]any)
 	nrec["did"] = "/path=1/foo=2"
@@ -325,7 +325,8 @@ func TestLoadSchemaWithStruct(t *testing.T) {
 	err = s.Validate(nrec)
 	t.Log("we should recieve ERROR from validataion")
 	if err == nil {
-		t.Fatalf("Used record=%+v with schema=\n%v, fail validation of list_struct type", rec, schemaRecords)
+		t.Logf("subrecords %+v", subrecords)
+		t.Fatalf("Used record=%+v with schema=\n%v, fail validation of list_struct type", nrec, schemaRecords)
 	}
 }
 
@@ -339,11 +340,11 @@ func TestLoadSchemaWithListStruct(t *testing.T) {
 	// Content of schema_with_subschema.json
 	structRecords := `[
 		{
-			"key": "foo",
+			"key": "int_key",
 			"type": "int"
 		},
 		{
-			"key": "bla",
+			"key": "str_key",
 			"type": "string"
 		}
 	]`
@@ -380,17 +381,15 @@ func TestLoadSchemaWithListStruct(t *testing.T) {
 
 	var subrecords []map[string]any
 	sub1 := make(map[string]any)
-	sub1["foo"] = 1
-	sub1["bla"] = "string_value"
+	sub1["int_key"] = 1
+	sub1["str_key"] = "string_value"
 	subrecords = append(subrecords, sub1)
-	sub2 := make(map[string]any)
-	sub2["two"] = []int{1, 2, 3}
-	subrecords = append(subrecords, sub2)
 	nrec := make(map[string]any)
 	nrec["did"] = "/path=1/foo=2"
 	nrec["sub"] = subrecords
 	err = s.Validate(nrec)
 	if err != nil {
+		t.Logf("record %+v", nrec)
 		t.Fatal(err)
 	}
 
@@ -398,6 +397,7 @@ func TestLoadSchemaWithListStruct(t *testing.T) {
 	rec := make(map[string]any)
 	rec["did"] = "/path=1/foo=2"
 	rec["sub"] = sub1
+	rec["nokey"] = 123
 	err = s.Validate(rec)
 	t.Log("we should recieve ERROR from validataion")
 	if err == nil {

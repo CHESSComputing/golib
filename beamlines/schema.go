@@ -276,15 +276,21 @@ func (s *Schema) Load() error {
 						// WebSectionKeys
 						if r.Schema != "" {
 							nr.Section = r.Key
+							nr.File = nestedFileName
+							// create composed key schemaKey.subSchemaKey
+							composedKey := fmt.Sprintf("%s.%s", r.Key, nr.Key)
+							smap[composedKey] = nr
+						} else {
+							smap[nr.Key] = nr
 						}
-						smap[nr.Key] = nr
 					}
 				}
 			} else {
 				log.Printf("ERROR: unable to load nested schema from file %s, error=%v", r.File, err)
 			}
+		} else {
+			smap[r.Key] = r
 		}
-		smap[r.Key] = r
 	}
 	// discard map record with embeded schema file
 	if r, ok := smap[""]; ok {
@@ -354,11 +360,15 @@ func (s *Schema) Validate(rec map[string]any) error {
 		}
 		// check if our record key belong to the schema keys
 		if !utils.InList(k, keys) {
-			msg := fmt.Sprintf("record key '%s' is not known", k)
-			log.Printf("ERROR: %s, schema file %s, schema map %+v", msg, s.FileName, s.Map)
-			return errors.New(msg)
+			// check if our key has struct value with proper attributes
+			if !checkSubKeys(k, v, keys) {
+				log.Println("all record keys", keys)
+				msg := fmt.Sprintf("record key '%s' with value %+v of type %T is not known", k, v, v)
+				log.Printf("ERROR: %s, schema file %s, schema map %+v", msg, s.FileName, s.Map)
+				return errors.New(msg)
+			}
 		}
-
+		check1 := false // check schema record key-value matching
 		if m, ok := s.Map[k]; ok {
 			// check key name
 			if m.Key != k {
@@ -366,43 +376,65 @@ func (s *Schema) Validate(rec map[string]any) error {
 				log.Printf("ERROR: %s", msg)
 				return errors.New(msg)
 			}
-			if m.Schema != "" {
+			// check data type
+			if !validateSchemaType(m.Type, v, s.Verbose) {
+				// check if provided data type can be converted to m.Type
+				msg := fmt.Sprintf("invalid data type for key=%s, value=%v, type=%T, expect=%s", k, v, v, m.Type)
+				log.Printf("ERROR: %s", msg)
+				return errors.New(msg)
+			}
+			// check data value
+			if !validateRecordValue(m, v, s.Verbose) {
+				// check if provided data type can be converted to m.Type
+				msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v valuetype=%T", k, m.Type, m.Multiple, v, v)
+				log.Printf("ERROR: %s", msg)
+				return errors.New(msg)
+			}
+			// collect mandatory keys
+			if !m.Optional {
+				mkeys = append(mkeys, k)
+			}
+			check1 = true
+		}
+		// check sub-struct for given record key
+		check2 := false // check schema sub-record key-value matching
+		for sk := range s.Map {
+			if strings.Contains(sk, ".") && strings.HasPrefix(sk, k) {
 				// we got record with another schema: it should be eitehr map or list of map records
-				if e := validateStructs(s.FileName, m, v, s.Verbose); e != nil {
-					return e
-				}
-				// collect mandatory keys
-				if !m.Optional {
-					mkeys = append(mkeys, k)
-				}
-			} else {
-				// check data type
-				if !validateSchemaType(m.Type, v, s.Verbose) {
-					// check if provided data type can be converted to m.Type
-					msg := fmt.Sprintf("invalid data type for key=%s, value=%v, type=%T, expect=%s", k, v, v, m.Type)
-					log.Printf("ERROR: %s", msg)
+				if m, ok := s.Map[sk]; ok {
+					if e := validateStructs(m.File, m, v, s.Verbose); e != nil {
+						log.Printf("### ERROR: subkey validateStructs %v", v)
+						return e
+					}
+					// collect mandatory keys
+					if !m.Optional {
+						mkeys = append(mkeys, sk)
+					}
+					check2 = true
+				} else {
+					msg := fmt.Sprintf("subkey %s does not exist in schema %+v", sk, s.Map)
 					return errors.New(msg)
-				}
-				// check data value
-				if !validateRecordValue(m, v, s.Verbose) {
-					// check if provided data type can be converted to m.Type
-					msg := fmt.Sprintf("invalid data value for key=%s, type=%s, multiple=%v, value=%v valuetype=%T", k, m.Type, m.Multiple, v, v)
-					log.Printf("ERROR: %s", msg)
-					return errors.New(msg)
-				}
-				// collect mandatory keys
-				if !m.Optional {
-					mkeys = append(mkeys, k)
 				}
 			}
 		}
+		if s.Verbose > 0 {
+			log.Printf("### record k=%s v=%+v passed check1=%v check2=%v", k, v, check1, check2)
+		}
+		// final check to see if we mathed either record key-value or sub-record key-value
+		if !check1 && !check2 {
+			msg := fmt.Sprintf("record key=%s value=%+v does not match record schema %+v", k, v, s.Map)
+			return errors.New(msg)
+		}
 	}
+	// get unique set of keys
+	mkeys = utils.List2Set(mkeys)
 
 	// check that we collected all mandatory keys
 	smkeys, err := s.MandatoryKeys()
 	if err != nil {
 		return err
 	}
+
 	if len(mkeys) != len(smkeys) {
 		sort.Sort(utils.StringList(mkeys))
 		var missing []string
@@ -416,6 +448,27 @@ func (s *Schema) Validate(rec map[string]any) error {
 		return errors.New(msg)
 	}
 	return nil
+}
+
+// helper function to check if schema key contains sub keys and they belong to schema keys
+func checkSubKeys(k string, v any, keys []string) bool {
+	switch data := v.(type) {
+	case map[string]any:
+		mapKeys := utils.MapKeys(data)
+		for _, sk := range mapKeys {
+			subKey := fmt.Sprintf("%s.%s", k, sk)
+			if utils.InList(subKey, keys) {
+				return true
+			}
+		}
+	case []map[string]any:
+		for _, item := range data {
+			if checkSubKeys(k, item, keys) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // Keys provides list of keys of the schema
@@ -571,14 +624,16 @@ func validateStruct(path string, rec SchemaRecord, v map[string]any, verbose int
 		log.Printf("validate subschema record %+v value=%+v", rec, v)
 	}
 	// load schema from given path and rec.Schema
-	dir := filepath.Dir(path)
-	s := &Schema{FileName: filepath.Join(dir, rec.Schema)}
+	//dir := filepath.Dir(path)
+	//s := &Schema{FileName: filepath.Join(dir, rec.Schema)}
+	s := &Schema{FileName: path}
 	err := s.Load()
 	if err != nil {
 		log.Printf("ERROR: unable to load sub-schema from record %+v filename=%s err=%v", rec, path, err)
 		return false
 	}
 	// loop over new schema records and validate our map value against them
+	passValidation := false
 	for key, record := range s.Map {
 		if verbose > 0 {
 			log.Printf("### subschema key=%s schema=%+v value=%+v", key, record, v)
@@ -600,21 +655,13 @@ func validateStruct(path string, rec SchemaRecord, v map[string]any, verbose int
 				log.Printf("struct %+v has invalid record value %+v", record, val)
 				return false
 			}
+			passValidation = true
 		}
 	}
-	/*
-		// check data type
-		if !validateSchemaType(rec.Type, v, verbose) {
-			log.Printf("struct %+v has invalid schema type='%s' expect %T", rec, rec.Type, v)
-			return false
-		}
-		// check data value
-		if !validateRecordValue(rec, v, verbose) {
-			log.Printf("struct %+v has invalid record value %+v", rec, v)
-			return false
-		}
-	*/
-	return true
+	if verbose > 0 {
+		log.Printf("### validateStruct %+v valid=%v", v, passValidation)
+	}
+	return passValidation
 }
 
 // helper function to validate given value with respect to schema one
