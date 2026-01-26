@@ -280,6 +280,8 @@ func (s *Schema) Load() error {
 							// create composed key schemaKey.subSchemaKey
 							composedKey := fmt.Sprintf("%s.%s", r.Key, nr.Key)
 							smap[composedKey] = nr
+							// preserve original struct schema key
+							smap[r.Key] = r
 						} else {
 							smap[nr.Key] = nr
 						}
@@ -595,6 +597,14 @@ func validateStructs(path string, rec SchemaRecord, v any, verbose int) error {
 	case map[string]any:
 		structType = true
 		valid = validateStruct(path, rec, v.(map[string]any), verbose)
+	case []any:
+		for _, item := range vt {
+			switch vi := item.(type) {
+			case map[string]any:
+				structType = true
+				valid = validateStruct(path, rec, vi, verbose)
+			}
+		}
 	default:
 		msg := fmt.Sprintf("unsupported sub-schema record type=%T", v)
 		log.Printf("ERROR: %s", msg)
@@ -859,6 +869,17 @@ func validateSchemaType(stype string, v interface{}, verbose int) bool {
 	if stype == "list_struct" {
 		switch v.(type) {
 		case []map[string]any:
+			return true
+		case []any:
+			items := v.([]any)
+			for _, item := range items {
+				switch item.(type) {
+				case map[string]any:
+					continue
+				default:
+					return false
+				}
+			}
 			return true
 		default:
 			return false
