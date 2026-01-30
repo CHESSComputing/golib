@@ -303,6 +303,10 @@ func (s *Schema) Load() error {
 	// update schema map
 	s.Map = smap
 
+	if strings.Contains(s.FileName, "ID7A") {
+		fmt.Printf("### smap=%+v", smap)
+	}
+
 	// upload SchemaKeys object
 	if _schemaKeys == nil {
 		_schemaKeys = make(SchemaKeys)
@@ -524,14 +528,11 @@ func (s *Schema) MandatoryKeys() ([]string, error) {
 
 // Sections provides list of schema sections
 func (s *Schema) Sections() ([]string, error) {
-	if len(srvConfig.Config.CHESSMetaData.OrderedSections) > 0 {
-		return srvConfig.Config.CHESSMetaData.OrderedSections, nil
-	}
 	var sections []string
 	if err := s.Load(); err != nil {
 		return sections, err
 	}
-	for k, _ := range s.Map {
+	for k := range s.Map {
 		if m, ok := s.Map[k]; ok {
 			if m.Section != "" {
 				if !utils.InList(m.Section, sections) {
@@ -541,6 +542,16 @@ func (s *Schema) Sections() ([]string, error) {
 		}
 	}
 	sort.Sort(utils.StringList(sections))
+	if len(srvConfig.Config.CHESSMetaData.OrderedSections) > 0 {
+		var newSections []string
+		newSections = append(newSections, srvConfig.Config.CHESSMetaData.OrderedSections...)
+		for _, s := range sections {
+			if !utils.InList(s, newSections) {
+				newSections = append(newSections, s)
+			}
+		}
+		return newSections, nil
+	}
 	return sections, nil
 }
 
