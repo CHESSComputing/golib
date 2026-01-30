@@ -303,10 +303,6 @@ func (s *Schema) Load() error {
 	// update schema map
 	s.Map = smap
 
-	if strings.Contains(s.FileName, "ID7A") {
-		fmt.Printf("### smap=%+v", smap)
-	}
-
 	// upload SchemaKeys object
 	if _schemaKeys == nil {
 		_schemaKeys = make(SchemaKeys)
