@@ -197,12 +197,11 @@ func getGroupMembersRecursive(
 		memberRes, err := l.Search(memberReq)
 		if err == nil && len(memberRes.Entries) > 0 {
 			// recurse into nested group
-			level := recursionLevel - 1
-			if level == 0 {
-				// we reached allowed recursion level
-				return nil
+			if recursionLevel <= 1 {
+				// reached recursion limit, skip further recursion
+				continue
 			}
-			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, level, verbose)
+			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, recursionLevel-1, verbose)
 		}
 	}
 
