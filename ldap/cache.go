@@ -93,8 +93,12 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 					if len(arr) > 0 {
 						a := arr[0] // first CN attribute represents group
 						groupCN := strings.Replace(a, "CN=", "", -1)
-						verbose := false
-						users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, verbose)
+						verbose := srvConfig.Config.Authz.Verbose
+						recursionLevel := srvConfig.Config.LDAP.RecursionLevel
+						if recursionLevel == 0 {
+							recursionLevel = 5 // default value based on CLASSE IT suggestion
+						}
+						users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, verbose)
 						if err == nil {
 							for _, user := range users {
 								btr := GetBTR(user)

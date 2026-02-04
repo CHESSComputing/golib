@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/go-ldap/ldap/v3"
 )
@@ -146,7 +147,7 @@ func getGroupMembersRecursive(
 	baseDN string,
 	visited map[string]bool,
 	results map[string]struct{},
-	verbose bool,
+	recursionLevel, verbose int,
 ) error {
 
 	// prevent infinite loops
@@ -196,7 +197,12 @@ func getGroupMembersRecursive(
 		memberRes, err := l.Search(memberReq)
 		if err == nil && len(memberRes.Entries) > 0 {
 			// recurse into nested group
-			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, verbose)
+			level := recursionLevel - 1
+			if level == 0 {
+				// we reached allowed recursion level
+				return nil
+			}
+			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, level, verbose)
 		}
 	}
 
@@ -204,9 +210,13 @@ func getGroupMembersRecursive(
 }
 
 func GetBTRUsersFromGroup(
-	ldapURL, login, password, baseDN, groupCN string, verbose bool,
+	ldapURL, login, password, baseDN, groupCN string, recursionLevel, verbose int,
 ) ([]string, error) {
 
+	time0 := time.Now()
+	defer func() {
+		log.Printf("INFO: GetBTRUsersFromGroup with recursion level=%d elapsed time: %s", recursionLevel, time.Since(time0))
+	}()
 	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
 	if err != nil {
@@ -223,7 +233,7 @@ func GetBTRUsersFromGroup(
 	visited := make(map[string]bool)
 	results := make(map[string]struct{})
 
-	if err := getGroupMembersRecursive(l, groupDN, baseDN, visited, results, verbose); err != nil {
+	if err := getGroupMembersRecursive(l, groupDN, baseDN, visited, results, recursionLevel, verbose); err != nil {
 		return nil, err
 	}
 
