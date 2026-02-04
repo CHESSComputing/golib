@@ -135,3 +135,115 @@ func GetGroups(ldapURL, login, password, baseDN string) ([]string, error) {
 	}
 	return groups, nil
 }
+
+func isBTRUserDN(dn string) bool {
+	return strings.Contains(strings.ToUpper(dn), "OU=BTR")
+}
+
+func getGroupMembersRecursive(
+	l *ldap.Conn,
+	groupDN string,
+	baseDN string,
+	visited map[string]bool,
+	results map[string]struct{},
+	verbose bool,
+) error {
+
+	// prevent infinite loops
+	if visited[groupDN] {
+		return nil
+	}
+	visited[groupDN] = true
+
+	req := ldap.NewSearchRequest(
+		groupDN,
+		ldap.ScopeBaseObject,
+		ldap.NeverDerefAliases,
+		0, 0, false,
+		"(objectClass=*)",
+		[]string{"memberOf"},
+		nil,
+	)
+
+	res, err := l.Search(req)
+	if err != nil {
+		return err
+	}
+
+	if len(res.Entries) == 0 {
+		return nil
+	}
+
+	for _, memberDN := range res.Entries[0].GetAttributeValues("memberOf") {
+
+		// Case 1: member is a user
+		if isBTRUserDN(memberDN) {
+			results[memberDN] = struct{}{}
+			continue
+		}
+
+		// Case 2: member might be another group
+		memberReq := ldap.NewSearchRequest(
+			memberDN,
+			ldap.ScopeBaseObject,
+			ldap.NeverDerefAliases,
+			0, 0, false,
+			"(objectClass=posixGroup)",
+			[]string{"cn"},
+			nil,
+		)
+
+		memberRes, err := l.Search(memberReq)
+		if err == nil && len(memberRes.Entries) > 0 {
+			// recurse into nested group
+			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, verbose)
+		}
+	}
+
+	return nil
+}
+
+func GetBTRUsersFromGroup(
+	ldapURL, login, password, baseDN, groupCN string, verbose bool,
+) ([]string, error) {
+
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
+	if err != nil {
+		return nil, err
+	}
+	defer l.Close()
+
+	if err := l.Bind(login, password); err != nil {
+		return nil, err
+	}
+
+	groupDN := fmt.Sprintf("CN=%s,CN=Users,%s", groupCN, baseDN)
+
+	visited := make(map[string]bool)
+	results := make(map[string]struct{})
+
+	if err := getGroupMembersRecursive(l, groupDN, baseDN, visited, results, verbose); err != nil {
+		return nil, err
+	}
+
+	var users []string
+	for dn := range results {
+		users = append(users, dn)
+	}
+
+	return users, nil
+}
+
+// GetBTR extracts BTR value from given user DN value
+func GetBTR(val string) string {
+	if strings.Contains(val, "OU=BTR") {
+		for _, a := range strings.Split(val, ",") {
+			if strings.HasPrefix(a, "CN=") {
+				btr := strings.Replace(a, "CN=", "", -1)
+				return btr
+			}
+		}
+	}
+	return ""
+}

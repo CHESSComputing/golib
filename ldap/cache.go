@@ -2,11 +2,13 @@ package ldap
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"sync"
 	"time"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/CHESSComputing/golib/utils"
 )
 
 // Entry represents LDAP user entry
@@ -81,14 +83,31 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 			// find out BTRs and Beamlines
 			var btrs, beamlines, foxdens []string
 			for _, val := range attr.Values {
-				if strings.Contains(val, "OU=BTR") {
-					for _, a := range strings.Split(val, ",") {
-						if strings.HasPrefix(a, "CN=") {
-							btr := strings.Replace(a, "CN=", "", -1)
-							btrs = append(btrs, btr)
+				btr := GetBTR(val)
+				if btr != "" {
+					btrs = append(btrs, btr)
+				}
+				// perform recursive search of users groups to extract additional BTRs
+				if strings.Contains(val, "CN=Users") {
+					arr := strings.Split(val, ",")
+					if len(arr) > 0 {
+						a := arr[0] // first CN attribute represents group
+						groupCN := strings.Replace(a, "CN=", "", -1)
+						verbose := false
+						users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, verbose)
+						if err == nil {
+							for _, user := range users {
+								btr := GetBTR(user)
+								if btr != "" {
+									btrs = append(btrs, btr)
+								}
+							}
+						} else {
+							log.Printf("### recursive search groupCN=%s, users=%+v, error=%v", groupCN, users, err)
 						}
 					}
 				}
+				btrs = utils.List2Set(btrs)
 				if strings.Contains(val, "CN=Users") && strings.Contains(val, "-m") {
 					for _, a := range strings.Split(val, ",") {
 						if strings.HasPrefix(a, "CN=") && a != "CN=Users" {
