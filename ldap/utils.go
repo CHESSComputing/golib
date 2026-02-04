@@ -206,6 +206,10 @@ func getGroupMembersRecursive(
 		}
 	}
 
+	if verbose > 1 {
+		log.Printf("INFO: recursive BTR lookup stoped at recursion level=%d", recursionLevel)
+	}
+
 	return nil
 }
 
