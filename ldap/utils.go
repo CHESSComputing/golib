@@ -199,7 +199,7 @@ func getGroupMembersRecursive(
 			// recurse into nested group
 			if recursionLevel <= 1 {
 				// reached recursion limit, skip further recursion
-				continue
+				return nil
 			}
 			_ = getGroupMembersRecursive(l, memberDN, baseDN, visited, results, recursionLevel-1, verbose)
 		}
