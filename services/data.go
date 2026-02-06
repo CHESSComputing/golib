@@ -51,7 +51,8 @@ func (s *ServiceRequest) String() string {
 	out += fmt.Sprintf("\n\tspec      : %+v", s.ServiceQuery.Spec)
 	out += fmt.Sprintf("\n\tprojection: %+v", s.ServiceQuery.Projection)
 	out += fmt.Sprintf("\n\tsql       : %s", s.ServiceQuery.SQL)
-	out += fmt.Sprintf("\n\tidx       : %d limit: %d", s.ServiceQuery.Idx, s.ServiceQuery.Limit)
+	out += fmt.Sprintf("\n\tidx       : %d", s.ServiceQuery.Idx)
+	out += fmt.Sprintf("\n\tlimit     : %d", s.ServiceQuery.Limit)
 	out += fmt.Sprintf("\n\tsort key  : %v", s.ServiceQuery.SortKeys)
 	out += fmt.Sprintf("\n\tsort order: %d", s.ServiceQuery.SortOrder)
 	return out
