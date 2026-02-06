@@ -26,6 +26,7 @@ type AIChat struct {
 	Host    string `mapstructure:"host"`
 	Port    int    `mapstructure:"port"`
 	Model   string `mapstructure:"model"`
+	Group   string `mapstructure:"group"`   // aichat group to use
 	Client  string `mapstructure:"client"`  // aichat client, e.g. ollaman or tichy
 	Timeout int    `mapstructure:"timeout"` // ai response timeout
 }
