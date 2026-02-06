@@ -46,8 +46,15 @@ type ServiceRequest struct {
 
 // String converts ServiceRequest into string representation
 func (s *ServiceRequest) String() string {
-	data, _ := json.MarshalIndent(s, "", "  ")
-	return string(data)
+	out := fmt.Sprintf("\n\tclient    : %s", s.Client)
+	out += fmt.Sprintf("\n\tquery     : %s", s.ServiceQuery.Query)
+	out += fmt.Sprintf("\n\tspec      : %+v", s.ServiceQuery.Spec)
+	out += fmt.Sprintf("\n\tprojection: %+v", s.ServiceQuery.Projection)
+	out += fmt.Sprintf("\n\tsql       : %s", s.ServiceQuery.SQL)
+	out += fmt.Sprintf("\n\tidx       : %d limit: %d", s.ServiceQuery.Idx, s.ServiceQuery.Limit)
+	out += fmt.Sprintf("\n\tsort key  : %v", s.ServiceQuery.SortKeys)
+	out += fmt.Sprintf("\n\tsort order: %d", s.ServiceQuery.SortOrder)
+	return out
 }
 
 // ServiceResponse represents service response structure
