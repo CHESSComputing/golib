@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"runtime"
 	"strconv"
 	"strings"
@@ -165,11 +166,12 @@ func LoggerMiddleware() gin.HandlerFunc {
 		log.SetFlags(log.Ldate | log.Ltime)
 
 		// Log the request details using custom fields
+		uri, _ := url.QueryUnescape(c.Request.URL.RequestURI())
 		log.Printf("%s %d %s %s [client: %s] [bytes in: %v | out: %v] [req: %.6f sec]",
 			r.Proto,
 			statusCode,
 			r.Method,
-			c.Request.URL.RequestURI(),
+			uri,
 			clientIP,
 			dataIn,
 			dataOut,
@@ -182,9 +184,9 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 // RateLimitMiddleware provides limiter middleware
 /* Here is an example how to use RateLimitMiddleware function with gin framework
-	r := gin.Default()
-	// Apply rate limit globally (e.g., 5 requests/sec burst up to 10)
-	r.Use(RateLimitMiddleware(rate.Every(200*time.Millisecond), 10))
+r := gin.Default()
+// Apply rate limit globally (e.g., 5 requests/sec burst up to 10)
+r.Use(RateLimitMiddleware(rate.Every(200*time.Millisecond), 10))
 
 */
 func RateLimitMiddleware(r rate.Limit, b int) gin.HandlerFunc {
