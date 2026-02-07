@@ -3,6 +3,7 @@ package lexicon
 import (
 	"errors"
 	"fmt"
+	"log"
 	"runtime"
 	"strings"
 )
@@ -67,9 +68,19 @@ func (e *LexiconError) Error() string {
 	if strings.Contains(e.Reason, "LexiconError") { // nested error
 		sep += "nested "
 	}
-	return fmt.Sprintf(
+	msg := fmt.Sprintf(
 		"LexiconError Code:%d Description:%s Function:%s Message:%s Error%s%v",
 		e.Code, e.Explain(), e.Function, e.Message, sep, e.Reason)
+	log.Println(msg)
+	rmsg := fmt.Sprintf(
+		"LexiconError Code:%d Reason:%s",
+		e.Code, e.Message)
+	if strings.Contains(sep, "nested") {
+		arr := strings.Split(e.Reason, sep)
+		rrr := strings.Split(arr[len(arr)-1], "Reason:")
+		rmsg = rrr[len(rrr)-1]
+	}
+	return rmsg
 }
 
 // ErrorStacktrace function implements details of Lexicon error message and stacktrace
