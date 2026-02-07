@@ -81,6 +81,17 @@ func (s *ServiceResponse) String() string {
 	return out
 }
 
+// HtmlString converts ServiceResponse into string representation for html
+func (s *ServiceResponse) HtmlString() string {
+	var out string
+	out += fmt.Sprintf("<b>Service:</b> %s<br/>", s.Service)
+	out += fmt.Sprintf("<b>Code:</b> %d<br/>", s.SrvCode)
+	out += fmt.Sprintf("<b>Status:</b> %s<br/>", s.Status)
+	out += fmt.Sprintf("<b>Error:</b> %s<br/>", s.Error)
+	out += fmt.Sprintf("<b>Timestamp:</b> %s<br/>", s.Timestamp)
+	return out
+}
+
 // JsonString converts ServiceResponse into string representation
 func (s *ServiceResponse) JsonString() string {
 	data, _ := json.MarshalIndent(s, "", "  ")
