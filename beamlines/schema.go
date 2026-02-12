@@ -167,10 +167,11 @@ var _smgr *SchemaCacheManager
 
 // Schema provides structure of schema file
 type Schema struct {
-	FileName       string                  `json:"fileName`
+	FileName       string                  `json:"fileName"`
 	Map            map[string]SchemaRecord `json:"map"`
 	WebSectionKeys map[string][]string     `json:"webSectionKeys"`
 	Verbose        int                     `json:"verbose"`
+	ConfigSections []srvConfig.BeamlineSection
 }
 
 // Load loads given schema file
@@ -179,6 +180,41 @@ func (s *Schema) String() string {
 		return fmt.Sprintf("<schema %s, map %d entries>", s.FileName, len(s.Map))
 	}
 	return fmt.Sprintf("<schema %s, map %v>", s.FileName, s.Map)
+}
+
+// helper function to build beamline section similar to config declaration
+func buildConfigSections(schema string, records []SchemaRecord) []srvConfig.BeamlineSection {
+	var configSections []srvConfig.BeamlineSection
+	var sections []string
+	// first loop collect all sections and their attributes
+	smap := make(map[string][]string)
+	for _, r := range records {
+		sections = append(sections, r.Section)
+		if attrs, ok := smap[r.Section]; ok {
+			attrs = append(attrs, r.Key)
+			smap[r.Section] = attrs
+		} else {
+			smap[r.Section] = []string{r.Key}
+		}
+	}
+	// second loop organize sections/attributes in order
+	var webSections []srvConfig.WebUISection
+	cmap := make(map[string]bool)
+	for _, r := range records {
+		attrs, _ := smap[r.Section]
+		ws := srvConfig.WebUISection{Section: r.Section, Attributes: attrs}
+		if _, ok := cmap[r.Section]; ok {
+			continue
+		} else {
+			webSections = append(webSections, ws)
+			cmap[r.Section] = true
+		}
+	}
+	bs := srvConfig.BeamlineSection{
+		Schema: schema, Sections: webSections,
+	}
+	configSections = append(configSections, bs)
+	return configSections
 }
 
 // Load loads given schema file
@@ -193,6 +229,7 @@ func (s *Schema) Load() error {
 		s.Map = sv.Map
 		s.WebSectionKeys = sv.WebSectionKeys
 		s.Verbose = sv.Verbose
+		s.ConfigSections = sv.ConfigSections
 		if sv.Verbose > 1 {
 			log.Printf("use cached schema %+v", s)
 		}
@@ -253,6 +290,9 @@ func (s *Schema) Load() error {
 		log.Printf("ERROR: %s", msg)
 		return errors.New(msg)
 	}
+	// walk through records and build srvConfig.BeamlineSection
+	s.ConfigSections = buildConfigSections(s.Name(), records)
+
 	s.FileName = fname
 	smap := make(map[string]SchemaRecord)
 	for _, r := range records {
