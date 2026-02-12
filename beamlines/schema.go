@@ -522,6 +522,13 @@ func (s *Schema) MandatoryKeys() ([]string, error) {
 	return keys, nil
 }
 
+// Name returns schema name from its file
+func (s *Schema) Name() string {
+	base := filepath.Base(s.FileName)
+	name := strings.TrimSuffix(base, filepath.Ext(base))
+	return name
+}
+
 // Sections provides list of schema sections
 func (s *Schema) Sections() ([]string, error) {
 	var sections []string
