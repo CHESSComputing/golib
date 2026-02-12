@@ -21,6 +21,23 @@ type OpenTelemetry struct {
 	EnableStdout   bool   `mapstructure:"EnableStdout"`
 }
 
+// WebUISection defines beamline section configuration
+type WebUISection struct {
+	Section    string   `mapstructure:"section"`
+	Attributes []string `mapstructure:"attributes"`
+}
+
+// BeamlineSection defines beamline section configuration
+type BeamlineSection struct {
+	Schema   string         `mapstructure:"schema"`
+	Sections []WebUISection `mapstructure:"sections"`
+}
+
+// BeamlineSections defines beamline section configuration on web UI
+type BeamlineSections struct {
+	Sections []BeamlineSection `mapstructure:"sections"`
+}
+
 // AIChat configuration
 type AIChat struct {
 	Host    string `mapstructure:"host"`
@@ -400,7 +417,7 @@ type SrvConfig struct {
 	S3              `mapstructure:"S3"`
 	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
-	LDAP            `mapstructure:LDAP`
+	LDAP            `mapstructure:"LDAP"`
 	Frontend        `mapstructure:"Frontend"`
 	Discovery       `mapstructure:"Discovery"`
 	MetaData        `mapstructure:"MetaData"`
@@ -423,7 +440,8 @@ type SrvConfig struct {
 	Embed           `mapstructure:"Embed"`
 	OpenTelemetry   `mapstructure:"OpenTelemetry"`
 
-	TrustedUsers []TrustedUser `mapstructure:"TrustedUsers"`
+	TrustedUsers     []TrustedUser     `mapstructure:"TrustedUsers"`
+	BeamlineSections []BeamlineSection `mapstructure:"BeamlineSections"`
 }
 
 // Config represents configuration instance object
