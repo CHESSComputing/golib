@@ -21,6 +21,12 @@ type OpenTelemetry struct {
 	EnableStdout   bool   `mapstructure:"EnableStdout"`
 }
 
+// SchemaAttrsWebUIOrder defines how beamline attributes are shown in web UI
+type SchemaAttrsWebUIOrder struct {
+	Schema string `mapstructure:"schema"`
+	Order  bool   `mapstructure:"order"`
+}
+
 // WebUISection defines beamline section configuration
 type WebUISection struct {
 	Section    string   `mapstructure:"section"`
@@ -440,8 +446,9 @@ type SrvConfig struct {
 	Embed           `mapstructure:"Embed"`
 	OpenTelemetry   `mapstructure:"OpenTelemetry"`
 
-	TrustedUsers     []TrustedUser     `mapstructure:"TrustedUsers"`
-	BeamlineSections []BeamlineSection `mapstructure:"BeamlineSections"`
+	TrustedUsers     []TrustedUser           `mapstructure:"TrustedUsers"`
+	BeamlineSections []BeamlineSection       `mapstructure:"BeamlineSections"`
+	SchemaOrders     []SchemaAttrsWebUIOrder `mapstructure:"SchemaOrders"`
 }
 
 // Config represents configuration instance object
