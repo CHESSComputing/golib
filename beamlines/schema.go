@@ -167,11 +167,12 @@ var _smgr *SchemaCacheManager
 
 // Schema provides structure of schema file
 type Schema struct {
-	FileName       string                  `json:"fileName"`
-	Map            map[string]SchemaRecord `json:"map"`
-	WebSectionKeys map[string][]string     `json:"webSectionKeys"`
-	Verbose        int                     `json:"verbose"`
-	ConfigSections []srvConfig.BeamlineSection
+	FileName       string                      `json:"fileName"`       // schema file name
+	Map            map[string]SchemaRecord     `json:"map"`            // map of flat schema records
+	ComposedMap    map[string]SchemaRecord     `json:"composedMap"`    // map of composed structs
+	WebSectionKeys map[string][]string         `json:"webSectionKeys"` // map of web section keys
+	ConfigSections []srvConfig.BeamlineSection `json:"configSections"` // list of beamline sections
+	Verbose        int                         `json:"verbose"`        // verbosity level
 }
 
 // Load loads given schema file
@@ -227,6 +228,7 @@ func (s *Schema) Load() error {
 		// take schema from the cache
 		s.FileName = sv.FileName
 		s.Map = sv.Map
+		s.ComposedMap = sv.ComposedMap
 		s.WebSectionKeys = sv.WebSectionKeys
 		s.Verbose = sv.Verbose
 		s.ConfigSections = sv.ConfigSections
@@ -295,6 +297,7 @@ func (s *Schema) Load() error {
 
 	s.FileName = fname
 	smap := make(map[string]SchemaRecord)
+	composedMap := make(map[string]SchemaRecord)
 	for _, r := range records {
 		if r.File != "" || r.Schema != "" {
 			// check if provided nested record file name is relative or absolute
@@ -310,6 +313,9 @@ func (s *Schema) Load() error {
 				nestedFileName = fmt.Sprintf("%s/%s", fdir, nestedFileName)
 			}
 			if nestedRecords, err := loadNestedRecords(nestedFileName); err == nil {
+				if _, ok := composedMap[r.Key]; !ok {
+					composedMap[r.Key] = r
+				}
 				for _, nr := range nestedRecords {
 					if nr.Key != "" {
 						// check if nested record comes from nested schema and properly assign
@@ -342,6 +348,7 @@ func (s *Schema) Load() error {
 	}
 	// update schema map
 	s.Map = smap
+	s.ComposedMap = composedMap
 
 	// upload SchemaKeys object
 	if _schemaKeys == nil {
@@ -553,6 +560,16 @@ func (s *Schema) MandatoryKeys() ([]string, error) {
 	}
 	for k, _ := range s.Map {
 		if m, ok := s.Map[k]; ok {
+			// check if our key is composed key
+			if strings.Contains(k, ".") {
+				arr := strings.Split(k, ".")
+				composedKey := arr[0]
+				if v, ok := s.ComposedMap[composedKey]; ok {
+					if v.Optional {
+						continue
+					}
+				}
+			}
 			if !m.Optional {
 				keys = append(keys, k)
 			}
