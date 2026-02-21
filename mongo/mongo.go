@@ -20,9 +20,9 @@ import (
 	"strings"
 	"time"
 
-	bson "go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	bson "go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 const (
@@ -198,12 +198,10 @@ func (m *Connection) Connect() *mongo.Client {
 	if m.Client != nil {
 		return m.Client
 	}
-	client, err := mongo.NewClient(options.Client().ApplyURI(m.URI))
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
+	opts := options.Client().ApplyURI(m.URI)
+	timeout := time.Duration(10) * time.Second
+	opts.Timeout = &timeout
+	client, err := mongo.Connect(opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -234,7 +232,7 @@ func UpsertAny(dbname, collname string, records []any) error {
 	for _, rec := range records {
 		spec := bson.M{}
 		update := bson.D{{"$set", rec}}
-		opts := options.Update().SetUpsert(true)
+		opts := options.UpdateOne().SetUpsert(true)
 		if _, err := c.UpdateOne(ctx, spec, update, opts); err != nil {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
 			return err
@@ -272,7 +270,7 @@ func UpsertRecord(dbname, collname string, spec, rec map[string]any) error {
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	c := client.Database(dbname).Collection(collname)
-	opts := options.Update().SetUpsert(true)
+	opts := options.UpdateOne().SetUpsert(true)
 	if _, err := c.UpdateOne(ctx, spec, rec, opts); err != nil {
 		log.Printf("Fail to insert record %v, error %v\n", rec, err)
 		return err
@@ -292,7 +290,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 		}
 		spec := bson.M{attr: value}
 		update := bson.D{{"$set", rec}}
-		opts := options.Update().SetUpsert(true)
+		opts := options.UpdateOne().SetUpsert(true)
 		if _, err := c.UpdateOne(ctx, spec, update, opts); err != nil {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
 			return err
@@ -430,15 +428,21 @@ func Count(dbname, collname string, spec map[string]any) int {
 
 // Distinct gets number records from MongoDB
 func Distinct(dbname, collname, field string) ([]any, error) {
+	var records []any
 	client := Mongo.Connect()
 	ctx := context.TODO()
 	filter := bson.D{}
 	c := client.Database(dbname).Collection(collname)
-	records, err := c.Distinct(ctx, field, filter)
-	if err != nil {
+	res := c.Distinct(ctx, field, filter)
+	if err := res.Err(); err != nil {
 		log.Printf("Unable to fetch unique records, field %s spec %v, error %v\n", field, filter, err)
+		return records, err
 	}
-	return records, err
+	err := res.Decode(&records)
+	if err != nil {
+		log.Printf("failed to decode distinct result: %v", err)
+	}
+	return records, res.Err()
 }
 
 // Remove records from MongoDB

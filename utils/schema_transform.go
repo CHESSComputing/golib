@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // ConvertCacmeCaseKeys converts map with CamelCase keys to map with snake case keys
@@ -62,7 +62,7 @@ func getValue(key string, rec map[string]any) string {
 			out = append(out, fmt.Sprintf("%s", v))
 		}
 		s = strings.Join(out, ",")
-	case primitive.A:
+	case bson.A:
 		var out []string
 		for _, v := range val {
 			out = append(out, fmt.Sprintf("%v", v))

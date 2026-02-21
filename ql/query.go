@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	utils "github.com/CHESSComputing/golib/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // Verbose defines verbosity level for this module
@@ -45,7 +45,7 @@ func ParseQuery(query string) (map[string]any, error) {
 			}
 			// adjust query _id to object id type
 			if val, ok := spec["_id"]; ok {
-				if oid, err := primitive.ObjectIDFromHex(val.(string)); err == nil {
+				if oid, err := bson.ObjectIDFromHex(val.(string)); err == nil {
 					spec["_id"] = oid
 				}
 			}
@@ -106,7 +106,7 @@ func adjustQuery(spec map[string]any) map[string]any {
 		}
 		// adjust query _id to object id type
 		if kkk == "_id" {
-			if oid, err := primitive.ObjectIDFromHex(val.(string)); err == nil {
+			if oid, err := bson.ObjectIDFromHex(val.(string)); err == nil {
 				nspec["_id"] = oid
 			}
 			continue
