@@ -27,9 +27,6 @@ import (
 // Verbose control verbosity printout level
 var Verbose int
 
-// SkipKeys defines list of schema keys to skip validation process
-var SkipKeys = []string{}
-
 // SchemaKeys represents full collection of schema keys across all schemas
 type SchemaKeys map[string]string
 
@@ -404,7 +401,7 @@ func (s *Schema) Validate(rec map[string]any) error {
 	var mkeys []string
 	for k, v := range rec {
 		// skip user key if it does not belong to schema
-		if utils.InList(k, SkipKeys) && !utils.InList(k, keys) {
+		if utils.InList(k, srvConfig.Config.CHESSMetaData.SkipKeys) && !utils.InList(k, keys) {
 			continue
 		}
 		// check if our record key belong to the schema keys
