@@ -547,7 +547,15 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		config.Sync.SleepInterval = 600 // sync daemon interval in seconds
 	}
 	if len(config.CHESSMetaData.SpecScanBeamlines) == 0 {
-		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "1A3", "3A", "3B", "4B"}
+		config.CHESSMetaData.SpecScanBeamlines = []string{"ID1A3", "ID3A", "ID3B", "ID4B", "ID7A", "1A3", "3A", "3B", "4B", "7A"}
+	}
+	if len(config.CHESSMetaData.SkipKeys) == 0 {
+		// default list of foxden keys used by all beamlines
+		config.CHESSMetaData.SkipKeys = []string{"user", "date", "description", "did",
+			"schema_name", "schema_file", "schema",
+			"doi", "doi_url", "doi_user", "doi_created_at", "doi_public",
+			"doi_provider", "doi_foxden_url", "doi_access_metadata", "doi_parents_dids",
+			"globus_link", "history"}
 	}
 	return config, nil
 }
