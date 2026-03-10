@@ -5,6 +5,7 @@ package server
 // Copyright (c) 2023 - Valentin Kuznetsov <vkuznet@gmail.com>
 //
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -21,7 +22,7 @@ func MDToHTML(fsys fs.FS, fname string) (string, error) {
 		filesFS, err := fs.Sub(StaticFs, "static/markdown")
 		if err != nil {
 			log.Println("ERROR: unable to open static/markdown", err)
-			return "", err
+			return "", fmt.Errorf("[golib.server.MDToHTML] fs.Sub error: %w", err)
 		}
 		log.Printf("### fileFS %+v", filesFS)
 		file, err := filesFS.Open(fname)
@@ -29,20 +30,20 @@ func MDToHTML(fsys fs.FS, fname string) (string, error) {
 	file, err := fsys.Open(fname)
 	if err != nil {
 		log.Println("ERROR: unable to open", fname, err)
-		return "", err
+		return "", fmt.Errorf("[golib.server.MDToHTML] fsys.Open error: %w", err)
 	}
 	/*
 	   file, err := os.Open(fname)
 	   if err != nil {
 	       log.Println("ERROR: unable to open", fname, err)
-	       return "", err
+	       return "", fmt.Errorf("[golib.server.MDToHTML] os.Open error: %w", err)
 	   }
 	*/
 	defer file.Close()
 	var md []byte
 	md, err = io.ReadAll(file)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.server.MDToHTML] io.ReadAll error: %w", err)
 	}
 
 	// create markdown parser with extensions

@@ -21,13 +21,13 @@ func LDAPUserAttributes(user string) (ldap.Entry, error) {
 	rurl := fmt.Sprintf("%s/attrs?user=%s", srvConfig.Config.Services.AuthzURL, user)
 	resp, err := httpReadRequest.Get(rurl)
 	if err != nil {
-		return attrs, err
+		return attrs, fmt.Errorf("[golib.services.LDAPUserAttributes] httpReadRequest.Get error: %w", err)
 	}
 	// parse data records from meta-data service
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return attrs, err
+		return attrs, fmt.Errorf("[golib.services.LDAPUserAttributes] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(data, &attrs)
 	return attrs, err

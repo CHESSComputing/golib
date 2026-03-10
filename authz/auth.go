@@ -86,7 +86,7 @@ func InspectToken(provider Provider, token string, verbose int) (TokenAttributes
 	var attrs TokenAttributes
 	claims, err := tokenClaims(provider, token)
 	if err != nil {
-		return attrs, err
+		return attrs, fmt.Errorf("[golib.auth.InspectToken] tokenClaims error: %w", err)
 	}
 	if verbose > 1 {
 		log.Println("token claims", claims)
@@ -154,7 +154,7 @@ func UserCredentials(r *http.Request) (string, error) {
 	attrs, err := InspectToken(provider, token, verbose)
 	if err != nil {
 		log.Println("ERROR: unable to get user credentials from token", token, err)
-		return "", err
+		return "", fmt.Errorf("[golib.auth.UserCredentials] InspectToken error: %w", err)
 	}
 	return attrs.UserName, nil
 }

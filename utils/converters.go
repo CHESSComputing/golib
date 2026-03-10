@@ -39,35 +39,35 @@ func Convert2dtype(val string, dtype string) (any, error) {
 	case "int":
 		i, err := strconv.Atoi(val)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.Atoi error: %w", err)
 		}
 		return i, nil
 
 	case "int8":
 		i, err := strconv.ParseInt(val, 10, 8)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseInt error: %w", err)
 		}
 		return int8(i), nil
 
 	case "int16":
 		i, err := strconv.ParseInt(val, 10, 16)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseInt error: %w", err)
 		}
 		return int16(i), nil
 
 	case "int32":
 		i, err := strconv.ParseInt(val, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseInt error: %w", err)
 		}
 		return int32(i), nil
 
 	case "int64":
 		i, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseInt error: %w", err)
 		}
 		return i, nil
 
@@ -75,14 +75,14 @@ func Convert2dtype(val string, dtype string) (any, error) {
 	case "float", "float64":
 		f, err := strconv.ParseFloat(val, 64)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseFloat error: %w", err)
 		}
 		return f, nil
 
 	case "float32":
 		f, err := strconv.ParseFloat(val, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseFloat error: %w", err)
 		}
 		return float32(f), nil
 
@@ -90,7 +90,7 @@ func Convert2dtype(val string, dtype string) (any, error) {
 	case "bool":
 		b, err := strconv.ParseBool(val)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseBool error: %w", err)
 		}
 		return b, nil
 
@@ -104,7 +104,7 @@ func Convert2dtype(val string, dtype string) (any, error) {
 		for _, p := range parts {
 			i, err := strconv.Atoi(p)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.Atoi error: %w", err)
 			}
 			out = append(out, i)
 		}
@@ -116,7 +116,7 @@ func Convert2dtype(val string, dtype string) (any, error) {
 		for _, p := range parts {
 			f, err := strconv.ParseFloat(p, 64)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("[golib.utils.Convert2dtype] strconv.ParseFloat error: %w", err)
 			}
 			out = append(out, f)
 		}

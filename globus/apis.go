@@ -27,7 +27,7 @@ func Token(scopes []string) (string, error) {
 	data.Set("client_secret", srvConfig.Config.Globus.ClientSecret)
 	req, err := http.NewRequest("POST", srvConfig.Config.Globus.AuthURL, strings.NewReader(data.Encode()))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.Token] http.NewRequest error: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -43,7 +43,7 @@ func Token(scopes []string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.Token] client.Do error: %w", err)
 	}
 	// Dump the HTTP response (for debugging)
 	if Verbose > 2 {
@@ -61,7 +61,7 @@ func Token(scopes []string) (string, error) {
 	var tokenResponse GlobusTokenResponse
 	err = json.NewDecoder(resp.Body).Decode(&tokenResponse)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.Token] json.NewDecoder error: %w", err)
 	}
 
 	return tokenResponse.AccessToken, nil
@@ -190,7 +190,7 @@ func Mkdir(token, endpointID, path string) error {
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(payload))
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.globus.Mkdir] http.NewRequest error: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -207,7 +207,7 @@ func Mkdir(token, endpointID, path string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.globus.Mkdir] client.Do error: %w", err)
 	}
 	// Dump the HTTP response (for debugging)
 	if Verbose > 2 {
@@ -250,7 +250,7 @@ func SharedLink(token, endpointID, path string) (string, error) {
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(payload))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.SharedLink] http.NewRequest error: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -267,7 +267,7 @@ func SharedLink(token, endpointID, path string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.SharedLink] client.Do error: %w", err)
 	}
 	// Dump the HTTP response (for debugging)
 	if Verbose > 2 {
@@ -285,7 +285,7 @@ func SharedLink(token, endpointID, path string) (string, error) {
 	var linkResponse map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&linkResponse)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.SharedLink] json.NewDecoder error: %w", err)
 	}
 
 	return linkResponse["link_url"].(string), nil

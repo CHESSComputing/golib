@@ -1,6 +1,7 @@
 package sqldb
 
 import (
+	"fmt"
 	"database/sql"
 	"log"
 	"time"
@@ -13,12 +14,12 @@ func InitDB(dbtype, dburi string) (*sql.DB, error) {
 	db, dberr := dbOpen(dbtype, dburi)
 	if dberr != nil {
 		log.Printf("unable to open dbtype=%s dburi=%s, error %v", dbtype, dburi, dberr)
-		return nil, dberr
+		return nil, fmt.Errorf("[golib.sqldb.InitDB] dbOpen error: %w", dberr)
 	}
 	dberr = db.Ping()
 	if dberr != nil {
 		log.Println("DB ping error", dberr)
-		return nil, dberr
+		return nil, fmt.Errorf("[golib.sqldb.InitDB] db.Ping error: %w", dberr)
 	}
 	if srvConfig.Config.DataBookkeeping.MaxDBConnections == 0 {
 		db.SetMaxOpenConns(100) // Allow up to 100 open connections

@@ -50,7 +50,7 @@ func GlobusLink(cid, path string) (string, error) {
 		return "", errors.New(fmt.Sprintf("Not a chess path %s", path))
 	}
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.GlobusLink] rawPath error: %w", err)
 	}
 	gurl := fmt.Sprintf("https://app.globus.org/file-manager?origin_id=%s&origin_path=%s", cid, epath)
 	return gurl, nil
@@ -81,7 +81,7 @@ func ChessGlobusLink(collection, path string) (string, error) {
 	scopes := []string{"urn:globus:auth:scope:transfer.api.globus.org:all"}
 	token, err := Token(scopes)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.globus.ChessGlobusLink] Token error: %w", err)
 	}
 	// find collection id
 	mapMutex := sync.RWMutex{}

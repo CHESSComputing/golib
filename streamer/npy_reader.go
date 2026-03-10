@@ -1,6 +1,7 @@
 package streamer
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,7 +23,7 @@ func NewNPYReader(dir string) (*NPYReader, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.streamer.NewNPYReader] filepath.Walk error: %w", err)
 	}
 	return &NPYReader{files: files, index: 0}, nil
 }
@@ -34,7 +35,7 @@ func (r *NPYReader) ReadChunk(_ int) (*Chunk, error) {
 	}
 	data, err := os.ReadFile(r.files[r.index])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.streamer.NPYReader.ReadChunk] os.ReadFile error: %w", err)
 	}
 	r.index++
 	return &Chunk{ContentType: "application/octet-stream", Data: data}, nil

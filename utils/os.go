@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,13 +11,13 @@ import (
 func CountEntries(dirPath string) (int, error) {
 	dir, err := os.Open(dirPath)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("[golib.utils.CountEntries] os.Open error: %w", err)
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdirnames(-1) // Read all entries
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("[golib.utils.CountEntries] dir.Readdirnames error: %w", err)
 	}
 
 	return len(files), nil
@@ -39,13 +40,13 @@ func FindMatches(dir, pattern string) ([]string, error) {
 	// Walk through the directory recursively
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("[golib.utils.FindMatches] filepath.Walk error: %w", err)
 		}
 
 		// Check if the file/directory name matches the pattern
 		matched, err := filepath.Match(pattern, info.Name())
 		if err != nil {
-			return err
+			return fmt.Errorf("[golib.utils.FindMatches] filepath.Match error: %w", err)
 		}
 
 		if matched {
@@ -55,7 +56,7 @@ func FindMatches(dir, pattern string) ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.utils.FindMatches] filepath.Match error: %w", err)
 	}
 
 	return matches, nil
@@ -67,7 +68,7 @@ func FindMatchingDirectories(dir, pattern string) ([]string, error) {
 
 	dirs, err := FindAllDirectories(dir)
 	if err != nil {
-		return matches, err
+		return matches, fmt.Errorf("[golib.utils.FindMatchingDirectories] FindAllDirectories error: %w", err)
 	}
 	for _, d := range dirs {
 		if strings.Contains(d, pattern) {
@@ -83,7 +84,7 @@ func FindAllDirectories(rootDir string) ([]string, error) {
 
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("[golib.utils.FindAllDirectories] filepath.Walk error: %w", err)
 		}
 
 		// Skip if it's not a directory
@@ -95,7 +96,7 @@ func FindAllDirectories(rootDir string) ([]string, error) {
 		hasSubDir := false
 		entries, err := os.ReadDir(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("[golib.utils.FindAllDirectories] os.ReadDir error: %w", err)
 		}
 
 		for _, entry := range entries {
@@ -109,7 +110,7 @@ func FindAllDirectories(rootDir string) ([]string, error) {
 		if !hasSubDir {
 			relPath, err := filepath.Rel(rootDir, path)
 			if err != nil {
-				return err
+				return fmt.Errorf("[golib.utils.FindAllDirectories] filepath.Rel error: %w", err)
 			}
 			finalDirs = append(finalDirs, relPath)
 		}
@@ -118,7 +119,7 @@ func FindAllDirectories(rootDir string) ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.utils.FindAllDirectories] filepath.Rel error: %w", err)
 	}
 
 	return finalDirs, nil

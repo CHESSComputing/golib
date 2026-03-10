@@ -1,6 +1,7 @@
 package streamer
 
 import (
+	"fmt"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
@@ -38,7 +39,7 @@ func NewImageReader(dir string) (*ImageReader, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.streamer.NewImageReader] filepath.Walk error: %w", err)
 	}
 	return &ImageReader{files: files}, nil
 }
@@ -52,7 +53,7 @@ func (r *ImageReader) ReadChunk(idx int) (*Chunk, error) {
 	path := r.files[idx]
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.streamer.ImageReader.ReadChunk] os.ReadFile error: %w", err)
 	}
 	r.index = idx + 1
 
@@ -70,7 +71,7 @@ func (r *ImageReader) ReadChunk(idx int) (*Chunk, error) {
 		// Extract metadata
 		img, format, err := image.DecodeConfig(bytes.NewReader(data))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[golib.streamer.ImageReader.ReadChunk] image.DecodeConfig error: %w", err)
 		}
 
 		meta := map[string]any{

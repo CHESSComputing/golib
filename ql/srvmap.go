@@ -33,7 +33,7 @@ func (q *QLManager) Init(fname string) error {
 	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.ql.QLManager.Init] io.ReadAll error: %w", err)
 	}
 
 	// each record in QL.ServiceMapFile has the following form:[QLRecord1, QLRecord2]
@@ -41,7 +41,7 @@ func (q *QLManager) Init(fname string) error {
 	var records []QLRecord
 	err = json.Unmarshal(data, &records)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.ql.QLManager.Init] json.Unmarshal error: %w", err)
 	}
 	for _, rec := range records {
 		// collect ql kys for each service
@@ -83,7 +83,7 @@ func (q *QLManager) ServiceQueries(query string) (map[string]map[string]any, err
 	sqMap := make(map[string]map[string]any)
 	spec, err := ParseQuery(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.ql.QLManager.ServiceQueries] ParseQuery error: %w", err)
 	}
 	for key, smap := range spec {
 		for srv, _ := range q.Map {

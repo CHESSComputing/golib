@@ -40,13 +40,13 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	mrec["metadata"] = rec
 	payload, err := json.Marshal(mrec)
 	if err != nil {
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.doi.ZenodoProvider.Publish] json.Marshal error: %w", err)
 	}
 
 	// create new Zenodo record
 	doc, err := zenodo.CreateRecord(payload)
 	if err != nil {
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.doi.ZenodoProvider.Publish] zenodo.CreateRecord error: %w", err)
 	}
 	docId := doc.Id
 	if docId == 0 {
@@ -72,7 +72,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	err = zenodo.AddRecord(docId, "foxden-datacite.json", frec)
 	if err != nil {
 		log.Println("ERROR: unable to add foxden-datacite.json record", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.doi.ZenodoProvider.Publish] zenodo.AddRecord error: %w", err)
 	}
 
 	if !publish {
@@ -83,7 +83,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 	// publish record
 	doiRecord, err := zenodo.PublishRecord(docId)
 	if err != nil {
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.doi.ZenodoProvider.Publish] zenodo.PublishRecord error: %w", err)
 	}
 	if z.Verbose > 1 {
 		log.Printf("Published doi record %+v", doiRecord)
@@ -95,7 +95,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 func (m *ZenodoProvider) MakePublic(doi string) error {
 	records, err := zenodo.DepositRecords(doi)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.doi.ZenodoProvider.MakePublic] zenodo.DepositRecords error: %w", err)
 	}
 	rec := records[0]
 	rid := fmt.Sprintf("%d", rec.Id)

@@ -1,6 +1,7 @@
 package embed
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -48,7 +49,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 		query := cloverQ.NewQuery(collname).Where(cloverQ.Field(attr).Eq(record[attr]))
 		existingDocs, err := db.FindAll(query)
 		if err != nil {
-			return err
+			return fmt.Errorf("[golib.embed.Upsert] db.FindAll error: %w", err)
 		}
 
 		if len(existingDocs) > 0 {
@@ -61,13 +62,13 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 				return doc
 			}
 			if err := db.UpdateById(collname, doc.ObjectId(), updater); err != nil {
-				return err
+				return fmt.Errorf("[golib.embed.Upsert] db.UpdateById error: %w", err)
 			}
 		} else {
 			// Insert a new record
 			doc := cloverD.NewDocumentOf(record)
 			if _, err := db.InsertOne(collname, doc); err != nil {
-				return err
+				return fmt.Errorf("[golib.embed.Upsert] db.InsertOne error: %w", err)
 			}
 		}
 	}
@@ -163,7 +164,7 @@ func Remove(dbname, collname string, spec map[string]any) error {
 	err := db.Delete(query)
 	if err != nil {
 		log.Printf("Failed to remove documents: %v", err)
-		return err
+		return fmt.Errorf("[golib.embed.Remove] db.Delete error: %w", err)
 	}
 	return nil
 }

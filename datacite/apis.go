@@ -86,7 +86,7 @@ func GetRecord(doi string, verbose int) (ResponsePayload, error) {
 	req, err := http.NewRequest("GET", rurl, nil)
 	if err != nil {
 		log.Println("ERROR: unable to create PUT request", err)
-		return record, err
+		return record, fmt.Errorf("[golib.datacite.GetRecord] http.NewRequest error: %w", err)
 	}
 
 	// Set authentication and headers
@@ -103,7 +103,7 @@ func GetRecord(doi string, verbose int) (ResponsePayload, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("ERROR: unable to make HTTP request", err)
-		return record, err
+		return record, fmt.Errorf("[golib.datacite.GetRecord] client.Do error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -114,7 +114,7 @@ func GetRecord(doi string, verbose int) (ResponsePayload, error) {
 	}
 	if err != nil {
 		log.Println("ERROR: unable to read HTTP response", err)
-		return record, err
+		return record, fmt.Errorf("[golib.datacite.GetRecord] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(body, &record)
 	return record, err
@@ -161,14 +161,14 @@ func MakePublic(doi string, verbose int) error {
 	}
 	if err != nil {
 		log.Println("ERROR: unable to create JSON payload", err)
-		return err
+		return fmt.Errorf("[golib.datacite.MakePublic] json.MarshalIndent error: %w", err)
 	}
 	// make HTTP PUT request to update our record
 	url := fmt.Sprintf("%s/dois/%s", srvConfig.Config.Datacite.Url, doi)
 	req, err := http.NewRequest("PUT", url, bytes.NewReader(data))
 	if err != nil {
 		log.Println("ERROR: unable to create PUT request", err)
-		return err
+		return fmt.Errorf("[golib.datacite.MakePublic] http.NewRequest error: %w", err)
 	}
 
 	// Set authentication and headers
@@ -185,7 +185,7 @@ func MakePublic(doi string, verbose int) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("ERROR: unable to make HTTP request", err)
-		return err
+		return fmt.Errorf("[golib.datacite.MakePublic] client.Do error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -193,7 +193,7 @@ func MakePublic(doi string, verbose int) error {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("ERROR: unable to read HTTP response", err)
-		return err
+		return fmt.Errorf("[golib.datacite.MakePublic] io.ReadAll error: %w", err)
 	}
 	// Check if the request was successful
 	if resp.StatusCode != http.StatusOK {

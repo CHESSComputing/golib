@@ -34,7 +34,7 @@ func (c *AWSClient) Initialize() error {
 		S3ForcePathStyle: aws.Bool(true), // Needed for Ceph's S3 compatibility
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.s3.AWSClient.Initialize] session.NewSession error: %w", err)
 	}
 	c.S3Client = aws3.New(sess)
 	return nil
@@ -103,7 +103,7 @@ func (c *AWSClient) ListObjects(bucket string) ([]ObjectInfo, error) {
 func (c *AWSClient) BucketContent(bucket string) (BucketObject, error) {
 	objects, err := c.ListObjects(bucket)
 	if err != nil {
-		return BucketObject{}, err
+		return BucketObject{}, fmt.Errorf("[golib.s3.AWSClient.BucketContent] c.ListObjects error: %w", err)
 	}
 	return BucketObject{
 		Bucket:  bucket,

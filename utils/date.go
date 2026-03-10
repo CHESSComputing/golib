@@ -75,7 +75,7 @@ func formatUnix(ts int64) string {
 func RFC3339ToEpoch(s string) (int64, error) {
 	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("[golib.utils.RFC3339ToEpoch] time.Parse error: %w", err)
 	}
 	return t.Unix(), nil
 }

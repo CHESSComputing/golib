@@ -82,12 +82,12 @@ func QLRecords(qlKey string) ([]QLRecord, error) {
 	fname := srvConfig.Config.QL.ServiceMapFile
 	file, err := os.Open(fname)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.ql.QLRecords] os.Open error: %w", err)
 	}
 	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.ql.QLRecords] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(data, &records)
 	return records, err

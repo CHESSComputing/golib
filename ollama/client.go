@@ -83,7 +83,7 @@ func (c *Client) SendRequest(ctx context.Context, prompt string, stream bool, ca
 
 	resp, err := c.config.Client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.ollama.Client.SendRequest] c.config.Client.Do error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -121,7 +121,7 @@ func (c *Client) SendRequest(ctx context.Context, prompt string, stream bool, ca
 
 	var res Response
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.ollama.Client.SendRequest] json.NewDecoder error: %w", err)
 	}
 	if res.Error != "" {
 		return "", errors.New(res.Error)

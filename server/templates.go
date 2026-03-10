@@ -67,7 +67,7 @@ func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
 	t := template.Must(template.ParseFiles(filenames...))
 	err := t.Execute(buf, data)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[golib.server.ParseTmpl] t.Execute error: %w", err)
 	}
 	return buf.String(), err
 }

@@ -36,7 +36,7 @@ func CreateRecord(payload []byte) (CreateResponse, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("ERROR: unable to post request to zenodo", err)
-		return response, err
+		return response, fmt.Errorf("[golib.zenodo.CreateRecord] client.Do error: %w", err)
 	}
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
@@ -55,11 +55,11 @@ func CreateRecord(payload []byte) (CreateResponse, error) {
 func AddRecord(docId int64, fileName string, foxdenRecord any) error {
 	data, err := json.Marshal(foxdenRecord)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.zenodo.AddRecord] json.Marshal error: %w", err)
 	}
 	records, err := DoiRecords(docId)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.zenodo.AddRecord] DoiRecords error: %w", err)
 	}
 	if len(records) != 1 {
 		return errors.New("Too many DOI records")
@@ -79,7 +79,7 @@ func AddRecord(docId int64, fileName string, foxdenRecord any) error {
 	// place HTTP request to zenodo upstream server
 	req, err := http.NewRequest("PUT", rurl, bytes.NewReader(data))
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.zenodo.AddRecord] http.NewRequest error: %w", err)
 	}
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -111,7 +111,7 @@ func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 	rec := MetaRecord{Metadata: mrec}
 	data, err := json.Marshal(rec)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.zenodo.UpdateRecord] json.Marshal error: %w", err)
 	}
 	zurl := srvConfig.Config.DOI.Zenodo.Url
 	token := srvConfig.Config.DOI.Zenodo.AccessToken
@@ -121,7 +121,7 @@ func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 	req, err := http.NewRequest("PUT", rurl, bytes.NewReader(data))
 	if err != nil {
 		log.Println("ERROR: unable to PUT request to zenodo", err)
-		return err
+		return fmt.Errorf("[golib.zenodo.UpdateRecord] http.NewRequest error: %w", err)
 	}
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -145,7 +145,7 @@ func PublishRecord(docId int64) (DoiRecord, error) {
 	req, err := http.NewRequest("POST", rurl, nil)
 	if err != nil {
 		log.Println("ERROR: unable to POST request to zenodo", err)
-		return record, err
+		return record, fmt.Errorf("[golib.zenodo.PublishRecord] http.NewRequest error: %w", err)
 	}
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -177,21 +177,21 @@ func DoiRecords(docId int64) ([]DoiRecord, error) {
 	resp, err := http.Get(rurl)
 	if err != nil {
 		log.Println("ERROR: in GET request", err)
-		return records, err
+		return records, fmt.Errorf("[golib.zenodo.DoiRecords] http.Get error: %w", err)
 	}
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
 	if docId == 0 {
 		if err := dec.Decode(&records); err != nil {
 			log.Println("ERROR: unable to decode JSON response", err)
-			return records, err
+			return records, fmt.Errorf("[golib.zenodo.DoiRecords] dec.Decode error: %w", err)
 		}
 		return records, nil
 	} else {
 		var record DoiRecord
 		if err := dec.Decode(&record); err != nil {
 			log.Println("ERROR: unable to decode JSON response", err)
-			return records, err
+			return records, fmt.Errorf("[golib.zenodo.DoiRecords] dec.Decode error: %w", err)
 		}
 		records = append(records, record)
 	}
@@ -223,13 +223,13 @@ func DepositRecords(doi string) ([]DepositRecord, error) {
 	resp, err := http.Get(rurl)
 	if err != nil {
 		log.Println("ERROR: in GET request", err)
-		return records, err
+		return records, fmt.Errorf("[golib.zenodo.DepositRecords] http.Get error: %w", err)
 	}
 	defer resp.Body.Close()
 	dec := json.NewDecoder(resp.Body)
 	if err := dec.Decode(&records); err != nil {
 		log.Println("ERROR: unable to decode JSON response", err)
-		return records, err
+		return records, fmt.Errorf("[golib.zenodo.DepositRecords] dec.Decode error: %w", err)
 	}
 	// if doi is provided filter out records with this doi
 	if doi != "" {
@@ -265,7 +265,7 @@ func MakePublic(rid string) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("ERROR: unable to post request to zenodo", err)
-		return err
+		return fmt.Errorf("[golib.zenodo.MakePublic] client.Do error: %w", err)
 	}
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)

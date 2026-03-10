@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -30,7 +31,7 @@ func (t *TrustedClient) Encrypt(salt string) ([]byte, error) {
 	var edata []byte
 	data, err := json.Marshal(t)
 	if err != nil {
-		return edata, err
+		return edata, fmt.Errorf("[golib.utils.TrustedClient.Encrypt] json.Marshal error: %w", err)
 	}
 	cipher := srvConfig.Config.Encryption.Cipher
 	return cryptoutils.Encrypt(data, salt, cipher)
@@ -42,7 +43,7 @@ func (t *TrustedClient) Decrypt(edata []byte, salt string) error {
 	cipher := srvConfig.Config.Encryption.Cipher
 	data, err := cryptoutils.Decrypt(edata, salt, cipher)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.utils.TrustedClient.Decrypt] cryptoutils.Decrypt error: %w", err)
 	}
 	err = json.Unmarshal(data, &tdata)
 	t.User = tdata.User

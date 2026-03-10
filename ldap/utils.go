@@ -66,14 +66,14 @@ func GetUsers(ldapURL, login, password, baseDN string) ([]string, error) {
 	}
 	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
 	if err != nil {
-		return users, err
+		return users, fmt.Errorf("[golib.ldap.GetUsers] ldap.DialURL error: %w", err)
 	}
 	defer l.Close()
 
 	// connect to LDAP server
 	err = l.Bind(login, password)
 	if err != nil {
-		return users, err
+		return users, fmt.Errorf("[golib.ldap.GetUsers] l.Bind error: %w", err)
 	}
 
 	// Adjust filter depending on your LDAP schema
@@ -89,7 +89,7 @@ func GetUsers(ldapURL, login, password, baseDN string) ([]string, error) {
 
 	result, err := l.Search(searchRequest)
 	if err != nil {
-		return users, err
+		return users, fmt.Errorf("[golib.ldap.GetUsers] l.Search error: %w", err)
 	}
 
 	for _, entry := range result.Entries {
@@ -106,7 +106,7 @@ func GetGroups(ldapURL, login, password, baseDN string) ([]string, error) {
 	}
 	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
 	if err != nil {
-		return groups, err
+		return groups, fmt.Errorf("[golib.ldap.GetGroups] ldap.DialURL error: %w", err)
 	}
 	defer l.Close()
 
@@ -128,7 +128,7 @@ func GetGroups(ldapURL, login, password, baseDN string) ([]string, error) {
 
 	result, err := l.Search(searchRequest)
 	if err != nil {
-		return groups, err
+		return groups, fmt.Errorf("[golib.ldap.GetGroups] l.Search error: %w", err)
 	}
 
 	for _, entry := range result.Entries {

@@ -102,7 +102,7 @@ func (h *HttpRequest) GetToken() {
 func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", rurl, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.services.HttpRequest.Get] http.NewRequest error: %w", err)
 	}
 	if h.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
@@ -161,7 +161,7 @@ func (h *HttpRequest) Delete(rurl, contentType string, buffer *bytes.Buffer) (*h
 func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Buffer) (*http.Response, error) {
 	req, err := http.NewRequest(method, rurl, buffer)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.services.HttpRequest.Request] http.NewRequest error: %w", err)
 	}
 	if h.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))
@@ -214,7 +214,7 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response, error) {
 	req, err := http.NewRequest("POST", rurl, strings.NewReader(formData.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.services.HttpRequest.PostForm] http.NewRequest error: %w", err)
 	}
 	if h.Token != "" {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", h.Token))

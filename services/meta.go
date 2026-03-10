@@ -19,19 +19,19 @@ func MetaDataRecords(query string, skeys []string, sorder, idx, limit int) ([]ma
 
 	data, err := json.Marshal(rec)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.services.MetaDataRecords] json.Marshal error: %w", err)
 	}
 	rurl := fmt.Sprintf("%s/search", srvConfig.Config.Services.MetaDataURL)
 	httpReadRequest := NewHttpRequest("read", 0)
 	httpReadRequest.GetToken()
 	resp, err := httpReadRequest.Post(rurl, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.services.MetaDataRecords] httpReadRequest.Post error: %w", err)
 	}
 	defer resp.Body.Close()
 	data, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.services.MetaDataRecords] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(data, &records)
 	if err != nil {

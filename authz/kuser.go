@@ -62,7 +62,7 @@ func kuserFromCache(cacheFile string) (*credentials.Credentials, error) {
 	client, err := client.NewClientFromCCache(ccache, cfg)
 	err = client.Login()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.auth.kuserFromCache] client.Login error: %w", err)
 	}
 	return client.Credentials, nil
 

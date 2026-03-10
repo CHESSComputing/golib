@@ -2,6 +2,7 @@ package ldap
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -67,7 +68,7 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	// Perform LDAP search if no valid cache entry is found
 	results, err := Search(ldapURL, login, password, baseDN, user, attributes)
 	if err != nil {
-		return Entry{}, err
+		return Entry{}, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
 	}
 	for _, entry := range results.Entries {
 		for _, attr := range entry.Attributes {

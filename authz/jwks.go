@@ -82,19 +82,19 @@ func (p *Provider) Init(purl string, verbose int) error {
 	resp, err := http.Get(fmt.Sprintf("%s/.well-known/openid-configuration", purl))
 	if err != nil {
 		log.Println("unable to contact ", purl, " error ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] http.Get error: %w", err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("unable to read body of HTTP response ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] io.ReadAll error: %w", err)
 	}
 	var conf OpenIDConfiguration
 	err = json.Unmarshal(body, &conf)
 	if err != nil {
 		log.Println("unable to unmarshal body of HTTP response ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] json.Unmarshal error: %w", err)
 	}
 	p.URL = purl
 	p.Configuration = conf
@@ -107,19 +107,19 @@ func (p *Provider) Init(purl string, verbose int) error {
 	resp2, err := http.Get(p.Configuration.JWKSUri)
 	if err != nil {
 		log.Println("unable to contact ", p.Configuration.JWKSUri, " error ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] http.Get error: %w", err)
 	}
 	defer resp2.Body.Close()
 	body2, err := io.ReadAll(resp2.Body)
 	if err != nil {
 		log.Println("unable to read body of HTTP response ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] io.ReadAll error: %w", err)
 	}
 	var certs Certs
 	err = json.Unmarshal(body2, &certs)
 	if err != nil {
 		log.Println("unable to unmarshal body of HTTP response ", err)
-		return err
+		return fmt.Errorf("[golib.auth.Provider.Init] json.Unmarshal error: %w", err)
 	}
 	p.JWKSBody = body2
 	for _, key := range certs.Keys {
@@ -134,7 +134,7 @@ func (p *Provider) Init(purl string, verbose int) error {
 		pub, err := getPublicKey(exp, mod)
 		if err != nil {
 			log.Println("unable to get public key ", err)
-			return err
+			return fmt.Errorf("[golib.auth.Provider.Init] getPublicKey error: %w", err)
 		}
 		p.PublicKeys = append(p.PublicKeys, publicKey{pub, key.Kid})
 	}
@@ -155,13 +155,13 @@ func getPublicKey(exp, mod string) (*rsa.PublicKey, error) {
 	var exponent []byte
 	var err error
 	if exponent, err = base64.RawURLEncoding.DecodeString(exp); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.auth.getPublicKey] base64.RawURLEncoding.DecodeString error: %w", err)
 	}
 
 	// Decode the modulus from Base64.
 	var modulus []byte
 	if modulus, err = base64.RawURLEncoding.DecodeString(mod); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.auth.getPublicKey] base64.RawURLEncoding.DecodeString error: %w", err)
 	}
 
 	// Create the RSA public key.
@@ -187,7 +187,7 @@ func tokenClaims(provider Provider, token string) (map[string]interface{}, error
 	claims, err := jwt.ParseWithoutCheck([]byte(token))
 	log.Printf("ParseWithoutCheck returns %v", err)
 	if err != nil {
-		return out, err
+		return out, fmt.Errorf("[golib.auth.tokenClaims] jwt.ParseWithoutCheck error: %w", err)
 	}
 	var pub *rsa.PublicKey
 	for _, pubkey := range provider.PublicKeys {
@@ -202,7 +202,7 @@ func tokenClaims(provider Provider, token string) (map[string]interface{}, error
 	// verify a JWT
 	claims, err = jwt.RSACheck([]byte(token), pub)
 	if err != nil {
-		return out, err
+		return out, fmt.Errorf("[golib.auth.tokenClaims] jwt.RSACheck error: %w", err)
 	}
 	if !claims.Valid(time.Now()) {
 		msg := "The token is not valid"

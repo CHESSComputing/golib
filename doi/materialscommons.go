@@ -16,6 +16,7 @@ func (m *MCProvider) Init() {
 	if m.ProjectName == "" {
 		m.ProjectName = srvConfig.Config.MaterialsCommons.ProjectName
 	}
+	m.Verbose = srvConfig.Config.MaterialsCommons.Verbose
 }
 
 // Publish provides publication of dataset with did and description

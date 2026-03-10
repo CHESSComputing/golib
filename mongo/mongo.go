@@ -235,7 +235,7 @@ func UpsertAny(dbname, collname string, records []any) error {
 		opts := options.UpdateOne().SetUpsert(true)
 		if _, err := c.UpdateOne(ctx, spec, update, opts); err != nil {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
-			return err
+			return fmt.Errorf("[golib.mongo.UpsertAny] c.UpdateOne error: %w", err)
 		}
 	}
 	return nil
@@ -260,7 +260,7 @@ func InsertRecord(dbname, collname string, rec map[string]any) error {
 	c := client.Database(dbname).Collection(collname)
 	if _, err := c.InsertOne(ctx, &rec); err != nil {
 		log.Printf("Fail to insert record %v, error %v\n", rec, err)
-		return err
+		return fmt.Errorf("[golib.mongo.InsertRecord] c.InsertOne error: %w", err)
 	}
 	return nil
 }
@@ -273,7 +273,7 @@ func UpsertRecord(dbname, collname string, spec, rec map[string]any) error {
 	opts := options.UpdateOne().SetUpsert(true)
 	if _, err := c.UpdateOne(ctx, spec, rec, opts); err != nil {
 		log.Printf("Fail to insert record %v, error %v\n", rec, err)
-		return err
+		return fmt.Errorf("[golib.mongo.UpsertRecord] c.UpdateOne error: %w", err)
 	}
 	return nil
 }
@@ -293,7 +293,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 		opts := options.UpdateOne().SetUpsert(true)
 		if _, err := c.UpdateOne(ctx, spec, update, opts); err != nil {
 			log.Printf("Fail to insert record %v, error %v\n", rec, err)
-			return err
+			return fmt.Errorf("[golib.mongo.Upsert] c.UpdateOne error: %w", err)
 		}
 	}
 	return nil
@@ -436,7 +436,7 @@ func Distinct(dbname, collname, field string) ([]any, error) {
 	res := c.Distinct(ctx, field, filter)
 	if err := res.Err(); err != nil {
 		log.Printf("Unable to fetch unique records, field %s spec %v, error %v\n", field, filter, err)
-		return records, err
+		return records, fmt.Errorf("[golib.mongo.Distinct] res.Err error: %w", err)
 	}
 	err := res.Decode(&records)
 	if err != nil {

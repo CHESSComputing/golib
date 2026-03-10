@@ -180,7 +180,7 @@ func Count(dbname, collname string, spec map[string]any) int {
 func count(collname string, spec map[string]interface{}) (int, error) {
 	results, err := get(collname, spec)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("[golib.embed.count] get error: %w", err)
 	}
 	return len(results), nil
 }

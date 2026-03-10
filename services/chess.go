@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
@@ -55,7 +56,7 @@ func (c *CHESSUser) Get(name string) (User, error) {
 	}
 	entry, err := c.ldapCache.Search(c.Login, c.Password, name)
 	if err != nil {
-		return user, err
+		return user, fmt.Errorf("[golib.services.CHESSUser.Get] c.ldapCache.Search error: %w", err)
 	}
 	// add default scope
 	user.Scopes = append(user.Scopes, "read")

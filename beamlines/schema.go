@@ -73,7 +73,7 @@ func (m *SchemaManager) Load(fname string) (*Schema, error) {
 	err := schema.Load()
 	if err != nil {
 		log.Println("unable to load schema from", fname, " error", err)
-		return schema, err
+		return schema, fmt.Errorf("[golib.beamlines.SchemaManager.Load] schema.Load error: %w", err)
 	}
 	if Verbose > 1 {
 		log.Println("renew schema:", fname)
@@ -367,13 +367,13 @@ func (s *Schema) Load() error {
 		file, err := os.Open(filepath)
 		if err != nil {
 			log.Println("unable to open", filepath, "error", err)
-			return err
+			return fmt.Errorf("[golib.beamlines.Schema.Load] os.Open error: %w", err)
 		}
 		defer file.Close()
 		data, err := io.ReadAll(file)
 		if err != nil {
 			log.Println("unable to read file, error", err)
-			return err
+			return fmt.Errorf("[golib.beamlines.Schema.Load] io.ReadAll error: %w", err)
 		}
 		var rec map[string][]string
 		err = json.Unmarshal(data, &rec)
@@ -391,11 +391,11 @@ func (s *Schema) Load() error {
 // Validate validates given record against schema
 func (s *Schema) Validate(rec map[string]any) error {
 	if err := s.Load(); err != nil {
-		return err
+		return fmt.Errorf("[golib.beamlines.Schema.Validate] s.Load error: %w", err)
 	}
 	keys, err := s.Keys()
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.beamlines.Schema.Validate] s.Keys error: %w", err)
 	}
 	// hidden mandatory keys we add to each form
 	var mkeys []string
@@ -450,7 +450,7 @@ func (s *Schema) Validate(rec map[string]any) error {
 				if m, ok := s.Map[sk]; ok {
 					if e := validateStructs(m.File, m, v, s.Verbose); e != nil {
 						log.Printf("### ERROR: subkey validateStructs %v", v)
-						return e
+						return fmt.Errorf("[golib.beamlines.Schema.Validate] validateStructs error: %w", e)
 					}
 					// collect mandatory keys
 					if !m.Optional {
@@ -478,7 +478,7 @@ func (s *Schema) Validate(rec map[string]any) error {
 	// check that we collected all mandatory keys
 	smkeys, err := s.MandatoryKeys()
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.beamlines.Schema.Validate] s.MandatoryKeys error: %w", err)
 	}
 
 	if len(mkeys) != len(smkeys) {
@@ -523,7 +523,7 @@ func checkSubKeys(k string, v any, keys []string) bool {
 func (s *Schema) Keys() ([]string, error) {
 	var keys []string
 	if err := s.Load(); err != nil {
-		return keys, err
+		return keys, fmt.Errorf("[golib.beamlines.Schema.Keys] s.Load error: %w", err)
 	}
 	for k, _ := range s.Map {
 		if k != "" {
@@ -538,7 +538,7 @@ func (s *Schema) Keys() ([]string, error) {
 func (s *Schema) OptionalKeys() ([]string, error) {
 	var keys []string
 	if err := s.Load(); err != nil {
-		return keys, err
+		return keys, fmt.Errorf("[golib.beamlines.Schema.OptionalKeys] s.Load error: %w", err)
 	}
 	for k, _ := range s.Map {
 		if m, ok := s.Map[k]; ok {
@@ -555,7 +555,7 @@ func (s *Schema) OptionalKeys() ([]string, error) {
 func (s *Schema) MandatoryKeys() ([]string, error) {
 	var keys []string
 	if err := s.Load(); err != nil {
-		return keys, err
+		return keys, fmt.Errorf("[golib.beamlines.Schema.MandatoryKeys] s.Load error: %w", err)
 	}
 	for k, _ := range s.Map {
 		if m, ok := s.Map[k]; ok {
@@ -589,7 +589,7 @@ func (s *Schema) Name() string {
 func (s *Schema) Sections() ([]string, error) {
 	var sections []string
 	if err := s.Load(); err != nil {
-		return sections, err
+		return sections, fmt.Errorf("[golib.beamlines.Schema.Sections] s.Load error: %w", err)
 	}
 	for k := range s.Map {
 		if m, ok := s.Map[k]; ok {
@@ -619,11 +619,11 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 	smap := make(map[string][]string)
 	sections, err := s.Sections()
 	if err != nil {
-		return smap, err
+		return smap, fmt.Errorf("[golib.beamlines.Schema.SectionKeys] s.Sections error: %w", err)
 	}
 	allKeys, err := s.Keys()
 	if err != nil {
-		return smap, err
+		return smap, fmt.Errorf("[golib.beamlines.Schema.SectionKeys] s.Keys error: %w", err)
 	}
 	// populate section map with keys defined in webSectionKeys
 	if s.WebSectionKeys != nil {

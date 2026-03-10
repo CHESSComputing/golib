@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -39,7 +40,7 @@ func HttpClient() *http.Client {
 func HttpGet(rurl string, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", rurl, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.utils.HttpGet] http.NewRequest error: %w", err)
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)
@@ -61,7 +62,7 @@ func HttpGet(rurl string, headers map[string]string) (*http.Response, error) {
 func HttpPost(rurl string, headers map[string]string, buffer *bytes.Buffer) (*http.Response, error) {
 	req, err := http.NewRequest("POST", rurl, buffer)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.utils.HttpPost] http.NewRequest error: %w", err)
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)
@@ -83,7 +84,7 @@ func HttpPost(rurl string, headers map[string]string, buffer *bytes.Buffer) (*ht
 func HttpPostForm(rurl string, headers map[string]string, formData url.Values) (*http.Response, error) {
 	req, err := http.NewRequest("POST", rurl, strings.NewReader(formData.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.utils.HttpPostForm] http.NewRequest error: %w", err)
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)

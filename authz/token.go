@@ -115,7 +115,7 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return claims, err
+			return claims, fmt.Errorf("[golib.auth.TokenClaims] jwt.ParseWithClaims error: %w", err)
 			//             log.Println("ERROR", err)
 		}
 	}

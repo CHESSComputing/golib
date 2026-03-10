@@ -280,13 +280,13 @@ func strType(key string, val interface{}) error {
 				for _, vvv := range strings.Split(input, ",") {
 					err := checkBlockHash(strings.Trim(vvv, " "))
 					if err != nil {
-						return err
+						return fmt.Errorf("[golib.lexicon.strType] checkBlockHash error: %w", err)
 					}
 				}
 			} else {
 				err := checkBlockHash(v)
 				if err != nil {
-					return err
+					return fmt.Errorf("[golib.lexicon.strType] checkBlockHash error: %w", err)
 				}
 			}
 		}

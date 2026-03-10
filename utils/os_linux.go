@@ -13,7 +13,7 @@ import (
 func DirCreationDate(dir string) (time.Time, error) {
 	fileInfo, err := os.Stat(dir)
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, fmt.Errorf("[golib.utils.DirCreationDate] os.Stat error: %w", err)
 	}
 
 	switch st := fileInfo.Sys().(type) {
