@@ -2,6 +2,7 @@ package MaterialsCommons
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -42,7 +43,7 @@ func Publish(did, projectName, description string, record map[string]any, publis
 	records, err := mcClient.ListProjects()
 	if err != nil {
 		log.Println("ERROR: unable to list projects, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] mcClient.ListProjects error: %w", err)
 	}
 	for _, r := range records {
 		if r.Name == projectName {
@@ -59,7 +60,7 @@ func Publish(did, projectName, description string, record map[string]any, publis
 		proj, err := mcClient.CreateProject(req)
 		if err != nil {
 			log.Println("ERROR: unable to create project, error", err)
-			return doi, doiLink, err
+			return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] mcClient.CreateProject error: %w", err)
 		}
 		projectID = proj.ID
 	}
@@ -68,23 +69,23 @@ func Publish(did, projectName, description string, record map[string]any, publis
 	tempFile, err := os.CreateTemp("", "foxden-metadata.json")
 	if err != nil {
 		log.Println("ERROR: unable to create temp foxden.json file, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] os.CreateTemp error: %w", err)
 	}
 	defer os.Remove(tempFile.Name())
 	content, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
 		log.Println("ERROR: unable to marshal record, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] json.MarshalIndent error: %w", err)
 	}
 	_, err = tempFile.Write(content)
 	if err != nil {
 		log.Println("ERROR: unable to write record, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] tempFile.Write error: %w", err)
 	}
 	err = tempFile.Close()
 	if err != nil {
 		log.Println("ERROR: unable to close temp file, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] tempFile.Close error: %w", err)
 	}
 
 	// compose dataset file
@@ -104,7 +105,7 @@ func Publish(did, projectName, description string, record map[string]any, publis
 	ds, err := mcClient.DepositDataset(projectID, deposit)
 	if err != nil {
 		log.Println("ERROR: unable to deposit dataset, error", err)
-		return doi, doiLink, err
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] mcClient.DepositDataset error: %w", err)
 	}
 	datasetID = ds.ID
 
@@ -132,7 +133,7 @@ func Publish(did, projectName, description string, record map[string]any, publis
 		ds, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
 		if err != nil {
 			log.Println("ERROR: unable to publish dataset, error", err)
-			return doi, doiLink, err
+			return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] mcClient.PublishDataset error: %w", err)
 		}
 		if verbose > 1 {
 			log.Printf("publish dataset with did=%s doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", did, doi, projectID, datasetID, ds, err, testInstance)
@@ -150,33 +151,30 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 	getMcClient()
 
 	// find out project ID to use
-	projectName := srvConfig.Config.MaterialsCommons.ProjectName
-	if projectName == "" {
-		projectName = "FOXDEN datasets"
-	}
 	records, err := mcClient.ListProjects()
 	if err != nil {
 		log.Println("ERROR: unable to list projects, error", err)
-		return projectID, datasetID, err
+		return projectID, datasetID, fmt.Errorf("[golib.MaterialsCommons.FindProjectDatasetIDs] mcClient.ListProjects error: %w", err)
 	}
+	// new algorithm should walk through all projects and find appropriate match
 	for _, r := range records {
-		if r.Name == projectName {
-			projectID = r.ID
-			break
+		// get list of datasets within our projectID
+		datasets, err := mcClient.ListDatasets(projectID)
+		if err != nil {
+			log.Println("ERROR: unable to list datasets for projectID", projectID, "error:", err)
+			return projectID, datasetID, fmt.Errorf("[golib.MaterialsCommons.FindProjectDatasetIDs] mcClient.ListDatasets error: %w", err)
+		}
+		for _, d := range datasets {
+			if d.DOI == doi || d.TestDOI == doi {
+				projectID = r.ID
+				datasetID = d.ID
+				return projectID, datasetID, err
+			}
 		}
 	}
-	// get list of datasets within our projectID
-	datasets, err := mcClient.ListDatasets(projectID)
-	if err != nil {
-		log.Println("ERROR: unable to list datasets for projectID", projectID, "error:", err)
-		return projectID, datasetID, err
-	}
-	for _, d := range datasets {
-		if d.DOI == doi || d.TestDOI == doi {
-			datasetID = d.ID
-		}
-	}
-	return projectID, datasetID, err
+
+	msg := fmt.Sprintf("No projectID and datasetID found for doi=%s", doi)
+	return projectID, datasetID, errors.New(msg)
 }
 
 // MakePublic implements logic of publishing draft DOI
@@ -187,7 +185,7 @@ func MakePublic(doi string, verbose int) error {
 	projectID, datasetID, err := FindProjectDatasetIDs(doi)
 	if err != nil {
 		log.Println("ERROR: unable to find project and datasetID for doi", doi, "error:", err)
-		return err
+		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] FindProjectDatasetIDs error: %w", err)
 	}
 
 	// check FOXDEN configuration to determine if we should use production or test instance of MaterialsCommons
