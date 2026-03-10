@@ -86,6 +86,15 @@ type LDAP struct {
 	RecursionLevel int    `mapstructure:recursion_level` // LDAP look-up recursion level
 }
 
+// EMailProvider defines email provider attributes
+type EMailProvider struct {
+	SMTPHost   string
+	SMTPPort   int
+	SenderAddr string
+	SenderPass string
+	AdminEmail string
+}
+
 // DOI attributes
 type DOI struct {
 	Provider         string           `mapstructure:"Provider"`    // doi provider, e.g. Zenodo or MaterialsCommons
@@ -94,6 +103,7 @@ type DOI struct {
 	Datacite         Datacite         `mapstructure:"Datacite"`
 	MaterialsCommons MaterialsCommons `mapstructure:"MaterialsCommons"`
 	WebServer
+	EMailProvider
 }
 
 // DID structure
@@ -472,7 +482,7 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			fmt.Println("ERROR", err)
-			return config, err
+			return config, fmt.Errorf("[golib.config.ParseConfig] os.UserHomeDir error: %w", err)
 		}
 		// setup cfile to $HOME/.foxden.yaml
 		cfile = filepath.Join(home, ".foxden.yaml")
@@ -531,7 +541,7 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 		return config, errors.New(msg)
 	}
 	if err := viper.Unmarshal(&config); err != nil {
-		return config, err
+		return config, fmt.Errorf("[golib.config.ParseConfig] viper.Unmarshal error: %w", err)
 	}
 	// set defaults
 	if config.LDAP.Expire == 0 {
