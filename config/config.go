@@ -339,6 +339,7 @@ type MaterialsCommons struct {
 	AccessToken        string `mapstructure:"AccessToken"`
 	ProjectName        string `mapstructure:"ProjectName"`        // name of the project (only valid for MaterialsCommons)
 	ProductionInstance bool   `mapstructure:"ProductionInstance"` // specify to use production instance
+	Verbose            int    `mapstructure:"Verbose"`
 }
 
 // Datacite represents Datacite service configuration
