@@ -200,7 +200,7 @@ func MakePublic(doi string, verbose int) error {
 	}
 	if err != nil {
 		log.Printf("ERROR: unable to mint DOI with doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", doi, projectID, datasetID, ds, err, testInstance)
-		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] mcClient.MingDOIForDataset error: %w", err)
+		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] mcClient.MintDOIForDataset error: %w", err)
 	}
 	ds, err = mcClient.PublishDataset(projectID, datasetID, testInstance)
 	if verbose > 1 {
@@ -208,7 +208,7 @@ func MakePublic(doi string, verbose int) error {
 	}
 	if err != nil {
 		log.Printf("ERROR: unable to publish dataset with doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", doi, projectID, datasetID, ds, err, testInstance)
-		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] mcClient.MingDOIForDataset error: %w", err)
+		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] mcClient.PublishDataset error: %w", err)
 	}
 
 	return err
