@@ -158,6 +158,7 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 	}
 	// new algorithm should walk through all projects and find appropriate match
 	for _, r := range records {
+		projectID = r.ID
 		// get list of datasets within our projectID
 		datasets, err := mcClient.ListDatasets(projectID)
 		if err != nil {
@@ -166,7 +167,6 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 		}
 		for _, d := range datasets {
 			if d.DOI == doi || d.TestDOI == doi {
-				projectID = r.ID
 				datasetID = d.ID
 				return projectID, datasetID, err
 			}
@@ -174,7 +174,7 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 	}
 
 	msg := fmt.Sprintf("No projectID and datasetID found for doi=%s", doi)
-	return projectID, datasetID, errors.New(msg)
+	return 0, 0, errors.New(msg)
 }
 
 // MakePublic implements logic of publishing draft DOI
