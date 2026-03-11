@@ -168,7 +168,7 @@ func GetIntValue(rec map[string]any, key string) (int, error) {
 	if ok {
 		return val, nil
 	}
-	return 0, fmt.Errorf("Unable to cast value for key '%s'", key)
+	return 0, fmt.Errorf("[golib.mongo.GetIntValue] nable to cast value for key '%s'", key)
 }
 
 // GetInt64Value function to get int value from record for given key
@@ -178,7 +178,7 @@ func GetInt64Value(rec map[string]any, key string) (int64, error) {
 	if ok {
 		return out, nil
 	}
-	return 0, fmt.Errorf("Unable to cast value for key '%s'", key)
+	return 0, fmt.Errorf("[golib.mongo.GetInt64Value] unable to cast value for key '%s'", key)
 }
 
 // Connection defines connection to MongoDB
@@ -441,6 +441,7 @@ func Distinct(dbname, collname, field string) ([]any, error) {
 	err := res.Decode(&records)
 	if err != nil {
 		log.Printf("failed to decode distinct result: %v", err)
+		return records, fmt.Errorf("[golib.mongo.Distinct] res.Decode error: %w", err)
 	}
 	return records, res.Err()
 }
@@ -453,8 +454,8 @@ func Remove(dbname, collname string, spec map[string]any) error {
 	results, err := c.DeleteMany(ctx, spec)
 	if err != nil {
 		log.Printf("Unable to remove records, spec %v, error %v\n", spec, err)
-	} else {
-		log.Printf("mongo remove results %+v", results)
+		return fmt.Errorf("[golib.mongo.Remove] c.DeleteMany error: %w", err)
 	}
-	return err
+	log.Printf("mongo remove results %+v", results)
+	return nil
 }
