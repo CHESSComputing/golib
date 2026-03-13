@@ -121,7 +121,10 @@ type CustomResponseWriter struct {
 func (w *CustomResponseWriter) Write(data []byte) (int, error) {
 	size, err := w.ResponseWriter.Write(data)
 	w.bodySize += size
-	return size, fmt.Errorf("[golib.server.CustomResponseWriter.Write] w.ResponseWriter error: %w", err)
+	if err != nil {
+		return size, fmt.Errorf("[golib.server.CustomResponseWriter.Write] w.ResponseWriter error: %w", err)
+	}
+	return size, nil
 }
 
 // LoggerMiddleware is custom logger for gin server
