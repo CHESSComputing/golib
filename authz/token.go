@@ -117,8 +117,7 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 		}
 	}
 	if tkn == nil {
-		err := errors.New("invalid or empty token")
-		return claims, err
+		return claims, errors.New("[golib.auth.TokenClaims] empty token")
 	}
 	if !tkn.Valid {
 		return claims, errors.New("[golib.auth.TokenClaims] invalid token")
