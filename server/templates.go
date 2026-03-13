@@ -69,7 +69,7 @@ func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("[golib.server.ParseTmpl] t.Execute error: %w", err)
 	}
-	return buf.String(), err
+	return buf.String(), nil
 }
 
 // TmplRecord represent template record
