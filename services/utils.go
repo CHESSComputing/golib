@@ -30,5 +30,8 @@ func LDAPUserAttributes(user string) (ldap.Entry, error) {
 		return attrs, fmt.Errorf("[golib.services.LDAPUserAttributes] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(data, &attrs)
-	return attrs, err
+	if err != nil {
+		return attrs, fmt.Errorf("[golib.services.LDAPUserAttributes] json.Unmarshal error: %w", err)
+	}
+	return attrs, nil
 }
