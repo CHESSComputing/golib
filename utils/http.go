@@ -55,7 +55,10 @@ func HttpGet(rurl string, headers map[string]string) (*http.Response, error) {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.utils.HttpGet] client.Do error: %w", err)
+	}
+	return resp, nil
 }
 
 // HttpPost performs HTTP POST request with bearer token
@@ -77,7 +80,10 @@ func HttpPost(rurl string, headers map[string]string, buffer *bytes.Buffer) (*ht
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.utils.HttpPost] client.Do error: %w", err)
+	}
+	return resp, nil
 }
 
 // HttpPostForm performs HTTP POST form request with bearer token
@@ -99,5 +105,8 @@ func HttpPostForm(rurl string, headers map[string]string, formData url.Values) (
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("response", string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.utils.HttpPostForm] client.Do error: %w", err)
+	}
+	return resp, nil
 }
