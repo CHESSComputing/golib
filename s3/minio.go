@@ -52,7 +52,10 @@ func (c *MinioClient) Initialize() error {
 		Creds:  credentials.NewStaticV4(s3.AccessKey, s3.AccessSecret, ""),
 		Secure: s3.UseSSL,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("[golib.s3.MinioClient.Initialize] minio.New error: %w", err)
+	}
+	return nil
 }
 
 // MinioBucketObject represents s3 object
@@ -67,23 +70,27 @@ func (c *MinioClient) BucketContent(bucket string) (BucketObject, error) {
 		log.Printf("looking for bucket:'%s'", bucket)
 	}
 	objects, err := c.ListObjects(bucket)
-	if err != nil {
-		log.Printf("ERROR: unabel to list bucket '%s', error %v", bucket, err)
-	}
 	bobj := BucketObject{
 		Bucket:  bucket,
 		Objects: objects,
 	}
-	return bobj, err
+	if err != nil {
+		log.Printf("ERROR: unabel to list bucket '%s', error %v", bucket, err)
+		return bobj, fmt.Errorf("[golib.s3.MinioClient.BucketContent] c.ListObjects error: %w", err)
+	}
+	return bobj, nil
 }
 
 // ListBuckets retrieves all available buckets
 func (c *MinioClient) ListBuckets() ([]BucketInfo, error) {
 	ctx := context.Background()
+	var blist []BucketInfo
 	buckets, err := c.S3Client.ListBuckets(ctx)
+	if err != nil {
+		return blist, fmt.Errorf("[golib.s3.MinioClient.ListBuckets] c.S3Client.ListBuckets error: %w", err)
+	}
 
 	// convert minio buckets into generic list of BucketInfo objects
-	var blist []BucketInfo
 	for _, bucket := range buckets {
 		b := BucketInfo{
 			Name:         bucket.Name,
@@ -91,7 +98,7 @@ func (c *MinioClient) ListBuckets() ([]BucketInfo, error) {
 		}
 		blist = append(blist, b)
 	}
-	return blist, err
+	return blist, nil
 }
 
 // ListObjects lists all objects in a bucket
@@ -139,13 +146,14 @@ func (c *MinioClient) CreateBucket(bucket string) error {
 			return nil
 		} else {
 			log.Printf("ERROR: unable to create bucket, error %v", err)
+			return fmt.Errorf("[golib.s3.MinioClient.CreateBucket] unable to create bucket error: %w", err)
 		}
 	} else {
 		if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
 			log.Printf("Successfully created %s\n", bucket)
 		}
 	}
-	return err
+	return nil
 }
 
 // DeleteBucket deletes an existing bucket
@@ -154,8 +162,9 @@ func (c *MinioClient) DeleteBucket(bucket string) error {
 	err := c.S3Client.RemoveBucket(ctx, bucket)
 	if err != nil {
 		log.Printf("ERROR: unable to remove bucket %s, error, %v", bucket, err)
+		return fmt.Errorf("[golib.s3.MinioClient.DeleteBucket] c.S3Client.RemoveBucket error: %w", err)
 	}
-	return err
+	return nil
 }
 
 // UploadObject uploads an object to a bucket
@@ -176,12 +185,13 @@ func (c *MinioClient) UploadObject(bucket, objectName, contentType string, reade
 		options)
 	if err != nil {
 		log.Printf("ERROR: fail to upload file object, error %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.UploadObject] c.S3Client.PutObject error: %w", err)
 	} else {
 		if srvConfig.Config.DataManagement.WebServer.Verbose > 0 {
 			log.Println("INFO: upload file", info)
 		}
 	}
-	return err
+	return nil
 }
 
 // DeleteObject deletes an object from a bucket
@@ -203,8 +213,9 @@ func (c *MinioClient) DeleteObject(bucket, objectName, versionId string) error {
 		options)
 	if err != nil {
 		log.Printf("ERROR: fail to delete file object, error %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.DeleteObject] c.S3Client.RemoveObject error: %w", err)
 	}
-	return err
+	return nil
 }
 
 // GetObject retrieves an object from a bucket
@@ -222,7 +233,10 @@ func (c *MinioClient) GetObject(bucket, objectName string) ([]byte, error) {
 		log.Printf("ERROR: fail to download file object, error %v", err)
 	}
 	data, err := io.ReadAll(object)
-	return data, err
+	if err != nil {
+		return data, fmt.Errorf("[golib.s3.MinioClient.GetObject] io.ReadAll error: %w", err)
+	}
+	return data, nil
 }
 
 // GetS3Link generates a URL for an object in the bucket or a bucket itself if objectName is empty.
@@ -240,14 +254,14 @@ func (c *MinioClient) GetS3Link(bucket, objectName string, expiresIn time.Durati
 
 	// Pre-signed URL with expiration
 	if objectName == "" {
-		return "", fmt.Errorf("cannot generate a pre-signed URL for the bucket itself with an expiration time")
+		return "", fmt.Errorf("[golib.s3.MinioClient.GetS3Link] cannot generate a pre-signed URL for the bucket itself with an expiration time")
 	}
 
 	// Generate a pre-signed URL for the object
 	ctx := context.Background()
 	url, err := c.S3Client.PresignedGetObject(ctx, bucket, objectName, expiresIn, nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate pre-signed URL for object %s in bucket %s: %v", objectName, bucket, err)
+		return "", fmt.Errorf("[golib.s3.MinioClient.GetS3Link] c.S3Client.PresignedGetObject error: %w", err)
 	}
 
 	return url.String(), nil
@@ -259,7 +273,7 @@ func (c *MinioClient) UploadFile(bucketName, fileName string) error {
 
 	file, err := os.Open(fileName)
 	if err != nil {
-		return fmt.Errorf("failed to open file: %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.UploadFile] os.Open error: %w", err)
 	}
 	defer file.Close()
 
@@ -272,14 +286,14 @@ func (c *MinioClient) UploadFile(bucketName, fileName string) error {
 			ContentType: "application/octet-stream",
 		})
 		if err != nil {
-			return fmt.Errorf("failed to upload small file: %v", err)
+			return fmt.Errorf("[golib.s3.MinioClient.UploadFile] c.S3Client.PutObject error: %w", err)
 		}
 		fmt.Println("Uploaded small file successfully!")
 	} else {
 		// Use multipart upload for large files
 		err = c.uploadLargeFile(bucketName, fileName)
 		if err != nil {
-			return fmt.Errorf("failed to upload large file: %v", err)
+			return fmt.Errorf("[golib.s3.MinioClient.UploadFile] c.uploadLargeFile error: %w", err)
 		}
 		fmt.Println("Uploaded large file successfully!")
 	}
@@ -292,7 +306,7 @@ func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
 	ctx := context.Background()
 	file, err := os.Open(fileName)
 	if err != nil {
-		return fmt.Errorf("failed to open file: %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.uploadLargeFile] os.Open error: %w", err)
 	}
 	defer file.Close()
 
@@ -307,7 +321,7 @@ func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
 		ContentType: "application/octet-stream",
 	})
 	if err != nil {
-		return fmt.Errorf("failed to initiate multipart upload: %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.uploadLargeFile] core.NewMultipartUpload error: %w", err)
 	}
 
 	var parts []minio.CompletePart
@@ -317,7 +331,7 @@ func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
 	for {
 		bytesRead, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
-			return fmt.Errorf("failed to read file: %v", err)
+			return fmt.Errorf("[golib.s3.MinioClient.uploadLargeFile] file.Read error: %w", err)
 		}
 		if bytesRead == 0 {
 			break
@@ -326,7 +340,7 @@ func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
 		part, err := core.PutObjectPart(ctx, bucketName, filepath.Base(fileName), uploadID, partNumber,
 			bytes.NewReader(buffer[:bytesRead]), int64(bytesRead), minio.PutObjectPartOptions{})
 		if err != nil {
-			return fmt.Errorf("failed to upload part: %v", err)
+			return fmt.Errorf("[golib.s3.MinioClient.uploadLargeFile] core.PutObjectPart error: %w", err)
 		}
 		parts = append(parts, minio.CompletePart{
 			PartNumber: partNumber,
@@ -338,7 +352,7 @@ func (c *MinioClient) uploadLargeFile(bucketName, fileName string) error {
 	// Complete the multipart upload
 	_, err = core.CompleteMultipartUpload(ctx, bucketName, filepath.Base(fileName), uploadID, parts, minio.PutObjectOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to complete multipart upload: %v", err)
+		return fmt.Errorf("[golib.s3.MinioClient.uploadLargeFile] core.CompleteMultipartUpload error: %w", err)
 	}
 
 	return nil
