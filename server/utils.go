@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	authz "github.com/CHESSComputing/golib/authz"
@@ -24,6 +25,9 @@ func GetAuthTokenUser(c *gin.Context) (string, string, error) {
 	token := parts[1]
 	claims, err := authz.TokenClaims(token, srvConfig.Config.Authz.ClientID)
 	user := claims.CustomClaims.User
+	if err != nil {
+		return token, user, fmt.Errorf("[golib.server.GetAuthTokenUser] authz.TokenClaims error: %w", err)
+	}
 
-	return token, user, err
+	return token, user, nil
 }
