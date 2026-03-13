@@ -46,8 +46,11 @@ func (t *TrustedClient) Decrypt(edata []byte, salt string) error {
 		return fmt.Errorf("[golib.utils.TrustedClient.Decrypt] cryptoutils.Decrypt error: %w", err)
 	}
 	err = json.Unmarshal(data, &tdata)
+	if err != nil {
+		return fmt.Errorf("[golib.utils.TrustedClient.Decrypt] json.Unmarshal error: %w", err)
+	}
 	t.User = tdata.User
 	t.IPs = tdata.IPs
 	t.MACs = tdata.MACs
-	return err
+	return nil
 }
