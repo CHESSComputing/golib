@@ -139,7 +139,10 @@ func (h *HttpRequest) Get(rurl string) (*http.Response, error) {
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("HttpRequest: GET response", string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.services.HttpRequest.Get] client.Do error: %w", err)
+	}
+	return resp, nil
 }
 
 // Post performs HTTP POST request
@@ -207,7 +210,10 @@ func (h *HttpRequest) Request(method, rurl, contentType string, buffer *bytes.Bu
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Printf("HttpRequest: method %s response %s, error %v", method, string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.services.HttpRequest.Request] client.Do error: %w", err)
+	}
+	return resp, nil
 }
 
 // PostForm perform HTTP POST form request with bearer token
@@ -233,5 +239,8 @@ func (h *HttpRequest) PostForm(rurl string, formData url.Values) (*http.Response
 		dump, err := httputil.DumpResponse(resp, true)
 		log.Println("HttpRequest: POST form response", string(dump), err)
 	}
-	return resp, err
+	if err != nil {
+		return resp, fmt.Errorf("[golib.services.HttpRequest.PostForm] client.Do error: %w", err)
+	}
+	return resp, nil
 }
