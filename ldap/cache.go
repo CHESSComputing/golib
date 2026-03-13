@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +16,11 @@ import (
 // Entry represents LDAP user entry
 type Entry struct {
 	DN        string
+	Name      string
+	Email     string
+	Uid       string
+	UidNumber int
+	GidNumber int
 	Groups    []string
 	Btrs      []string
 	Beamlines []string
@@ -47,7 +53,7 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	// extract LDAP configuration parameters
 	ldapURL := srvConfig.Config.LDAP.URL
 	baseDN := srvConfig.Config.LDAP.BaseDN
-	attributes := []string{"memberOf"}
+	attributes := []string{"memberOf", "uidNumber", "gidNumber", "uid", "mail", "displayName"}
 	expireDuration := time.Duration(srvConfig.Config.LDAP.Expire) * time.Second
 
 	// Check if the entry exists in the cache and is still valid
@@ -71,76 +77,86 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 		return Entry{}, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
 	}
 	for _, entry := range results.Entries {
-		for _, attr := range entry.Attributes {
-			// Create cache entry with correct expiration time
-			// here attr.Name is our attribute name, e.g. memberOf
-			cacheEntry := Entry{
-				DN:     entry.DN,
-				Groups: attr.Values,
-				Expire: time.Now().Add(expireDuration), // Expiration based on config
+		// Create cache entry with correct expiration time
+		cacheEntry := Entry{
+			DN:     entry.DN,
+			Expire: time.Now().Add(expireDuration), // Expiration based on config
 
-			}
-
-			// find out BTRs and Beamlines
-			var btrs, beamlines, foxdens []string
-			for _, val := range attr.Values {
-				btr := GetBTR(val)
-				if btr != "" {
-					btrs = append(btrs, btr)
-				}
-				// perform recursive search of users groups to extract additional BTRs
-				if strings.Contains(val, "CN=Users") {
-					arr := strings.Split(val, ",")
-					if len(arr) > 0 {
-						a := arr[0] // first CN attribute represents group
-						groupCN := strings.Replace(a, "CN=", "", -1)
-						verbose := srvConfig.Config.Authz.Verbose
-						recursionLevel := srvConfig.Config.LDAP.RecursionLevel
-						if recursionLevel == 0 {
-							recursionLevel = 5 // default value based on CLASSE IT suggestion
-						}
-						users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, verbose)
-						if err == nil {
-							for _, user := range users {
-								btr := GetBTR(user)
-								if btr != "" {
-									btrs = append(btrs, btr)
-								}
-							}
-						} else {
-							log.Printf("### recursive search groupCN=%s, users=%+v, error=%v", groupCN, users, err)
-						}
-					}
-				}
-				btrs = utils.List2Set(btrs)
-				if strings.Contains(val, "CN=Users") && strings.Contains(val, "-m") {
-					for _, a := range strings.Split(val, ",") {
-						if strings.HasPrefix(a, "CN=") && a != "CN=Users" {
-							beamline := strings.Replace(a, "CN=", "", -1)
-							beamline = removeSuffix(beamline, "-m")
-							beamlines = append(beamlines, beamline)
-						}
-					}
-				}
-				if strings.Contains(val, "CN=foxden") {
-					for _, a := range strings.Split(val, ",") {
-						if strings.HasPrefix(a, "CN=foxden") {
-							foxden := strings.Replace(a, "CN=", "", -1)
-							foxdens = append(foxdens, foxden)
-						}
-					}
-				}
-			}
-			cacheEntry.Foxdens = foxdens
-			cacheEntry.Beamlines = beamlines
-			cacheEntry.Btrs = btrs
-
-			// Store in cache
-			c.mutex.Lock()
-			c.Map[user] = cacheEntry
-			c.mutex.Unlock()
-			return cacheEntry, nil
 		}
+		entry.PrettyPrint(3)
+		cacheEntry.Name = entry.GetAttributeValue("displayName")
+		cacheEntry.Uid = entry.GetAttributeValue("uid")
+		cacheEntry.Email = entry.GetAttributeValue("mail")
+		cacheEntry.Name = entry.GetAttributeValue("displayName")
+		if uid, err := strconv.ParseInt(entry.GetAttributeValue("uidNumber"), 10, 32); err == nil {
+			cacheEntry.UidNumber = int(uid)
+		}
+		if gid, err := strconv.ParseInt(entry.GetAttributeValue("gidNumber"), 10, 32); err == nil {
+			cacheEntry.GidNumber = int(gid)
+		}
+		// work with memberOf attributes
+		attrValues := entry.GetAttributeValues("memberOf")
+		cacheEntry.Groups = attrValues
+
+		// find out BTRs and Beamlines
+		var btrs, beamlines, foxdens []string
+		for _, val := range attrValues {
+			btr := GetBTR(val)
+			if btr != "" {
+				btrs = append(btrs, btr)
+			}
+			// perform recursive search of users groups to extract additional BTRs
+			if strings.Contains(val, "CN=Users") {
+				arr := strings.Split(val, ",")
+				if len(arr) > 0 {
+					a := arr[0] // first CN attribute represents group
+					groupCN := strings.Replace(a, "CN=", "", -1)
+					verbose := srvConfig.Config.Authz.Verbose
+					recursionLevel := srvConfig.Config.LDAP.RecursionLevel
+					if recursionLevel == 0 {
+						recursionLevel = 5 // default value based on CLASSE IT suggestion
+					}
+					users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, verbose)
+					if err == nil {
+						for _, user := range users {
+							btr := GetBTR(user)
+							if btr != "" {
+								btrs = append(btrs, btr)
+							}
+						}
+					} else {
+						log.Printf("### recursive search groupCN=%s, users=%+v, error=%v", groupCN, users, err)
+					}
+				}
+			}
+			btrs = utils.List2Set(btrs)
+			if strings.Contains(val, "CN=Users") && strings.Contains(val, "-m") {
+				for _, a := range strings.Split(val, ",") {
+					if strings.HasPrefix(a, "CN=") && a != "CN=Users" {
+						beamline := strings.Replace(a, "CN=", "", -1)
+						beamline = removeSuffix(beamline, "-m")
+						beamlines = append(beamlines, beamline)
+					}
+				}
+			}
+			if strings.Contains(val, "CN=foxden") {
+				for _, a := range strings.Split(val, ",") {
+					if strings.HasPrefix(a, "CN=foxden") {
+						foxden := strings.Replace(a, "CN=", "", -1)
+						foxdens = append(foxdens, foxden)
+					}
+				}
+			}
+		}
+		cacheEntry.Foxdens = foxdens
+		cacheEntry.Beamlines = beamlines
+		cacheEntry.Btrs = btrs
+
+		// Store in cache
+		c.mutex.Lock()
+		c.Map[user] = cacheEntry
+		c.mutex.Unlock()
+		return cacheEntry, nil
 	}
 	return Entry{}, errors.New("no cache entry found")
 }
