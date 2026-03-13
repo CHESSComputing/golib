@@ -409,9 +409,10 @@ func Update(dbname, collname string, spec, newdata map[string]any) error {
 	c := client.Database(dbname).Collection(collname)
 	_, err := c.UpdateOne(ctx, spec, newdata)
 	if err != nil {
-		log.Printf("Unable to update record, spec %v, data %v, error %v\n", spec, newdata, err)
+		log.Printf("ERROR: Unable to update record, spec %v, data %v, error %v\n", spec, newdata, err)
+		return fmt.Errorf("[golib.mongo.Update] c.UpdateOne error: %w", err)
 	}
-	return err
+	return nil
 }
 
 // Count gets number records from MongoDB
