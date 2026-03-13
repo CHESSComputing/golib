@@ -293,6 +293,12 @@ type MetaData struct {
 	DataLocationAttributes []string `mapstructure:"DataLocationAttributes"` // data location attributes to use
 }
 
+// ClasseInfoData represents User ClasseInfo configuration
+type ClasseInfoData struct {
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
+}
+
 // UserMetaData represents User MetaData configuration
 type UserMetaData struct {
 	FoxdenUser `mapstructure:"FoxdenUser"`
@@ -426,6 +432,7 @@ type Services struct {
 	DOIServiceURL      string `mapstructure:"DOIServiceUrl"`
 	SyncServiceURL     string `mapstructure:"SyncServiceUrl"`
 	UserMetaDataURL    string `mapstructure:"UserMetaDataUrl"`
+	ClasseInfoURL      string `mapstructure:"ClasseInfoUrl"`
 }
 
 // SrvConfig represents configuration structure
@@ -448,6 +455,7 @@ type SrvConfig struct {
 	Encryption      `mapstructure:"Encryption"`
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
 	UserMetaData    `mapstructure:"UserMetaData"`
+	ClasseInfoData  `mapstructure:"ClasseInfoService"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
 	Publication     `mapstructure:"PublicationService"`
