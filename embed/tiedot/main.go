@@ -25,8 +25,7 @@ func Insert(dbname, collname string, records []map[string]any) {
 
 // Upsert records into document-oriented db
 func Upsert(dbname, collname, attr string, records []map[string]any) error {
-	var err error
-	return err
+	return nil
 }
 
 // Get records from document-oriented db
@@ -44,26 +43,27 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 
 // Update inplace for given spec
 func Update(dbname, collname string, spec, newdata map[string]any) error {
+	// Not implemented yet
 	return nil
 }
 
 // Count gets number records from document-oriented db
 func Count(dbname, collname string, spec map[string]any) int {
+	// Not implemented yet
 	return 0
 }
 
 // Remove records from document-oriented db
 func Remove(dbname, collname string, spec map[string]any) error {
-	var err error
-	return err
+	// Not implemented yet
+	return nil
 }
 
 // Distinct gets number records from document-oriented db
 func Distinct(dbname, collname, field string) ([]any, error) {
 	var out []any
-	var err error
 	// Not implemented yet
-	return out, err
+	return out, nil
 }
 
 // InsertRecord insert record with given spec to document-oriented db

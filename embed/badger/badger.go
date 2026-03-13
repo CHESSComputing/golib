@@ -132,7 +132,7 @@ func get(collname string, spec map[string]interface{}) ([]map[string]interface{}
 		}
 		return nil
 	})
-	return results, err
+	return results, nil
 }
 
 // Update records in BadgerDB
@@ -140,8 +140,9 @@ func Update(dbname, collname string, spec, newdata map[string]any) error {
 	err := update(collname, spec, newdata)
 	if err != nil {
 		log.Println("ERROR:", err)
+		return fmt.Errorf("[golib.badger.Update] update error: %w", err)
 	}
-	return err
+	return nil
 }
 func update(collname string, spec map[string]interface{}, newdata map[string]interface{}) error {
 	return db.Update(func(txn *badger.Txn) error {
@@ -219,7 +220,7 @@ func Distinct(dbname, collname, field string) ([]any, error) {
 			out = append(out, rec)
 		}
 	}
-	return out, err
+	return out, fmt.Errorf("[golib.badger.Distinct] get error: %w", err)
 }
 
 // InsertRecord insert record with given spec to document-oriented db
