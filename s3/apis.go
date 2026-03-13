@@ -71,5 +71,8 @@ func InitializeS3Client(clientType string) (S3Client, error) {
 	if s3Client != nil {
 		s3Client.Initialize()
 	}
-	return s3Client, err
+	if err != nil {
+		return s3Client, fmt.Errorf("[golib.s3.InitializeS3Client] error: %w", err)
+	}
+	return s3Client, nil
 }
