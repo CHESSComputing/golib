@@ -12,6 +12,12 @@ import (
 
 // Search provides LDAP search for our FOXDEN LDAP service
 func Search(ldapURL, login, password, baseDN, user string, attributes []string) (*ldap.SearchResult, error) {
+	// by default we search by uid
+	return SearchBy(ldapURL, login, password, baseDN, user, "uid", attributes)
+}
+
+// SearchBy provides LDAP search for our FOXDEN LDAP service
+func SearchBy(ldapURL, login, password, baseDN, user, method string, attributes []string) (*ldap.SearchResult, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
@@ -28,8 +34,16 @@ func Search(ldapURL, login, password, baseDN, user string, attributes []string) 
 	}
 
 	// create LDAP filter, must start and finish with ()!
-	//     filter := fmt.Sprintf("(CN=%s)", ldap.EscapeFilter(user))
 	filter := fmt.Sprintf("(uid=%s)", ldap.EscapeFilter(user))
+	if method == "name" {
+		filter = fmt.Sprintf("(name=%s)", ldap.EscapeFilter(user))
+	} else if method == "mail" {
+		filter = fmt.Sprintf("(mail=%s)", ldap.EscapeFilter(user))
+	} else if method == "uidNumber" {
+		filter = fmt.Sprintf("(uidNumber=%s)", ldap.EscapeFilter(user))
+	} else if method == "cn" {
+		filter = fmt.Sprintf("(CN=%s)", ldap.EscapeFilter(user))
+	}
 
 	// query LDAP server
 	sizeLimit := 0

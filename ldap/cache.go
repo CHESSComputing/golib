@@ -46,6 +46,12 @@ type Cache struct {
 
 // Search provides cached search results
 func (c *Cache) Search(login, password, user string) (Entry, error) {
+	// by default we search by uid
+	return c.SearchBy(login, password, user, "uid")
+}
+
+// Search provides cached search results
+func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 	if c.Map == nil {
 		c.Map = make(map[string]Entry)
 	}
@@ -72,7 +78,8 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	}
 
 	// Perform LDAP search if no valid cache entry is found
-	results, err := Search(ldapURL, login, password, baseDN, user, attributes)
+	results, err := SearchBy(
+		ldapURL, login, password, baseDN, user, method, attributes)
 	if err != nil {
 		return Entry{}, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
 	}
