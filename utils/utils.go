@@ -40,7 +40,7 @@ func RecordSize(v interface{}) (int64, error) {
 	if err == nil {
 		return int64(binary.Size(data)), nil
 	}
-	return 0, err
+	return 0, fmt.Errorf("[golib.utils.RecordSize] json.Marshal error: %w", err)
 }
 
 // Stack returns full runtime stack
@@ -254,5 +254,5 @@ func Publish2DOIService(record map[string]any) (string, string, error) {
 		return schema, url, errors.New("FOXDEN configuration does not provide DOIServiceURL")
 	}
 	url = srvConfig.Config.Services.DOIServiceURL
-	return schema, url, err
+	return schema, url, fmt.Errorf("[golib.utils.Publish2DOIService] error: %w", err)
 }
