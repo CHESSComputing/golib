@@ -103,5 +103,8 @@ func DataciteMetadata(doi, did, description string, record map[string]any, publi
 		},
 	}
 	payloadBytes, err := json.MarshalIndent(payload, "", "   ")
-	return payloadBytes, err
+	if err != nil {
+		return payloadBytes, fmt.Errorf("[golib.datacite.DataciteMetadata] json.MarshalIndent error: %w", err)
+	}
+	return payloadBytes, nil
 }
