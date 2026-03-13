@@ -54,6 +54,9 @@ func (c *Client) SendPrompt(ctx context.Context, prompt string) (string, error) 
 
 func (c *Client) StreamPrompt(ctx context.Context, prompt string, callback func(string)) error {
 	_, err := c.sendWithRetry(ctx, prompt, true, callback)
+	if err != nil {
+		return fmt.Errorf("[golib.ollama.StreamPrompt] c.sendWithRetry error: %w", err)
+	}
 	return err
 }
 
@@ -101,7 +104,7 @@ func (c *Client) SendRequest(ctx context.Context, prompt string, stream bool, ca
 				if errors.Is(err, io.EOF) {
 					break
 				}
-				return "", err
+				return "", fmt.Errorf("[golib.ollama.Client.SendRequest] reader.ReadBytes error: %w", err)
 			}
 			var res Response
 			if err := json.Unmarshal(line, &res); err != nil {
