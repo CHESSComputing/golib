@@ -57,7 +57,7 @@ func (c *Client) StreamPrompt(ctx context.Context, prompt string, callback func(
 	if err != nil {
 		return fmt.Errorf("[golib.ollama.StreamPrompt] c.sendWithRetry error: %w", err)
 	}
-	return err
+	return nil
 }
 
 func (c *Client) sendWithRetry(ctx context.Context, prompt string, stream bool, callback func(string)) (string, error) {
