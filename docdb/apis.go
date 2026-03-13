@@ -46,5 +46,8 @@ func InitializeDocDB(uri string) (DocDB, error) {
 	if docDB != nil {
 		docDB.InitDB(uri)
 	}
-	return docDB, err
+	if err != nil {
+		return docDB, fmt.Errorf("[golib.docdb.InitializeDocDB] error: %w", err)
+	}
+	return docDB, nil
 }
