@@ -125,8 +125,9 @@ func Update(dbname, collname string, spec, newdata map[string]any) error {
 	err := db.Update(query, newdata)
 	if err != nil {
 		log.Printf("Failed to update document: %v", err)
+		return fmt.Errorf("[golib.embed.Update] db.Update error: %w", err)
 	}
-	return err
+	return nil
 }
 
 // Count gets number of records from document-oriented db
