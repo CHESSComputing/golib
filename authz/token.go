@@ -13,7 +13,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -95,10 +94,9 @@ func (t *Token) Validate(clientId string) error {
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return errors.New("invalid signature")
-			log.Fatal(err)
+			return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims invalid signature error: %w", err)
 		}
-		return err
+		return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims error: %w", err)
 	}
 	if !tkn.Valid {
 		return errors.New("token.Validate: invalid token")
@@ -116,7 +114,6 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return claims, fmt.Errorf("[golib.auth.TokenClaims] jwt.ParseWithClaims error: %w", err)
-			//             log.Println("ERROR", err)
 		}
 	}
 	if tkn == nil {
@@ -124,8 +121,7 @@ func TokenClaims(accessToken, clientId string) (*Claims, error) {
 		return claims, err
 	}
 	if !tkn.Valid {
-		err := errors.New("TokenClaims: invalid token")
-		return claims, err
+		return claims, errors.New("[golib.auth.TokenClaims] invalid token")
 	}
 	return claims, nil
 }
@@ -171,8 +167,11 @@ func JWTAccessToken(secretKey string, expiresAt int64, customClaims CustomClaims
 	// SignedString declared as interface{} but should accept []byte
 	// see https://github.com/dgrijalva/jwt-go/issues/65
 	token, err := tokenString.SignedString([]byte(secretKey))
+	if err != nil {
+		return token, fmt.Errorf("[golib.auth.JWTAccessToken] tokenString.SignedString error: %w", err)
+	}
 
-	return token, err
+	return token, nil
 }
 
 // Helper function to extract bearer token from http request
