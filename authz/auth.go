@@ -138,7 +138,7 @@ func InspectToken(provider Provider, token string, verbose int) (TokenAttributes
 	if verbose > 1 {
 		log.Printf("token attributes %+v\n", attrs)
 	}
-	return attrs, err
+	return attrs, nil
 }
 
 // UserCredentials inspect http request and return user credentials from its token
