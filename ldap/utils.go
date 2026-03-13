@@ -47,7 +47,10 @@ func Search(ldapURL, login, password, baseDN, user string, attributes []string) 
 		attributes,
 		controls)
 	result, err := l.Search(searchReq)
-	return result, err
+	if err != nil {
+		return result, fmt.Errorf("[golib.ldap.Search] l.Search error: %w", err)
+	}
+	return result, nil
 }
 
 // helper function to remove specific suffix from the end of the string
@@ -168,7 +171,7 @@ func getGroupMembersRecursive(
 
 	res, err := l.Search(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("[golib.ldap.getGroupMembersRecursive] l.Search error: %w", err)
 	}
 
 	if len(res.Entries) == 0 {
@@ -212,6 +215,7 @@ func getGroupMembersRecursive(
 	return nil
 }
 
+// GetBTRUsersFromGroup fetch BTR user information
 func GetBTRUsersFromGroup(
 	ldapURL, login, password, baseDN, groupCN string, recursionLevel, verbose int,
 ) ([]string, error) {
@@ -223,12 +227,12 @@ func GetBTRUsersFromGroup(
 	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.ldap.GetBTRUsersFromGroup] ldap.DialURL error: %w", err)
 	}
 	defer l.Close()
 
 	if err := l.Bind(login, password); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.ldap.GetBTRUsersFromGroup] l.Bind error: %w", err)
 	}
 
 	groupDN := fmt.Sprintf("CN=%s,CN=Users,%s", groupCN, baseDN)
@@ -237,7 +241,7 @@ func GetBTRUsersFromGroup(
 	results := make(map[string]struct{})
 
 	if err := getGroupMembersRecursive(l, groupDN, baseDN, visited, results, recursionLevel, verbose); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[golib.ldap.GetBTRUsersFromGroup] getGroupMembersRecursive error: %w", err)
 	}
 
 	var users []string
