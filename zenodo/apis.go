@@ -44,7 +44,10 @@ func CreateRecord(payload []byte) (CreateResponse, error) {
 		log.Println("createDocument received response", string(data))
 	}
 	err = json.Unmarshal(data, &response)
-	return response, err
+	if err != nil {
+		return response, fmt.Errorf("[golib.zenodo.CreateRecord] json.Unmarshal error: %w", err)
+	}
+	return response, nil
 }
 
 // AddRecord represents add API to zenodo
@@ -62,7 +65,7 @@ func AddRecord(docId int64, fileName string, foxdenRecord any) error {
 		return fmt.Errorf("[golib.zenodo.AddRecord] DoiRecords error: %w", err)
 	}
 	if len(records) != 1 {
-		return errors.New("Too many DOI records")
+		return errors.New("[golib.zenodo.AddRecord] too many DOI records")
 	}
 	rec := records[0]
 	arr := strings.Split(rec.Links.Bucket, "/")
@@ -88,7 +91,10 @@ func AddRecord(docId int64, fileName string, foxdenRecord any) error {
 	if Verbose > 0 {
 		log.Println("updateDocument received response", string(data))
 	}
-	return err
+	if err != nil {
+		return fmt.Errorf("[golib.zenodo.AddRecord] io.ReadAll error: %w", err)
+	}
+	return nil
 }
 
 // UpdateRecord updates Zenodo records with our metadata
@@ -130,7 +136,10 @@ func UpdateRecord(docId int64, mrec MetaDataRecord) error {
 	if Verbose > 0 {
 		log.Println("updateDocument received response", string(data))
 	}
-	return err
+	if err != nil {
+		return fmt.Errorf("[golib.zenodo.UpdateRecord] io.ReadAll error: %w", err)
+	}
+	return nil
 }
 
 // PublishRecord publishes docId record in Zenodo
@@ -155,7 +164,10 @@ func PublishRecord(docId int64) (DoiRecord, error) {
 		log.Println("publishDocument received response", string(data))
 	}
 	err = json.Unmarshal(data, &record)
-	return record, err
+	if err != nil {
+		return record, fmt.Errorf("[golib.zenodo.PublishRecord] json.Unmarshal error: %w", err)
+	}
+	return record, nil
 }
 
 // DoiRecords returns list of Zenodo DOI records
@@ -272,9 +284,12 @@ func MakePublic(rid string) error {
 	if Verbose > 0 {
 		log.Println("MakePublic received response", string(data))
 	}
+	if err != nil {
+		return fmt.Errorf("[golib.zenodo.MakePublic] io.ReadAll error: %w", err)
+	}
 	if resp.StatusCode >= 400 && resp.StatusCode < 200 {
 		log.Println("MakePublic received response", string(data))
 		return errors.New(fmt.Sprintf("fail to make public DOI record, status code=%v", resp.StatusCode))
 	}
-	return err
+	return nil
 }
