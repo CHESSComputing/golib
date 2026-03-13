@@ -132,7 +132,10 @@ func get(collname string, spec map[string]interface{}) ([]map[string]interface{}
 		}
 		return nil
 	})
-	return results, fmt.Errorf("[golib.badger.Get] db.View error: %w", err)
+	if err != nil {
+		return results, fmt.Errorf("[golib.badger.Get] db.View error: %w", err)
+	}
+	return results, nil
 }
 
 // Update records in BadgerDB
