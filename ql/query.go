@@ -39,23 +39,23 @@ func ParseQuery(query string) (map[string]any, error) {
 	// support MongoDB specs
 	if strings.Contains(query, "{") {
 		err := json.Unmarshal([]byte(query), &spec)
-		if err == nil {
-			if Verbose > 0 {
-				log.Printf("found bson spec %+v", spec)
-			}
-			// adjust query _id to object id type
-			if val, ok := spec["_id"]; ok {
-				if oid, err := bson.ObjectIDFromHex(val.(string)); err == nil {
-					spec["_id"] = oid
-				}
-			}
-			if _, ok := spec["$or"]; ok {
-				return spec, nil
-			}
-			return adjustQuery(spec), nil
+		if err != nil {
+			log.Printf("ERROR: unable to parse input query '%s' error %v", query, err)
+			return nil, fmt.Errorf("[golib.ql.ParseQuery] json.Unmarshal error: %w", err)
 		}
-		log.Printf("ERROR: unable to parse input query '%s' error %v", query, err)
-		return nil, err
+		if Verbose > 0 {
+			log.Printf("found bson spec %+v", spec)
+		}
+		// adjust query _id to object id type
+		if val, ok := spec["_id"]; ok {
+			if oid, err := bson.ObjectIDFromHex(val.(string)); err == nil {
+				spec["_id"] = oid
+			}
+		}
+		if _, ok := spec["$or"]; ok {
+			return spec, nil
+		}
+		return adjustQuery(spec), nil
 	}
 
 	// query as key:value
