@@ -1,6 +1,8 @@
 package doi
 
 import (
+	"fmt"
+
 	datacite "github.com/CHESSComputing/golib/datacite"
 )
 
@@ -18,7 +20,10 @@ func (d *DataciteProvider) Init() {
 // Publish provides publication of dataset with did and description
 func (d *DataciteProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
 	doi, doiLink, err := datacite.Publish(did, description, record, publish, d.Verbose)
-	return doi, doiLink, err
+	if err != nil {
+		return doi, doiLink, fmt.Errorf("[golib.doi.DataciteProvider.Publish] datacite.Publish error: %w", err)
+	}
+	return doi, doiLink, nil
 }
 
 // MakePublic provides publication of draft DOI
