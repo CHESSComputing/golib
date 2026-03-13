@@ -1040,27 +1040,27 @@ func loadNestedRecords(filename string) ([]SchemaRecord, error) {
 	var records []SchemaRecord
 	_, err := os.Stat(filename)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] os.Stat error: %w", err)
 	}
 	file, err := os.Open(filename)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] os.Open error: %w", err)
 	}
 	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return records, err
+		return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] io.ReadAll error: %w", err)
 	}
 	if strings.HasSuffix(filename, "json") {
 		err = json.Unmarshal(data, &records)
 		if err != nil {
-			return records, err
+			return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] json.Unmarshal error: %w", err)
 		}
 	} else if strings.HasSuffix(filename, "yaml") || strings.HasSuffix(filename, "yml") {
 		var yrecords []map[interface{}]interface{}
 		err = yaml.Unmarshal(data, &yrecords)
 		if err != nil {
-			return records, err
+			return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] yaml.Unmarshal error: %w", err)
 		}
 		for _, yr := range yrecords {
 			m := convertYaml(yr)
