@@ -76,7 +76,7 @@ func Publish(did, description string, record map[string]any, publish bool, verbo
 	}
 	doiLink := fmt.Sprintf("%s/dois/%s", srvConfig.Config.DOI.Datacite.Url, doi)
 
-	return doi, doiLink, err
+	return doi, doiLink, nil
 }
 
 // GetRecord fetches DOI record for given doi
@@ -117,7 +117,10 @@ func GetRecord(doi string, verbose int) (ResponsePayload, error) {
 		return record, fmt.Errorf("[golib.datacite.GetRecord] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(body, &record)
-	return record, err
+	if err != nil {
+		return record, fmt.Errorf("[golib.datacite.GetRecord] json.Unmarshal error: %w", err)
+	}
+	return record, nil
 }
 
 // MakePublic implements logic of publishing draft DOI
