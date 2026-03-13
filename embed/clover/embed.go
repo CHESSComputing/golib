@@ -173,9 +173,8 @@ func Remove(dbname, collname string, spec map[string]any) error {
 // Distinct gets number records from document-oriented db
 func Distinct(dbname, collname, field string) ([]any, error) {
 	var out []any
-	var err error
 	// Not implemented yet
-	return out, err
+	return out, nil
 }
 
 // InsertRecord insert record with given spec to document-oriented db
