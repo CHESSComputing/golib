@@ -90,5 +90,8 @@ func QLRecords(qlKey string) ([]QLRecord, error) {
 		return records, fmt.Errorf("[golib.ql.QLRecords] io.ReadAll error: %w", err)
 	}
 	err = json.Unmarshal(data, &records)
-	return records, err
+	if err != nil {
+		return records, fmt.Errorf("[golib.ql.QLRecords] json.Unmarshal error: %w", err)
+	}
+	return records, nil
 }
