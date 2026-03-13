@@ -139,8 +139,11 @@ func Publish(did, projectName, description string, record map[string]any, publis
 			log.Printf("publish dataset with did=%s doi=%s projectID=%v datasetID=%v ds=%+v err=%v testInstance=%v", did, doi, projectID, datasetID, ds, err, testInstance)
 		}
 	}
+	if err != nil {
+		return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons] error: %w", err)
+	}
 
-	return doi, doiLink, err
+	return doi, doiLink, nil
 }
 
 // FindProjectDatasetIDs finds both projectID and datasetID for a given doi
@@ -168,7 +171,7 @@ func FindProjectDatasetIDs(doi string) (int, int, error) {
 		for _, d := range datasets {
 			if d.DOI == doi || d.TestDOI == doi {
 				datasetID = d.ID
-				return projectID, datasetID, err
+				return projectID, datasetID, nil
 			}
 		}
 	}
@@ -209,5 +212,5 @@ func MakePublic(doi string, verbose int) error {
 		return fmt.Errorf("[golib.MaterialsCommons.MakePublic] mcClient.PublishDataset error: %w", err)
 	}
 
-	return err
+	return nil
 }
