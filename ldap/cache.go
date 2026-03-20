@@ -40,8 +40,9 @@ func (e *Entry) Belong(group string) bool {
 
 // Cache represent LDAP cache
 type Cache struct {
-	mutex sync.RWMutex
-	Map   map[string]Entry
+	mutex   sync.RWMutex
+	Map     map[string]Entry
+	Verbose int
 }
 
 // Search provides cached search results
@@ -118,12 +119,11 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 				if len(arr) > 0 {
 					a := arr[0] // first CN attribute represents group
 					groupCN := strings.Replace(a, "CN=", "", -1)
-					verbose := srvConfig.Config.Authz.Verbose
 					recursionLevel := srvConfig.Config.LDAP.RecursionLevel
 					if recursionLevel == 0 {
 						recursionLevel = 5 // default value based on CLASSE IT suggestion
 					}
-					users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, verbose)
+					users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, c.Verbose)
 					if err == nil {
 						for _, user := range users {
 							btr := GetBTR(user)
