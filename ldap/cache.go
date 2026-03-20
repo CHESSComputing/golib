@@ -91,7 +91,9 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 			Expire: time.Now().Add(expireDuration), // Expiration based on config
 
 		}
-		entry.PrettyPrint(3)
+		if c.Verbose > 1 {
+			entry.PrettyPrint(3)
+		}
 		cacheEntry.Name = entry.GetAttributeValue("displayName")
 		cacheEntry.Uid = entry.GetAttributeValue("uid")
 		cacheEntry.Email = entry.GetAttributeValue("mail")
