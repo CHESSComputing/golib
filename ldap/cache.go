@@ -51,17 +51,11 @@ func (c *Cache) Search(login, password, user string) (Entry, error) {
 	return c.SearchBy(login, password, user, "uid")
 }
 
-// Search provides cached search results
+// SearchBy provides cached search results
 func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 	if c.Map == nil {
 		c.Map = make(map[string]Entry)
 	}
-
-	// extract LDAP configuration parameters
-	ldapURL := srvConfig.Config.LDAP.URL
-	baseDN := srvConfig.Config.LDAP.BaseDN
-	attributes := []string{"memberOf", "uidNumber", "gidNumber", "uid", "mail", "displayName"}
-	expireDuration := time.Duration(srvConfig.Config.LDAP.Expire) * time.Second
 
 	// Check if the entry exists in the cache and is still valid
 	c.mutex.RLock()
@@ -79,10 +73,38 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 	}
 
 	// Perform LDAP search if no valid cache entry is found
+	records, err := Records(
+		login, password, user, method, c.Verbose)
+	if err != nil {
+		return Entry{}, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
+	}
+	if len(records) > 0 && err == nil {
+		// Store in cache
+		c.mutex.Lock()
+		c.Map[user] = cacheEntry
+		c.mutex.Unlock()
+		return cacheEntry, nil
+	}
+	return Entry{}, errors.New("no cache entry found")
+}
+
+// MultiSearch provides cached search results
+func Records(login, password, user, method string, verbose int) ([]Entry, error) {
+	var records []Entry
+	var err error
+
+	// extract LDAP configuration parameters
+	ldapURL := srvConfig.Config.LDAP.URL
+	baseDN := srvConfig.Config.LDAP.BaseDN
+	attributes := []string{
+		"memberOf", "uidNumber", "gidNumber", "uid", "mail", "displayName"}
+	expireDuration := time.Duration(srvConfig.Config.LDAP.Expire) * time.Second
+
+	// Perform LDAP search if no valid cache entry is found
 	results, err := SearchBy(
 		ldapURL, login, password, baseDN, user, method, attributes)
 	if err != nil {
-		return Entry{}, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
+		return records, fmt.Errorf("[golib.ldap.Cache.Search] Search error: %w", err)
 	}
 	for _, entry := range results.Entries {
 		// Create cache entry with correct expiration time
@@ -90,9 +112,6 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 			DN:     entry.DN,
 			Expire: time.Now().Add(expireDuration), // Expiration based on config
 
-		}
-		if c.Verbose > 1 {
-			entry.PrettyPrint(3)
 		}
 		cacheEntry.Name = entry.GetAttributeValue("displayName")
 		cacheEntry.Uid = entry.GetAttributeValue("uid")
@@ -125,7 +144,7 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 					if recursionLevel == 0 {
 						recursionLevel = 5 // default value based on CLASSE IT suggestion
 					}
-					users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, c.Verbose)
+					users, err := GetBTRUsersFromGroup(ldapURL, login, password, baseDN, groupCN, recursionLevel, verbose)
 					if err == nil {
 						for _, user := range users {
 							btr := GetBTR(user)
@@ -134,7 +153,9 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 							}
 						}
 					} else {
-						log.Printf("### recursive search groupCN=%s, users=%+v, error=%v", groupCN, users, err)
+						if verbose > 0 {
+							log.Printf("### recursive search groupCN=%s, users=%+v, error=%v", groupCN, users, err)
+						}
 					}
 				}
 			}
@@ -161,11 +182,7 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 		cacheEntry.Beamlines = beamlines
 		cacheEntry.Btrs = btrs
 
-		// Store in cache
-		c.mutex.Lock()
-		c.Map[user] = cacheEntry
-		c.mutex.Unlock()
-		return cacheEntry, nil
+		records = append(records, cacheEntry)
 	}
-	return Entry{}, errors.New("no cache entry found")
+	return records, err
 }
