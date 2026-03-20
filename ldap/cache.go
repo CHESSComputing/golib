@@ -80,6 +80,7 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 	}
 	if len(records) > 0 && err == nil {
 		// Store in cache
+		cacheEntry := records[0]
 		c.mutex.Lock()
 		c.Map[user] = cacheEntry
 		c.mutex.Unlock()
