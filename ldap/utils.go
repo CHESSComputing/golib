@@ -238,7 +238,9 @@ func GetBTRUsersFromGroup(
 
 	time0 := time.Now()
 	defer func() {
-		log.Printf("INFO: GetBTRUsersFromGroup with recursion level=%d elapsed time: %s", recursionLevel, time.Since(time0))
+		if verbose > 0 {
+			log.Printf("INFO: GetBTRUsersFromGroup with recursion level=%d elapsed time: %s", recursionLevel, time.Since(time0))
+		}
 	}()
 	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 	l, err := ldap.DialURL(ldapURL, ldap.DialWithTLSConfig(tlsConfig))
