@@ -195,10 +195,10 @@ type AuthUser struct {
 
 // TokenMap defines token map structure
 type TokenMap struct {
-	AccessToken string
-	Scope       string
-	Type        string
-	Expires     int64
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
+	Type        string `json:"type"`
+	Expires     int64  `json:"expires"`
 }
 
 // TokenMap generates valid token map
