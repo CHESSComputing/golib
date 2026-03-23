@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	srvConfig "github.com/CHESSComputing/golib/config"
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -178,4 +179,53 @@ func BearerToken(r *http.Request) string {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "bearer ")
 	token = strings.TrimPrefix(token, "Bearer ")
 	return token
+}
+
+// AuthUser defines common authenticated user structure
+type AuthUser struct {
+	Name    string
+	Scope   string
+	Kind    string
+	App     string
+	Expires int64
+	Btrs    []string
+	Groups  []string
+	Scopes  []string
+}
+
+// TokenMap defines token map structure
+type TokenMap struct {
+	AccessToken string
+	Scope       string
+	Type        string
+	Expires     int64
+}
+
+// TokenMap generates valid token map
+func (a *AuthUser) TokenMap() (TokenMap, error) {
+	if a.Expires == 0 {
+		a.Expires = 3600
+	}
+	customClaims := CustomClaims{
+		User:        a.Name,
+		Scope:       a.Scope,
+		Kind:        a.Kind,
+		Application: a.App,
+		Btrs:        a.Btrs,
+		Groups:      a.Groups,
+		Scopes:      a.Scopes,
+	}
+	accessToken, err := JWTAccessToken(
+		srvConfig.Config.Authz.ClientID,
+		a.Expires, customClaims)
+	if err != nil {
+		return TokenMap{}, fmt.Errorf("[Authz.main.tokenMap] authz.JWTAccessToken error: %w", err)
+	}
+	tmap := TokenMap{
+		AccessToken: accessToken,
+		Scope:       a.Scope,
+		Type:        "bearer",
+		Expires:     a.Expires,
+	}
+	return tmap, nil
 }
