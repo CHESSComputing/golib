@@ -45,6 +45,8 @@ func SearchBy(ldapURL, login, password, baseDN, user, method string, attributes 
 		filter = fmt.Sprintf("(uidNumber=%s)", ldap.EscapeFilter(user))
 	} else if method == "gidNumber" {
 		filter = fmt.Sprintf("(gidNumber=%s)", ldap.EscapeFilter(user))
+	} else if method == "sAMAccountName" {
+		filter = fmt.Sprintf("(sAMAccountName=%s)", ldap.EscapeFilter(user))
 	} else if method == "cn" {
 		filter = fmt.Sprintf("(CN=%s)", ldap.EscapeFilter(user))
 	}
