@@ -28,7 +28,7 @@ func getMcClient() {
 }
 
 // Publish function pulishes FOXDEN dataset with did and description in MaterialsCommons
-func Publish(did, projectName, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
+func Publish(authors []string, did, projectName, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
 	var err error
 	var doi, doiLink string
 	var projectID, datasetID int
@@ -94,11 +94,16 @@ func Publish(did, projectName, description string, record map[string]any, publis
 	// create new deposit
 	name := fmt.Sprintf("FOXDEN dataset %s", did)
 	summary := "FOXDEN dataset"
+	var dAuthors []mcapi.Author
+	for _, a := range authors {
+		dAuthors = append(dAuthors, mcapi.Author{Name: a, Affiliations: "Cornell University"})
+	}
 	deposit := mcapi.DepositDatasetRequest{
 		Metadata: mcapi.DatasetMetadata{
 			Name:        name,
 			Description: description,
 			Summary:     summary,
+			Authors:     dAuthors,
 		},
 		Files: datasetFiles,
 	}

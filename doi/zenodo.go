@@ -20,12 +20,17 @@ func (z *ZenodoProvider) Init() {
 }
 
 // Publish provides publication of dataset with did and description
-func (z *ZenodoProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
+func (z *ZenodoProvider) Publish(authors []string, did, description string, record map[string]any, publish bool) (string, string, error) {
 	var doi, doiLink string
 	var err error
 
 	// create new meta-data record
 	creator := zenodo.Creator{Name: "FOXDEN", Affiliation: "Cornell University"}
+	var contributors []zenodo.Creator
+	for _, a := range authors {
+		c := zenodo.Creator{Name: a, Affiliation: "Cornell University"}
+		contributors = append(contributors, c)
+	}
 	rec := zenodo.MetaDataRecord{
 		PublicationType: "deliverable",
 		UploadType:      "dataset",
@@ -34,6 +39,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 		Title:           fmt.Sprintf("FOXDEN did=%s", did),
 		Licences:        []string{"MIT"},
 		Creators:        []zenodo.Creator{creator},
+		Contributors:    contributors,
 		PreserveDoi:     true,
 	}
 	mrec := make(map[string]any)
@@ -63,7 +69,7 @@ func (z *ZenodoProvider) Publish(did, description string, record map[string]any,
 
 	// add foxden datacite metadata record
 	frec := zenodo.FoxdenRecord{Did: did, MetaData: record}
-	if payload, err := datacite.DataciteMetadata(doi, did, description, record, publish); err == nil {
+	if payload, err := datacite.DataciteMetadata(authors, doi, did, description, record, publish); err == nil {
 		var rec map[string]any
 		if err := json.Unmarshal(payload, &rec); err == nil {
 			frec = zenodo.FoxdenRecord{Did: did, MetaData: rec}

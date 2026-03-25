@@ -22,8 +22,8 @@ func (m *MCProvider) Init() {
 }
 
 // Publish provides publication of dataset with did and description
-func (m *MCProvider) Publish(did, description string, record map[string]any, publish bool) (string, string, error) {
-	doi, doiLink, err := materialscommons.Publish(did, m.ProjectName, description, record, publish, m.Verbose)
+func (m *MCProvider) Publish(authors []string, did, description string, record map[string]any, publish bool) (string, string, error) {
+	doi, doiLink, err := materialscommons.Publish(authors, did, m.ProjectName, description, record, publish, m.Verbose)
 	if err != nil {
 		return doi, doiLink, fmt.Errorf("[golib.doi.MCProvider.Publish] materialscommons.Publish error: %w", err)
 	}

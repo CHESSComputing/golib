@@ -13,14 +13,15 @@ import (
 )
 
 // Publish provides publication of did into datacite
-func Publish(did, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
+func Publish(authors []string, did, description string, record map[string]any, publish bool, verbose int) (string, string, error) {
 	if srvConfig.Config.Services.DOIServiceURL == "" {
 		return "", "", errors.New("Missing DOIService url in FOXDEN configuration")
 	}
 
 	// Set the DOI creation endpoint
 	url := fmt.Sprintf("%s/dois", srvConfig.Config.DOI.Datacite.Url)
-	payloadBytes, err := DataciteMetadata("", did, description, record, publish)
+	doi := ""
+	payloadBytes, err := DataciteMetadata(authors, doi, did, description, record, publish)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to marshal metadata payload: %v", err)
 	}

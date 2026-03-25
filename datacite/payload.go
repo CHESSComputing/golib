@@ -17,19 +17,28 @@ import (
  */
 
 // helper function to provide DOI creators
-func creatorsInfo() []Creator {
+func creatorsInfo(authors []string) []Creator {
+	var creators []Creator
 	nameIdent := NameIdentifier{
 		AffiliationIdentifier:       "https://ror.org/05bnh6r87",
 		AffiliationIdentifierScheme: "ROR",
 		SchemeUri:                   "https://ror.org/",
 	}
-	return []Creator{
-		Creator{
-			Name:            "FOXDEN",
+	c := Creator{
+		Name:            "FOXDEN",
+		NameType:        "Organizational",
+		NameIdentifiers: []NameIdentifier{nameIdent},
+	}
+	creators = append(creators, c)
+	for _, a := range authors {
+		c := Creator{
+			Name:            a,
 			NameType:        "Organizational",
 			NameIdentifiers: []NameIdentifier{nameIdent},
-		},
+		}
+		creators = append(creators, c)
 	}
+	return creators
 }
 
 // helper function to provide DOI Types, return pointer since our Attributes.Types is a pointer
@@ -62,7 +71,7 @@ func descriptionInfo(d string) Description {
 }
 
 // DataciteMetadata provides datacite metadata record for given did and FOXDEN record
-func DataciteMetadata(doi, did, description string, record map[string]any, publish bool) ([]byte, error) {
+func DataciteMetadata(authors []string, doi, did, description string, record map[string]any, publish bool) ([]byte, error) {
 	url := srvConfig.Config.Services.DOIServiceURL
 	if doi != "" {
 		url += "/doi" // http://DOIServiceURL/doi/<10.xxx/...>
@@ -86,7 +95,7 @@ func DataciteMetadata(doi, did, description string, record map[string]any, publi
 		Event:              event,
 		Titles:             []Title{title},
 		Prefix:             srvConfig.Config.DOI.Datacite.Prefix,
-		Creators:           creatorsInfo(),
+		Creators:           creatorsInfo(authors),
 		Publisher:          publisherInfo(),
 		PublicationYear:    time.Now().Year(),
 		Descriptions:       []Description{descriptionInfo(description)},
