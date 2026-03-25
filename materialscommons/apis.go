@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	srvConfig "github.com/CHESSComputing/golib/config"
+	"github.com/CHESSComputing/golib/ldap"
 	mcapi "github.com/materials-commons/gomcapi"
 )
 
@@ -96,7 +97,15 @@ func Publish(authors []string, did, projectName, description string, record map[
 	summary := "FOXDEN dataset"
 	var dAuthors []mcapi.Author
 	for _, a := range authors {
-		dAuthors = append(dAuthors, mcapi.Author{Name: a, Affiliations: "Cornell University"})
+		email, err := ldap.GetEmail(
+			srvConfig.Config.LDAP.Login,
+			srvConfig.Config.LDAP.Password,
+			a,
+		)
+		if err != nil {
+			return doi, doiLink, fmt.Errorf("[golib.MaterialsCommons.Publish] ldap.GetEmail error: %w", err)
+		}
+		dAuthors = append(dAuthors, mcapi.Author{Name: a, Email: email, Affiliations: "Cornell University"})
 	}
 	deposit := mcapi.DepositDatasetRequest{
 		Metadata: mcapi.DatasetMetadata{
