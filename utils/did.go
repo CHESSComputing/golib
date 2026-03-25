@@ -64,3 +64,15 @@ func CreateDID(rec map[string]any, attrs, sep, div string) string {
 	}
 	return did
 }
+
+// GetBtr extracts btr from given did
+func GetBtr(did string) string {
+	arr := strings.Split(did, "/")
+	for _, a := range arr {
+		if strings.HasPrefix(a, "btr") {
+			btr := strings.Replace(a, "btr=", "", -1)
+			return btr
+		}
+	}
+	return ""
+}

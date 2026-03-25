@@ -27,3 +27,12 @@ func TestCreateDID(t *testing.T) {
 		t.Errorf("Fail TestCreateDID did=%s, expect=%s\n", did, expect)
 	}
 }
+
+func TestGetBtr(t *testing.T) {
+	did := "/beamline=abc/btr=btr-test/sample=sample"
+	expect := "btr-test"
+	btr := GetBtr(did)
+	if btr != expect {
+		t.Errorf("Fail to extract btr from did=%s, btr=%s expect=%s", did, btr, expect)
+	}
+}
