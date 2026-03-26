@@ -88,11 +88,12 @@ type LDAP struct {
 
 // EMailProvider defines email provider attributes
 type EMailProvider struct {
-	SMTPHost   string
-	SMTPPort   int
-	SenderAddr string
-	SenderPass string
-	AdminEmail string
+	SMTPHost       string
+	SMTPPort       int
+	SenderAddr     string
+	SenderPass     string
+	RecepientEmail string
+	SendmailPath   string
 }
 
 // DOI attributes
