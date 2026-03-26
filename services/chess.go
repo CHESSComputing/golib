@@ -86,3 +86,19 @@ func (c *CHESSUser) Get(name string) (User, error) {
 
 	return user, nil
 }
+
+// GetGroup implements UserAttributes GetGroupsForUser API
+func (c *CHESSUser) GetGroup(did string) string {
+	return utils.GetBtr(did)
+}
+
+// GetEmail implements UserAttributes GetUserMail API
+func (c *CHESSUser) GetEmail(user string) (string, error) {
+	return ldap.GetEmail(c.Login, c.Password, user)
+}
+
+// GetMembers implements UserAttributes GetGroupsForUser API
+func (c *CHESSUser) GetMembers(btr string) ([]string, error) {
+	// in case of CHESS we get members associated with given btr
+	return ldap.BtrMembers(c.Login, c.Password, btr)
+}

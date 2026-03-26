@@ -19,4 +19,10 @@ type UserAttributes interface {
 	GetGroups() ([]string, error)
 	// Get should return User
 	Get(user string) (User, error)
+	// GetGroup should return group associated with given did
+	GetGroup(did string) string
+	// GetEmail should return email associated with this user
+	GetEmail(user string) (string, error)
+	// GetMembers should return group members associated with this user
+	GetMembers(user string) ([]string, error)
 }

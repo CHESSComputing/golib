@@ -59,3 +59,23 @@ func (c *MaglabUser) Get(name string) (User, error) {
 	user.Groups = entry.Btrs
 	return user, nil
 }
+
+// GetGroup implements UserAttributes GetGroupsForUser API
+func (c *MaglabUser) GetGroup(did string) string {
+	// Not implemented
+	return "Not implemented"
+}
+
+// GetEmail implements UserAttributes GetUserMail API
+func (c *MaglabUser) GetEmail(user string) (string, error) {
+	// Not implemented
+	return "NotImplemented@mail.com", nil
+}
+
+// GetMembers implements UserAttributes GetGroupsForUser API
+func (c *MaglabUser) GetMembers(user string) ([]string, error) {
+	// Not implemented
+	// in case of Maglab we get members associated with given user
+	var groups []string
+	return groups, nil
+}
