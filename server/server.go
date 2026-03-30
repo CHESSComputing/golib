@@ -130,6 +130,7 @@ func Router(routes []Route, fsys fs.FS, static string, webServer srvConfig.WebSe
 	r.GET("/apis", ApisHandler)
 	r.GET("/qlkeys", QLKeysHandler)
 	r.GET("/metrics", MetricsHandler)
+	r.GET("/health", HealthHandler(webServer))
 
 	// loop over routes and creates necessary router structure
 	var authGroup bool

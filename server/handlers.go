@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	srvConfig "github.com/CHESSComputing/golib/config"
 	"github.com/dchest/captcha"
 	"github.com/gin-gonic/gin"
 )
@@ -52,6 +53,18 @@ func ApisHandler(c *gin.Context) {
 // MetricsHandler provides metrics JSON for monitoring purposes (Prometheus)
 func MetricsHandler(c *gin.Context) {
 	c.Writer.Write([]byte(promMetrics(metricsPrefix)))
+}
+
+// HealthHandler provides metrics JSON for monitoring purposes (Prometheus)
+func HealthHandler(webServer srvConfig.WebServer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"service": "foxden-server",
+			"port":    webServer.Port,
+			"time":    time.Now().UTC(),
+		})
+	}
 }
 
 // GinHandlerFunc converts given http.Handler to gin.HandlerFunc
