@@ -58,9 +58,14 @@ func MetricsHandler(c *gin.Context) {
 // HealthHandler provides metrics JSON for monitoring purposes (Prometheus)
 func HealthHandler(webServer srvConfig.WebServer) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		name := "foxden-service"
+		if webServer.Name != "" {
+			name = webServer.Name
+		}
+
 		c.JSON(200, gin.H{
 			"status":  "ok",
-			"service": "foxden-server",
+			"service": name,
 			"port":    webServer.Port,
 			"time":    time.Now().UTC(),
 		})
