@@ -182,6 +182,7 @@ type WebServer struct {
 	Base        string `mapstructure:"Base"`        // base URL
 	StaticDir   string `mapstructure:"StaticDir"`   // specify static dir location
 	LogFile     string `mapstructure:"LogFile"`     // server log file
+	Name        string `mapstructure:"Name"`        // name of the web server
 	LogLongFile bool   `mapstructure:"LogLongFile"` // server log structure
 
 	// middleware server parts
