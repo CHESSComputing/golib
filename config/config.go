@@ -427,25 +427,25 @@ type Authz struct {
 
 // Services represents services structure
 type Services struct {
-	FrontendURL               string `mapstructure:"FrontendUrl"`
-	DiscoveryURL              string `mapstructure:"DiscoveryUrl"`
-	MetaDataURL               string `mapstructure:"MetaDataUrl"`
-	MLHubURL                  string `mapstructure:"MLHubUrl"`
-	DataHubURL                string `mapstructure:"DataHubUrl"`
-	DataManagementURL         string `mapstructure:"DataManagementUrl"`
-	DataBookkeepingURL        string `mapstructure:"DataBookkeepingUrl"`
-	AuthzURL                  string `mapstructure:"AuthzUrl"`
-	SpecScansURL              string `mapstructure:"SpecScansUrl"`
-	PublicationURL            string `mapstructure:"PublicationUrl"`
-	CHAPBookURL               string `mapstructure:"CHAPBookUrl"`
-	DOIServiceURL             string `mapstructure:"DOIServiceUrl"`
-	SyncServiceURL            string `mapstructure:"SyncServiceUrl"`
-	UserMetaDataURL           string `mapstructure:"UserMetaDataUrl"`
-	ClasseInfoURL             string `mapstructure:"ClasseInfoUrl"`
-	FabricNodeCatalogURL      string `mapstructure:"FabricNodeCatalogUrl"`
-	FabricNodeDataServiceURL  string `mapstructure:"FabricNodeDataServiceUrl"`
-	FabricNodeIdentityURL     string `mapstructure:"FabricNodeIdentityUrl"`
-	FabricNodeNotificationURL string `mapstructure:"FabricNodeNotificationUrl"`
+	FrontendURL           string `mapstructure:"FrontendUrl"`
+	DiscoveryURL          string `mapstructure:"DiscoveryUrl"`
+	MetaDataURL           string `mapstructure:"MetaDataUrl"`
+	MLHubURL              string `mapstructure:"MLHubUrl"`
+	DataHubURL            string `mapstructure:"DataHubUrl"`
+	DataManagementURL     string `mapstructure:"DataManagementUrl"`
+	DataBookkeepingURL    string `mapstructure:"DataBookkeepingUrl"`
+	AuthzURL              string `mapstructure:"AuthzUrl"`
+	SpecScansURL          string `mapstructure:"SpecScansUrl"`
+	PublicationURL        string `mapstructure:"PublicationUrl"`
+	CHAPBookURL           string `mapstructure:"CHAPBookUrl"`
+	DOIServiceURL         string `mapstructure:"DOIServiceUrl"`
+	SyncServiceURL        string `mapstructure:"SyncServiceUrl"`
+	UserMetaDataURL       string `mapstructure:"UserMetaDataUrl"`
+	ClasseInfoURL         string `mapstructure:"ClasseInfoUrl"`
+	FabricCatalogURL      string `mapstructure:"FabricCatalogUrl"`
+	FabricDataServiceURL  string `mapstructure:"FabricDataServiceUrl"`
+	FabricIdentityURL     string `mapstructure:"FabricIdentityUrl"`
+	FabricNotificationURL string `mapstructure:"FabricNotificationUrl"`
 }
 
 // SrvConfig represents configuration structure
