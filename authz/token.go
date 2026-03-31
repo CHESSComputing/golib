@@ -90,14 +90,15 @@ func (t *Token) Validate(clientId string) error {
 	// validate our token
 	var jwtKey = []byte(clientId)
 	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(t.AccessToken, claims, func(token *jwt.Token) (interface{}, error) {
+	token := t.AccessToken
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
-			return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims invalid signature error: %w", err)
+			return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims token '%s', invalid signature error: %w", token, err)
 		}
-		return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims error: %w", err)
+		return fmt.Errorf("[golib.auth.Validate] jwt.ParseWithClaims token '%s' error: %w", token, err)
 	}
 	if !tkn.Valid {
 		return errors.New("token.Validate: invalid token")
