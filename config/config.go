@@ -44,14 +44,21 @@ type BeamlineSections struct {
 	Sections []BeamlineSection `mapstructure:"sections"`
 }
 
+// AIAccessRules provides AI chatbot access rules based on user groups and vector databases
+type AIAccessRules struct {
+	Group     string   `mapstructure:"group"`
+	Databases []string `mapstructure:"databases"`
+}
+
 // AIChat configuration
 type AIChat struct {
-	Host    string `mapstructure:"host"`
-	Port    int    `mapstructure:"port"`
-	Model   string `mapstructure:"model"`
-	Group   string `mapstructure:"group"`   // aichat group to use
-	Client  string `mapstructure:"client"`  // aichat client, e.g. ollaman or tichy
-	Timeout int    `mapstructure:"timeout"` // ai response timeout
+	Host        string          `mapstructure:"host"`
+	Port        int             `mapstructure:"port"`
+	Model       string          `mapstructure:"model"`
+	Group       string          `mapstructure:"group"`       // aichat group to use
+	Client      string          `mapstructure:"client"`      // aichat client, e.g. ollaman or tichy
+	Timeout     int             `mapstructure:"timeout"`     // ai response timeout
+	AccessRules []AIAccessRules `mapstructure:"AccessRules"` // AI access rules
 }
 
 // FoxdenUser represents foxden user interface to use
