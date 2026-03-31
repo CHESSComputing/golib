@@ -67,11 +67,31 @@ func CreateDID(rec map[string]any, attrs, sep, div string) string {
 
 // GetBtr extracts btr from given did
 func GetBtr(did string) string {
+	return GetDidPart(did, "btr")
+}
+
+// GetBeamline extracts beamline from given did
+func GetBeamline(did string) string {
+	return GetDidPart(did, "beamline")
+}
+
+// GetCycle extracts cycle from given did
+func GetCycle(did string) string {
+	return GetDidPart(did, "cycle")
+}
+
+// GetSample extracts sample_name from given did
+func GetSample(did string) string {
+	return GetDidPart(did, "sample_name")
+}
+
+// helper function to extract did part
+func GetDidPart(did, part string) string {
 	arr := strings.Split(did, "/")
 	for _, a := range arr {
-		if strings.HasPrefix(a, "btr") {
-			btr := strings.Replace(a, "btr=", "", -1)
-			return btr
+		if strings.HasPrefix(a, part) {
+			val := strings.Replace(a, fmt.Sprintf("%s=", part), "", -1)
+			return val
 		}
 	}
 	return ""
