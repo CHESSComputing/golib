@@ -308,6 +308,13 @@ type ClasseInfoData struct {
 	WebServer  `mapstructure:"WebServer"`
 }
 
+// ELogData represents User ELogData configuration
+type ELogData struct {
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
+	MongoDB    `mapstructure:"MongoDB"`
+}
+
 // UserMetaData represents User MetaData configuration
 type UserMetaData struct {
 	FoxdenUser `mapstructure:"FoxdenUser"`
@@ -441,6 +448,7 @@ type Services struct {
 	DOIServiceURL         string `mapstructure:"DOIServiceUrl"`
 	SyncServiceURL        string `mapstructure:"SyncServiceUrl"`
 	UserMetaDataURL       string `mapstructure:"UserMetaDataUrl"`
+	ELogServiceURL        string `mapstructure:"ELogServiceUrl"`
 	ClasseInfoURL         string `mapstructure:"ClasseInfoUrl"`
 	FabricCatalogURL      string `mapstructure:"FabricCatalogUrl"`
 	FabricDataServiceURL  string `mapstructure:"FabricDataServiceUrl"`
@@ -468,6 +476,7 @@ type SrvConfig struct {
 	Encryption      `mapstructure:"Encryption"`
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
 	UserMetaData    `mapstructure:"UserMetaData"`
+	ELogData        `mapstructure:"ELogData"`
 	ClasseInfoData  `mapstructure:"ClasseInfoService"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
