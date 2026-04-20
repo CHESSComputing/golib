@@ -71,10 +71,10 @@ func (c *CHESSUser) Get(name string) (User, error) {
 				grp := strings.Replace(a, "CN=", "", -1)
 				groups = append(groups, grp)
 				// add more scopes based on user's groups
-				if grp == "foxdenadmin" {
+				if grp == srvConfig.Config.AccessRules.DeleteGroup || grp == srvConfig.Config.AccessRules.AdminGroup {
 					user.Scopes = append(user.Scopes, "delete")
 				}
-				if grp == "foxdenrw" {
+				if grp == srvConfig.Config.AccessRules.WriteGroup || grp == srvConfig.Config.AccessRules.AdminGroup {
 					user.Scopes = append(user.Scopes, "write")
 				}
 			}

@@ -44,6 +44,12 @@ type BeamlineSections struct {
 	Sections []BeamlineSection `mapstructure:"sections"`
 }
 
+type AccessRules struct {
+	AdminGroup  string `json:"AdminGroup"`
+	WriteGroup  string `json:"WriteGroup"`
+	DeleteGroup string `json:"DeleteGroup"`
+}
+
 // AIAccessRules provides AI chatbot access rules based on user groups and vector databases
 type AIAccessRules struct {
 	Group     string   `mapstructure:"group"`
@@ -459,6 +465,7 @@ type Services struct {
 // SrvConfig represents configuration structure
 type SrvConfig struct {
 	AIChat          `mapstructure:"AIChat"`
+	AccessRules     `mapstructure:"AccessRules"`
 	S3              `mapstructure:"S3"`
 	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
@@ -597,6 +604,15 @@ func ParseConfig(cfile string) (SrvConfig, error) {
 			"doi", "doi_url", "doi_user", "doi_created_at", "doi_public",
 			"doi_provider", "doi_foxden_url", "doi_access_metadata", "doi_parents_dids",
 			"globus_link", "history"}
+	}
+	if config.AccessRules.AdminGroup == "" {
+		config.AccessRules.AdminGroup = "foxdenadmins"
+	}
+	if config.AccessRules.WriteGroup == "" {
+		config.AccessRules.WriteGroup = "foxdenrw"
+	}
+	if config.AccessRules.DeleteGroup == "" {
+		config.AccessRules.DeleteGroup = "foxdendelete"
 	}
 	return config, nil
 }
