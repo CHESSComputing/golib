@@ -100,5 +100,5 @@ func (c *CHESSUser) GetEmail(user string) (string, error) {
 // GetMembers implements UserAttributes GetGroupsForUser API
 func (c *CHESSUser) GetMembers(btr string) ([]string, error) {
 	// in case of CHESS we get members associated with given btr
-	return ldap.BtrMembers(c.Login, c.Password, btr)
+	return ldap.BtrMembersUids(c.Login, c.Password, btr)
 }

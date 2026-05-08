@@ -89,7 +89,7 @@ func (c *Cache) SearchBy(login, password, user, method string) (Entry, error) {
 	return Entry{}, errors.New("no cache entry found")
 }
 
-// MultiSearch provides cached search results
+// Records provides cached search results
 func Records(login, password, user, method string, verbose int) ([]Entry, error) {
 	var records []Entry
 	var err error
