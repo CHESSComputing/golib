@@ -456,6 +456,7 @@ type Services struct {
 	UserMetaDataURL       string `mapstructure:"UserMetaDataUrl"`
 	ELogServiceURL        string `mapstructure:"ELogServiceUrl"`
 	ClasseInfoURL         string `mapstructure:"ClasseInfoUrl"`
+	BeamPassURL           string `mapstructure:"BeamPassUrl"`
 	FabricCatalogURL      string `mapstructure:"FabricCatalogUrl"`
 	FabricDataServiceURL  string `mapstructure:"FabricDataServiceUrl"`
 	FabricIdentityURL     string `mapstructure:"FabricIdentityUrl"`
