@@ -1,0 +1,32 @@
+version: 2
+
+# documentation:
+# https://docs.github.com/en/code-security/concepts/supply-chain-security/about-dependabot-version-updates?utm_source=chatgpt.com
+# cooldown mechanism:
+# https://blog.yossarian.net/2025/11/21/We-should-all-be-using-dependency-cooldowns
+#
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:00"
+
+    cooldown:
+      semver-major-days: 30
+      semver-minor-days: 14
+      semver-patch-days: 3
+
+    groups:
+      golang:
+        patterns:
+          - "*"
+
+    ignore:
+      - dependency-name: "golang.org/x/*"
+        update-types:
+          - "version-update:semver-major"
+
+    open-pull-requests-limit: 3
