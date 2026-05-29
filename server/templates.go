@@ -3,11 +3,11 @@ package server
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"log"
 	"path/filepath"
 	"strconv"
-	"text/template"
 	"time"
 
 	utils "github.com/CHESSComputing/golib/utils"
@@ -125,8 +125,37 @@ type Templates struct {
 	html string
 }
 
+// TmplWithFuncs method allows passing a modifier function for template setup (e.g., FuncMap)
+func (q *Templates) TmplWithFuncs(fsys fs.FS, tfile string, tmplData map[string]interface{}, fn func(*template.Template) *template.Template) string {
+	if q.html != "" {
+		return q.html
+	}
+
+	filenames := []string{"static/templates/" + tfile}
+
+	// Initialize the template object
+	t := template.New(tfile)
+
+	// Apply your custom function modifier (like injecting FuncMap) *before* parsing
+	if fn != nil {
+		t = fn(t)
+	}
+
+	// Parse the filesystem template
+	t = template.Must(t.ParseFS(fsys, filenames...))
+
+	buf := new(bytes.Buffer)
+	err := t.Execute(buf, tmplData)
+	if err != nil {
+		log.Println("ERROR: template.TmplWithFuncs", err)
+		return ""
+	}
+	q.html = buf.String()
+	return q.html
+}
+
 // Tmpl method for ServerTemplates structure
-func (q Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
+func (q *Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
 	if q.html != "" {
 		return q.html
 	}
@@ -145,7 +174,7 @@ func (q Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]interface{
 }
 
 // Tmpl method for ServerTemplates structure
-func (q Templates) TextTmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
+func (q *Templates) TextTmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
 	if q.html != "" {
 		return q.html
 	}
@@ -170,5 +199,15 @@ func TmplPage(fsys fs.FS, tmpl string, tmplData TmplRecord) string {
 	}
 	var templates Templates
 	page := templates.Tmpl(fsys, tmpl, tmplData)
+	return page
+}
+
+// TmplPageWithFuncs parses given template, injects custom functions, and returns the HTML page
+func TmplPageWithFuncs(fsys fs.FS, tmpl string, tmplData TmplRecord, fn func(*template.Template) *template.Template) string {
+	if tmplData == nil {
+		tmplData = make(TmplRecord)
+	}
+	var templates Templates
+	page := templates.TmplWithFuncs(fsys, tmpl, tmplData, fn)
 	return page
 }
