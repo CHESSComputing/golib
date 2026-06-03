@@ -410,7 +410,8 @@ func (s *Schema) Validate(rec map[string]any) error {
 			if !checkSubKeys(k, v, keys) {
 				log.Println("all record keys", keys)
 				msg := fmt.Sprintf("record key '%s' with value %+v of type %T is not known", k, v, v)
-				log.Printf("ERROR: %s, schema file %s, schema map %+v", msg, s.FileName, s.Map)
+				//log.Printf("ERROR: %s, schema file %s, schema map %+v", msg, s.FileName, s.Map)
+				log.Printf("ERROR: %s, schema file %s", msg, s.FileName)
 				return errors.New(msg)
 			}
 		}
