@@ -321,6 +321,14 @@ type ELogData struct {
 	MongoDB    `mapstructure:"MongoDB"`
 }
 
+// ProxyWriter represents User MetaData configuration
+type ProxyWriter struct {
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
+	MongoDB    `mapstructure:"MongoDB"`
+	PathPrefix string `mapstructure:"PathPrefix"`
+}
+
 // UserMetaData represents User MetaData configuration
 type UserMetaData struct {
 	FoxdenUser `mapstructure:"FoxdenUser"`
@@ -453,6 +461,7 @@ type Services struct {
 	CHAPBookURL           string `mapstructure:"CHAPBookUrl"`
 	DOIServiceURL         string `mapstructure:"DOIServiceUrl"`
 	SyncServiceURL        string `mapstructure:"SyncServiceUrl"`
+	ProxyWriterURL        string `mapstructure:"ProxyWriterUrl"`
 	UserMetaDataURL       string `mapstructure:"UserMetaDataUrl"`
 	ELogServiceURL        string `mapstructure:"ELogServiceUrl"`
 	ClasseInfoURL         string `mapstructure:"ClasseInfoUrl"`
@@ -483,6 +492,7 @@ type SrvConfig struct {
 	Services        `mapstructure:"Services"`
 	Encryption      `mapstructure:"Encryption"`
 	CHESSMetaData   `mapstructure:"CHESSMetaData"`
+	ProxyWriter     `mapstructure:"ProxyWriter"`
 	UserMetaData    `mapstructure:"UserMetaData"`
 	ELogData        `mapstructure:"ELogData"`
 	ClasseInfoData  `mapstructure:"ClasseInfoService"`
