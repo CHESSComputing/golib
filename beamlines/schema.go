@@ -491,7 +491,7 @@ func (s *Schema) Validate(rec map[string]any) error {
 			}
 		}
 		if len(missing) > 0 {
-			msg := fmt.Sprintf("Schema %s, mandatory keys %v, record keys %v, missing keys %v", s.FileName, smkeys, mkeys, missing)
+			msg := fmt.Sprintf("Schema %s, records keys != mandatory keys, missing keys %v", s.FileName, missing)
 			log.Printf("ERROR: %s", msg)
 			return errors.New(msg)
 		}
