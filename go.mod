@@ -19,7 +19,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/materials-commons/gomcapi v0.0.7
-	github.com/mattn/go-sqlite3 v1.14.45
+	github.com/mattn/go-sqlite3 v1.14.46
 	github.com/minio/minio-go/v7 v7.2.0
 	github.com/ostafen/clover/v2 v2.0.0-alpha.3
 	github.com/pascaldekloe/jwt v1.12.0
@@ -31,7 +31,7 @@ require (
 	github.com/ulule/limiter/v3 v3.11.2
 	github.com/vkuznet/cryptoutils v0.0.2
 	github.com/vkuznet/http-logging v0.0.0-20210729230351-fc50acd79868
-	go.mongodb.org/mongo-driver/v2 v2.6.0
+	go.mongodb.org/mongo-driver/v2 v2.6.2
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.69.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
