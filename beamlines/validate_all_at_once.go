@@ -14,10 +14,24 @@ import (
 	utils "github.com/CHESSComputing/golib/utils"
 )
 
+// ValidateTmplRecord validates a partial (tempalte) record against the schema
+// collecting ALL errors rather than returning on the first one. Returns an empty
+// string on success, or a human-readable multi-line report of every problem found.
+func (s *Schema) ValidateTmplRecord(rec map[string]any) string {
+	return s.validateAll(rec, false)
+}
+
 // ValidateAll validates a record against the schema collecting ALL errors
 // rather than returning on the first one. Returns an empty string on success,
 // or a human-readable multi-line report of every problem found.
 func (s *Schema) ValidateAll(rec map[string]any) string {
+	return s.validateAll(rec, true)
+}
+
+// validateAll validates a record against the schema collecting ALL errors
+// rather than returning on the first one. Returns an empty string on success,
+// or a human-readable multi-line report of every problem found.
+func (s *Schema) validateAll(rec map[string]any, checkMandatoryKeys bool) string {
 	var errs []string
 	add := func(format string, a ...any) {
 		errs = append(errs, fmt.Sprintf(format, a...))
@@ -96,16 +110,18 @@ func (s *Schema) ValidateAll(rec map[string]any) string {
 	}
 
 	// ── Pass 2: check that all mandatory keys are present ─────────────────────
-	mkeys = utils.List2Set(mkeys)
+	if checkMandatoryKeys {
+		mkeys = utils.List2Set(mkeys)
 
-	smkeys, err := s.MandatoryKeys()
-	if err != nil {
-		add("could not retrieve mandatory keys: %v", err)
-	} else if len(mkeys) != len(smkeys) {
-		sort.Sort(utils.StringList(mkeys))
-		for _, k := range smkeys {
-			if !utils.InList(k, mkeys) {
-				add("missing mandatory key %q", k)
+		smkeys, err := s.MandatoryKeys()
+		if err != nil {
+			add("could not retrieve mandatory keys: %v", err)
+		} else if len(mkeys) != len(smkeys) {
+			sort.Sort(utils.StringList(mkeys))
+			for _, k := range smkeys {
+				if !utils.InList(k, mkeys) {
+					add("missing mandatory key %q", k)
+				}
 			}
 		}
 	}
