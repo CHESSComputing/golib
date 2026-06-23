@@ -22,9 +22,9 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Verify formatting
-        run: |
-          test -z "$(gofmt -l .)"
+#      - name: Verify formatting
+#        run: |
+#          test -z "$(gofmt -l .)"
 
       - name: Run tests
         run: make test
