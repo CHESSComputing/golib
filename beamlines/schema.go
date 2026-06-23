@@ -754,11 +754,15 @@ func validateRecordValue(rec SchemaRecord, v any, verbose int) bool {
 
 	vtype := simpleType(v)
 	if rec.Type == "struct" {
-		log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		if verbose > 0 {
+			log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		}
 		vtype = rec.Type
 	}
 	if rec.Type == "list_struct" {
-		log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		if verbose > 0 {
+			log.Printf("validateRecordValue: rec=%+v value=%+v reassign type=%s", rec, v, rec.Type)
+		}
 		vtype = rec.Type
 	}
 	// check for non list data-types
