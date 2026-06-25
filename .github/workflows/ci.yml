@@ -22,6 +22,12 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Start MongoDB
+        uses: MongoCamp/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-port: 8230
+
 #      - name: Verify formatting
 #        run: |
 #          test -z "$(gofmt -l .)"
