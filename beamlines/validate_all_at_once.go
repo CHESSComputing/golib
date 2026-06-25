@@ -73,7 +73,7 @@ func (s *Schema) validateAll(rec map[string]any, checkMandatoryKeys bool) string
 			// perform validation steps
 			if !validateSchemaType(m.Type, v, s.Verbose) {
 				// type check
-				add("wrong type for key %q: got %T (%v), schema expects %s",
+				add("invalid data type for key %q: value=%v (type %T), schema type=%s",
 					k, v, v, m.Type)
 			} else if !validateRecordValue(m, v, s.Verbose) {
 				// value check
