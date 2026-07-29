@@ -321,6 +321,13 @@ type ELogData struct {
 	MongoDB    `mapstructure:"MongoDB"`
 }
 
+// CalibrationData represents User ELogData configuration
+type CalibrationData struct {
+	FoxdenUser `mapstructure:"FoxdenUser"`
+	WebServer  `mapstructure:"WebServer"`
+	DBUri      string `mapstructure:"DBUri"` // database URI
+}
+
 // ProxyWriter represents User MetaData configuration
 type ProxyWriter struct {
 	FoxdenUser `mapstructure:"FoxdenUser"`
@@ -495,6 +502,7 @@ type SrvConfig struct {
 	ProxyWriter     `mapstructure:"ProxyWriter"`
 	UserMetaData    `mapstructure:"UserMetaData"`
 	ELogData        `mapstructure:"ELogData"`
+	CalibrationData `mapstructure:"CalibrationData"`
 	ClasseInfoData  `mapstructure:"ClasseInfoService"`
 	OreCastMetaData `mapstructure:"OreCastMetaData"`
 	SpecScans       `mapstructure:"SpecScansService"`
