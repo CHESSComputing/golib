@@ -65,6 +65,9 @@ func InitializeS3Client(clientType string) (S3Client, error) {
 		log.Println("Initializing MinIO Client")
 		// Initialize and return MinioClient
 		s3Client = &MinioClient{}
+	case "versitygw":
+		log.Println("Initializing Versity S3 Gateway Client")
+		s3Client = &VersityGWClient{}
 	default:
 		err = errors.New(fmt.Sprintf("Unsupported client type: %s", clientType))
 	}
