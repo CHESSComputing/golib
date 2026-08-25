@@ -27,11 +27,14 @@ func (c *AWSClient) Initialize() error {
 	accessKey := srvConfig.Config.DataManagement.S3.AccessKey
 	secretKey := srvConfig.Config.DataManagement.S3.AccessSecret
 	region := srvConfig.Config.DataManagement.S3.Region
+	useSSL := srvConfig.Config.DataManagement.S3.UseSSL
+	disableSSL := aws.Bool(!useSSL)
 	sess, err := session.NewSession(&aws.Config{
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region), // Region is needed even for Ceph.
 		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		S3ForcePathStyle: aws.Bool(true), // Needed for Ceph's S3 compatibility
+		DisableSSL:       disableSSL,
 	})
 	if err != nil {
 		return fmt.Errorf("[golib.s3.AWSClient.Initialize] session.NewSession error: %w", err)

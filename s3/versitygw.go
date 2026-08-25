@@ -37,11 +37,14 @@ func (c *VersityGWClient) Initialize() error {
 	accessKey := srvConfig.Config.DataManagement.S3.AccessKey
 	secretKey := srvConfig.Config.DataManagement.S3.AccessSecret
 	region := srvConfig.Config.DataManagement.S3.Region
+	useSSL := srvConfig.Config.DataManagement.S3.UseSSL
+	disableSSL := aws.Bool(!useSSL)
 	sess, err := session.NewSession(&aws.Config{
 		Endpoint:         aws.String(endpoint),
 		Region:           aws.String(region), // Region is required by SDK even though versitygw may ignore it.
 		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		S3ForcePathStyle: aws.Bool(true), // versitygw requires path-style addressing.
+		DisableSSL:       disableSSL,
 	})
 	if err != nil {
 		return fmt.Errorf("[golib.s3.VersityGWClient.Initialize] session.NewSession error: %w", err)
