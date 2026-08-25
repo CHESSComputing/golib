@@ -150,6 +150,9 @@ func (c *AWSClient) GetObject(bucket, objectName string) ([]byte, error) {
 
 // DeleteObject deletes an object from a bucket
 func (c *AWSClient) DeleteObject(bucket, objectName, versionId string) error {
+	if versionId == "" {
+		return fmt.Errorf("unable to delete object %s from bucket %s, no versionId is provided", objectName, bucket)
+	}
 	_, err := c.S3Client.DeleteObject(&aws3.DeleteObjectInput{
 		Bucket:    aws.String(bucket),
 		Key:       aws.String(objectName),
