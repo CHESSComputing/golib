@@ -29,7 +29,7 @@ require (
 	github.com/ulule/limiter/v3 v3.11.2
 	github.com/vkuznet/cryptoutils v0.0.2
 	github.com/vkuznet/http-logging v0.0.0-20210729230351-fc50acd79868
-	go.mongodb.org/mongo-driver/v2 v2.9.0
+	go.mongodb.org/mongo-driver/v2 v2.9.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.71.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
