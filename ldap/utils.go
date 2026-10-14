@@ -277,7 +277,7 @@ func GetBTRUsersFromGroup(
 // GetBTR extracts BTR value from given user DN value
 func GetBTR(val string) string {
 	if strings.Contains(val, "OU=BTR") {
-		for _, a := range strings.Split(val, ",") {
+		for a := range strings.SplitSeq(val, ",") {
 			if strings.HasPrefix(a, "CN=") {
 				btr := strings.Replace(a, "CN=", "", -1)
 				return btr

@@ -162,7 +162,7 @@ func Records(login, password, user, method string, verbose int) ([]Entry, error)
 			}
 			btrs = utils.List2Set(btrs)
 			if strings.Contains(val, "CN=Users") && strings.Contains(val, "-m") {
-				for _, a := range strings.Split(val, ",") {
+				for a := range strings.SplitSeq(val, ",") {
 					if strings.HasPrefix(a, "CN=") && a != "CN=Users" {
 						beamline := strings.Replace(a, "CN=", "", -1)
 						beamline = removeSuffix(beamline, "-m")
@@ -171,7 +171,7 @@ func Records(login, password, user, method string, verbose int) ([]Entry, error)
 				}
 			}
 			if strings.Contains(val, "CN=foxden") {
-				for _, a := range strings.Split(val, ",") {
+				for a := range strings.SplitSeq(val, ",") {
 					if strings.HasPrefix(a, "CN=foxden") {
 						foxden := strings.Replace(a, "CN=", "", -1)
 						foxdens = append(foxdens, foxden)
