@@ -99,7 +99,7 @@ func ErrorRecord(msg, etype string, ecode int) map[string]any {
 }
 
 // GetValue function to get int value from record for given key
-func GetValue(rec map[string]any, key string) interface{} {
+func GetValue(rec map[string]any, key string) any {
 	var val map[string]any
 	keys := strings.Split(key, ".")
 	if len(keys) > 1 {
@@ -117,7 +117,7 @@ func GetValue(rec map[string]any, key string) interface{} {
 			} else {
 				return ""
 			}
-		case []interface{}:
+		case []any:
 			vvv := v[0]
 			if vvv != nil {
 				val = vvv.(map[string]any)
@@ -138,9 +138,9 @@ func GetValue(rec map[string]any, key string) interface{} {
 }
 
 // helper function to return single entry (e.g. from a list) of given value
-func singleEntry(data interface{}) interface{} {
+func singleEntry(data any) any {
 	switch v := data.(type) {
-	case []interface{}:
+	case []any:
 		return v[0]
 	default:
 		return v
