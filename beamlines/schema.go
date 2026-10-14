@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"maps"
 	"math"
 	"os"
 	"path/filepath"
@@ -50,11 +51,11 @@ type SchemaManager struct {
 
 // Schema returns either cached schema map or load it from provided file
 func (m *SchemaManager) String() string {
-	var out string
+	var out strings.Builder
 	for k, v := range m.Map {
-		out += fmt.Sprintf("\n%s %s, loaded %v\n", k, v.Schema, v.LoadTime)
+		out.WriteString(fmt.Sprintf("\n%s %s, loaded %v\n", k, v.Schema, v.LoadTime))
 	}
-	return out
+	return out.String()
 }
 
 // Schema returns either cached schema map or load it from provided file
@@ -259,7 +260,7 @@ func (s *Schema) Load() error {
 			return errors.New(msg)
 		}
 	} else if strings.HasSuffix(fname, "yaml") || strings.HasSuffix(fname, "yml") {
-		var yrecords []map[interface{}]interface{}
+		var yrecords []map[any]any
 		err = yaml.Unmarshal(data, &yrecords)
 		if err != nil {
 			msg := fmt.Sprintf("fail to unmarshal yaml file %s, error=%v", fname, err)
@@ -628,9 +629,7 @@ func (s *Schema) SectionKeys() (map[string][]string, error) {
 	}
 	// populate section map with keys defined in webSectionKeys
 	if s.WebSectionKeys != nil {
-		for k, v := range s.WebSectionKeys {
-			smap[k] = v
-		}
+		maps.Copy(smap, s.WebSectionKeys)
 	}
 	// loop over all sections and add section keys to the map
 	for _, sect := range sections {
@@ -864,7 +863,7 @@ func validateRecordValue(rec SchemaRecord, v any, verbose int) bool {
 			switch rvals := v.(type) {
 			case []string:
 				for _, rv := range rvals {
-					for _, vvv := range strings.Split(rv, " ") {
+					for vvv := range strings.SplitSeq(rv, " ") {
 						rvalues = append(rvalues, vvv)
 					}
 				}
@@ -924,7 +923,7 @@ func Float64IsInt64Compatible(v float64) bool {
 }
 
 // helper function to validate schema type of given value with respect to schema
-func validateSchemaType(stype string, v interface{}, verbose int) bool {
+func validateSchemaType(stype string, v any, verbose int) bool {
 	// on web form 0 will be int type, but we can allow it for any int's float's
 	if v == 0 || v == 0. {
 		if strings.Contains(stype, "int") || strings.Contains(stype, "float") {
@@ -1027,11 +1026,11 @@ func validateSchemaType(stype string, v interface{}, verbose int) bool {
 }
 
 // helper function to convert yaml map to json map interface
-func convertYaml(m map[interface{}]interface{}) map[string]interface{} {
-	res := map[string]interface{}{}
+func convertYaml(m map[any]any) map[string]any {
+	res := map[string]any{}
 	for k, v := range m {
 		switch v2 := v.(type) {
-		case map[interface{}]interface{}:
+		case map[any]any:
 			res[fmt.Sprint(k)] = convertYaml(v2)
 		default:
 			res[fmt.Sprint(k)] = v
@@ -1062,7 +1061,7 @@ func loadNestedRecords(filename string) ([]SchemaRecord, error) {
 			return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] json.Unmarshal error: %w", err)
 		}
 	} else if strings.HasSuffix(filename, "yaml") || strings.HasSuffix(filename, "yml") {
-		var yrecords []map[interface{}]interface{}
+		var yrecords []map[any]any
 		err = yaml.Unmarshal(data, &yrecords)
 		if err != nil {
 			return records, fmt.Errorf("[golib.beamlines.loadNestedRecords] yaml.Unmarshal error: %w", err)
