@@ -6,7 +6,8 @@ package lexicon
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
+
 	"log"
 	"net/http"
 	"regexp"
@@ -79,7 +80,7 @@ var LexiconPatterns map[string]LexiconPattern
 // the format of the file is a list of the following dicts:
 // [ {"name": <name>, "patterns": [list of patterns], "length": int},...]
 func LoadPatterns(fname string) (map[string]LexiconPattern, error) {
-	data, err := ioutil.ReadFile(fname)
+	data, err := os.ReadFile(fname)
 	if err != nil {
 		log.Printf("Unable to read, file '%s', error: %v\n", fname, err)
 		return nil, Error(err, ReaderErrorCode, "", "lexicon.validator.LoadPatterns")
@@ -114,7 +115,7 @@ var RunRangePattern = regexp.MustCompile(`^\d+-\d+$`)
 
 // ObjectPattern represents interface to check different objects
 type ObjectPattern interface {
-	Check(k string, v interface{}) error
+	Check(k string, v any) error
 }
 
 // StrPattern represents string object pattern
@@ -124,7 +125,7 @@ type StrPattern struct {
 }
 
 // Check implements ObjectPattern interface for StrPattern objects
-func (o StrPattern) Check(key string, val interface{}) error {
+func (o StrPattern) Check(key string, val any) error {
 	if Verbose > 0 {
 		log.Printf("StrPatern check key=%s val=%v", key, val)
 		log.Printf("patterns %v max length %v", o.Patterns, o.Len)
@@ -198,7 +199,7 @@ func lfnList(v string) []string {
 	fileList = strings.Replace(fileList, "'", "", -1)
 	fileList = strings.Replace(fileList, "\"", "", -1)
 	var lfns []string
-	for _, val := range strings.Split(fileList, ",") {
+	for val := range strings.SplitSeq(fileList, ",") {
 		lfns = append(lfns, strings.Trim(val, " "))
 	}
 	return lfns
@@ -207,7 +208,7 @@ func lfnList(v string) []string {
 // helper function to validate string parameters
 //
 //gocyclo:ignore
-func strType(key string, val interface{}) error {
+func strType(key string, val any) error {
 	var v string
 	switch vvv := val.(type) {
 	case string:
@@ -277,7 +278,7 @@ func strType(key string, val interface{}) error {
 				// split input into pieces
 				input := strings.Replace(v, "[", "", -1)
 				input = strings.Replace(input, "]", "", -1)
-				for _, vvv := range strings.Split(input, ",") {
+				for vvv := range strings.SplitSeq(input, ",") {
 					err := checkBlockHash(strings.Trim(vvv, " "))
 					if err != nil {
 						return fmt.Errorf("[golib.lexicon.strType] checkBlockHash error: %w", err)
@@ -309,13 +310,13 @@ func checkBlockHash(blk string) error {
 }
 
 // helper function to validate int parameters
-func intType(k string, v interface{}) error {
+func intType(k string, v any) error {
 	// to be implemented
 	return nil
 }
 
 // helper function to validate mix parameters
-func mixType(k string, v interface{}) error {
+func mixType(k string, v any) error {
 	// to be implemented
 	return nil
 }
