@@ -20,8 +20,8 @@ func setupTestImages(t *testing.T, dir string) []string {
 	for _, f := range files {
 		buf := new(bytes.Buffer)
 		img := image.NewRGBA(image.Rect(0, 0, 10, 10)) // 10x10 black image
-		for x := 0; x < 10; x++ {
-			for y := 0; y < 10; y++ {
+		for x := range 10 {
+			for y := range 10 {
 				img.Set(x, y, color.RGBA{255, 0, 0, 255}) // red pixels
 			}
 		}
