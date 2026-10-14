@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"maps"
 	"math/big"
 	"net/http"
 	"strings"
@@ -181,8 +182,8 @@ func getPublicKey(exp, mod string) (*rsa.PublicKey, error) {
 
 // helper function to check access token and return claims map based on
 // github.com/pascaldekloe/jwt go package
-func tokenClaims(provider Provider, token string) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
+func tokenClaims(provider Provider, token string) (map[string]any, error) {
+	out := make(map[string]any)
 	// First parse without checking signature, to get the Kid
 	claims, err := jwt.ParseWithoutCheck([]byte(token))
 	log.Printf("ParseWithoutCheck returns %v", err)
@@ -208,9 +209,7 @@ func tokenClaims(provider Provider, token string) (map[string]interface{}, error
 		msg := "The token is not valid"
 		return out, errors.New(msg)
 	}
-	for k, v := range claims.Set {
-		out[k] = v
-	}
+	maps.Copy(out, claims.Set)
 	t := claims.Registered.Expires.Time()
 	out["exp"] = t.Unix()
 	out["sub"] = claims.Subject

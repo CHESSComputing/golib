@@ -7,7 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
+
 	"log"
 	"net/http"
 
@@ -104,7 +105,7 @@ func GoogleCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	}
 	defer userInfo.Body.Close()
 
-	info, err := ioutil.ReadAll(userInfo.Body)
+	info, err := io.ReadAll(userInfo.Body)
 	if err != nil {
 		log.Printf("GoogleCallBack read body %s", err)
 		_ = ctx.AbortWithError(http.StatusInternalServerError, err)

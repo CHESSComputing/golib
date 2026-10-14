@@ -13,7 +13,7 @@ func CodeVerifier() string {
 	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	length := rand.Intn(86) + 43
 	result := make([]byte, length)
-	for i := 0; i < length; i++ {
+	for i := range length {
 		result[i] = chars[rand.Intn(len(chars))]
 	}
 	return string(result)

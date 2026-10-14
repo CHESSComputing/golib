@@ -91,7 +91,7 @@ func (t *Token) Validate(clientId string) error {
 	var jwtKey = []byte(clientId)
 	claims := &Claims{}
 	token := t.AccessToken
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
@@ -110,7 +110,7 @@ func (t *Token) Validate(clientId string) error {
 func TokenClaims(accessToken, clientId string) (*Claims, error) {
 	var jwtKey = []byte(clientId)
 	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (any, error) {
 		return jwtKey, nil
 	})
 	if err != nil {

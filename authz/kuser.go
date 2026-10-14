@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+
 	"log"
 	"os"
 	"time"
@@ -27,7 +27,7 @@ func (k *Kerberos) Credentials() (*credentials.Credentials, error) {
 	var msg string
 	// user didn't use web interface, we switch to POST form
 	fname := fmt.Sprintf("krb-%d", time.Now().UnixNano())
-	tmpFile, err := ioutil.TempFile("/tmp", fname)
+	tmpFile, err := os.CreateTemp("/tmp", fname)
 	if err != nil {
 		msg = fmt.Sprintf("Unable to create tempfile: %v", err)
 		log.Printf("ERROR: %s", msg)

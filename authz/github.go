@@ -7,7 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
+
 	"log"
 	"net/http"
 
@@ -118,7 +119,7 @@ func GithubCallBack(ctx *gin.Context, endpoint string, verbose int) {
 	}
 	defer userInfo.Body.Close()
 
-	info, err := ioutil.ReadAll(userInfo.Body)
+	info, err := io.ReadAll(userInfo.Body)
 	if err != nil {
 		_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		return

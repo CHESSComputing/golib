@@ -14,7 +14,7 @@ func RandomBytes(size int, seed int64) []byte {
 	src := rand.NewSource(seed)
 	r := rand.New(src)
 	bytes := make([]byte, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		bytes[i] = byte(r.Intn(256))
 	}
 	return bytes
