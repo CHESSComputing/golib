@@ -61,7 +61,7 @@ func fileNames(tdir string, filenames ...string) []string {
 }
 
 // ParseTmpl parses template with given data
-func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
+func ParseTmpl(tdir, tmpl string, data any) (string, error) {
 	buf := new(bytes.Buffer)
 	filenames := fileNames(tdir, tmpl)
 	t := template.Must(template.ParseFiles(filenames...))
@@ -73,7 +73,7 @@ func ParseTmpl(tdir, tmpl string, data interface{}) (string, error) {
 }
 
 // TmplRecord represent template record
-type TmplRecord map[string]interface{}
+type TmplRecord map[string]any
 
 // GetString converts given value for provided key to string data-type
 func (t TmplRecord) GetString(key string) string {
@@ -126,7 +126,7 @@ type Templates struct {
 }
 
 // TmplWithFuncs method allows passing a modifier function for template setup (e.g., FuncMap)
-func (q *Templates) TmplWithFuncs(fsys fs.FS, tfile string, tmplData map[string]interface{}, fn func(*template.Template) *template.Template) string {
+func (q *Templates) TmplWithFuncs(fsys fs.FS, tfile string, tmplData map[string]any, fn func(*template.Template) *template.Template) string {
 	if q.html != "" {
 		return q.html
 	}
@@ -155,7 +155,7 @@ func (q *Templates) TmplWithFuncs(fsys fs.FS, tfile string, tmplData map[string]
 }
 
 // Tmpl method for ServerTemplates structure
-func (q *Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
+func (q *Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]any) string {
 	if q.html != "" {
 		return q.html
 	}
@@ -174,7 +174,7 @@ func (q *Templates) Tmpl(fsys fs.FS, tfile string, tmplData map[string]interface
 }
 
 // Tmpl method for ServerTemplates structure
-func (q *Templates) TextTmpl(fsys fs.FS, tfile string, tmplData map[string]interface{}) string {
+func (q *Templates) TextTmpl(fsys fs.FS, tfile string, tmplData map[string]any) string {
 	if q.html != "" {
 		return q.html
 	}
