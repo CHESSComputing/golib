@@ -6,24 +6,19 @@ package utils
 //
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"slices"
 	"sort"
 	"strings"
-
-	constraints "golang.org/x/exp/constraints"
 )
 
 // FindInList helper function to find item in a list
 func FindInList(a string, arr []string) bool {
-	for _, e := range arr {
-		if e == a {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(arr, a)
 }
 
 // InList helper function to check item in a list
@@ -41,7 +36,7 @@ func InList[T ListEntry](a T, list []T) bool {
 }
 
 // MapKeys returns string keys from a map
-func MapKeys(rec map[string]interface{}) []string {
+func MapKeys(rec map[string]any) []string {
 	keys := make([]string, 0, len(rec))
 	for k := range rec {
 		keys = append(keys, k)
@@ -51,7 +46,7 @@ func MapKeys(rec map[string]interface{}) []string {
 }
 
 // MapIntKeys returns int keys from a map
-func MapIntKeys(rec map[int]interface{}) []int {
+func MapIntKeys(rec map[int]any) []int {
 	keys := make([]int, 0, len(rec))
 	for k := range rec {
 		keys = append(keys, k)
@@ -112,7 +107,7 @@ func IsFloat(val string) bool {
 }
 
 // Sum helper function to perform sum operation over provided array of values
-func Sum(data []interface{}) float64 {
+func Sum(data []any) float64 {
 	out := 0.0
 	for _, val := range data {
 		if val != nil {
@@ -134,7 +129,7 @@ func Sum(data []interface{}) float64 {
 }
 
 // Max helper function to perform Max operation over provided array of values
-func Max(data []interface{}) float64 {
+func Max(data []any) float64 {
 	out := 0.0
 	for _, val := range data {
 		if val != nil {
@@ -159,7 +154,7 @@ func Max(data []interface{}) float64 {
 }
 
 // Min helper function to perform Min operation over provided array of values
-func Min(data []interface{}) float64 {
+func Min(data []any) float64 {
 	out := float64(^uint(0) >> 1) // largest int
 	for _, val := range data {
 		if val == nil {
@@ -238,10 +233,8 @@ func Set[T ListEntry](arr []T) []T {
 
 // sortSlice helper function on any ordered generic list
 // https://gosamples.dev/generics-sort-slice/
-func sortSlice[T constraints.Ordered](s []T) {
-	sort.Slice(s, func(i, j int) bool {
-		return s[i] < s[j]
-	})
+func sortSlice[T cmp.Ordered](s []T) {
+	slices.Sort(s)
 }
 
 // OrderedSet implementa ordered set
@@ -282,7 +275,7 @@ func ListFiles(dir string) []string {
 }
 
 // Insert inserts value into array at zero position
-func Insert(arr []interface{}, val interface{}) []interface{} {
+func Insert(arr []any, val any) []any {
 	arr = append(arr, val)
 	copy(arr[1:], arr[0:])
 	arr[0] = val

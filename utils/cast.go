@@ -9,7 +9,7 @@ import (
 )
 
 // CastString function to check and cast interface{} to string data-type
-func CastString(val interface{}) (string, error) {
+func CastString(val any) (string, error) {
 	switch v := val.(type) {
 	case string:
 		return v, nil
@@ -19,7 +19,7 @@ func CastString(val interface{}) (string, error) {
 }
 
 // CastInt function to check and cast interface{} to int data-type
-func CastInt(val interface{}) (int, error) {
+func CastInt(val any) (int, error) {
 	switch v := val.(type) {
 	case int:
 		return v, nil
@@ -31,7 +31,7 @@ func CastInt(val interface{}) (int, error) {
 }
 
 // CastInt64 function to check and cast interface{} to int64 data-type
-func CastInt64(val interface{}) (int64, error) {
+func CastInt64(val any) (int64, error) {
 	switch v := val.(type) {
 	case int:
 		return int64(v), nil
@@ -43,7 +43,7 @@ func CastInt64(val interface{}) (int64, error) {
 }
 
 // CastFloat function to check and cast interface{} to int64 data-type
-func CastFloat(val interface{}) (float64, error) {
+func CastFloat(val any) (float64, error) {
 	switch v := val.(type) {
 	case float64:
 		return v, nil

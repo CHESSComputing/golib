@@ -17,7 +17,7 @@ func ReplaceBinds(stm string) string {
 }
 
 // PrintSQL prints SQL/args
-func PrintSQL(stm string, args []interface{}, msg string) {
+func PrintSQL(stm string, args []any, msg string) {
 	if msg != "" {
 		log.Println(msg)
 	} else {

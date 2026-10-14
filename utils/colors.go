@@ -14,12 +14,12 @@ func ColorURL(rurl string) string {
 }
 
 // Error prints Server error message with given arguments
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	fmt.Println(Color(RED, "Server ERROR"), args)
 }
 
 // Warning prints Server error message with given arguments
-func Warning(args ...interface{}) {
+func Warning(args ...any) {
 	fmt.Println(Color(BROWN, "Server WARNING"), args)
 }
 

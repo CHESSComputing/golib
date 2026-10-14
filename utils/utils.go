@@ -26,16 +26,16 @@ const symbols string = "!@#$%&*+_-="
 
 // RandomString generates random string
 func RandomString() string {
-	var str string
+	var str strings.Builder
 	chars := voc + numbers
-	for i := 0; i < 16; i++ {
-		str += string([]rune(chars)[rand.Intn(len(chars))])
+	for range 16 {
+		str.WriteString(string([]rune(chars)[rand.Intn(len(chars))]))
 	}
-	return str
+	return str.String()
 }
 
 // RecordSize returns actual record size of given interface object
-func RecordSize(v interface{}) (int64, error) {
+func RecordSize(v any) (int64, error) {
 	data, err := json.Marshal(v)
 	if err == nil {
 		return int64(binary.Size(data)), nil
@@ -65,7 +65,7 @@ func ErrPropagate(api string) {
 //	   defer ErrPropagate2Channel(api, ch)
 //	   someFunction()
 //	}()
-func ErrPropagate2Channel(api string, ch chan interface{}) {
+func ErrPropagate2Channel(api string, ch chan any) {
 	if err := recover(); err != nil {
 		log.Println("ERROR", api, "error", err, Stack())
 		ch <- fmt.Sprintf("%s:%s", api, err)
@@ -74,7 +74,7 @@ func ErrPropagate2Channel(api string, ch chan interface{}) {
 
 // GoDeferFunc runs any given function in defered go routine
 func GoDeferFunc(api string, f func()) {
-	ch := make(chan interface{})
+	ch := make(chan any)
 	go func() {
 		defer ErrPropagate2Channel(api, ch)
 		f()
@@ -135,7 +135,7 @@ func FindFiles(root string) []string {
 }
 
 // TimeFormat helper function to convert Unix time into human readable form
-func TimeFormat(ts interface{}) string {
+func TimeFormat(ts any) string {
 	var err error
 	var t int64
 	switch v := ts.(type) {
@@ -160,7 +160,7 @@ func TimeFormat(ts interface{}) string {
 }
 
 // SizeFormat helper function to convert size into human readable form
-func SizeFormat(val interface{}) string {
+func SizeFormat(val any) string {
 	var size float64
 	var err error
 	switch v := val.(type) {
@@ -234,7 +234,7 @@ func Domain() string {
 func PaddedKey(key string, maxLen int) string {
 	if len(key) < maxLen {
 		pad := maxLen - len(key)
-		for i := 0; i < pad; i++ {
+		for range pad {
 			key += " "
 		}
 	}

@@ -13,7 +13,7 @@ func DIDKeys(attrs string) []string {
 	}
 	attrs = strings.Replace(attrs, " ", "", -1)
 	var keys []string
-	for _, k := range strings.Split(attrs, ",") {
+	for k := range strings.SplitSeq(attrs, ",") {
 		if k != "" {
 			keys = append(keys, strings.ToLower(k))
 		}
@@ -87,8 +87,8 @@ func GetSample(did string) string {
 
 // helper function to extract did part
 func GetDidPart(did, part string) string {
-	arr := strings.Split(did, "/")
-	for _, a := range arr {
+	arr := strings.SplitSeq(did, "/")
+	for a := range arr {
 		if strings.HasPrefix(a, part) {
 			val := strings.Replace(a, fmt.Sprintf("%s=", part), "", -1)
 			return val
