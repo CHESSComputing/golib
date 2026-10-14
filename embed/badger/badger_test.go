@@ -24,7 +24,7 @@ func TestUpsertAndGet(t *testing.T) {
 	defer teardownBadgerDB()
 	setupBadgerDB(t)
 
-	records := []map[string]interface{}{
+	records := []map[string]any{
 		{"id": 1, "name": "Alice", "age": 25},
 		{"id": 2, "name": "Bob", "age": 30},
 	}
@@ -34,7 +34,7 @@ func TestUpsertAndGet(t *testing.T) {
 		t.Fatalf("Failed to upsert records: %v", err)
 	}
 
-	results, err := get("users", map[string]interface{}{"name": "Alice"})
+	results, err := get("users", map[string]any{"name": "Alice"})
 	if err != nil {
 		t.Fatalf("Failed to get records: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestUpdate(t *testing.T) {
 	defer teardownBadgerDB()
 	setupBadgerDB(t)
 
-	records := []map[string]interface{}{
+	records := []map[string]any{
 		{"id": 1, "name": "Alice", "age": 25},
 	}
 
@@ -61,12 +61,12 @@ func TestUpdate(t *testing.T) {
 		t.Fatalf("Failed to upsert records: %v", err)
 	}
 
-	err = update("users", map[string]interface{}{"name": "Alice"}, map[string]interface{}{"age": 26})
+	err = update("users", map[string]any{"name": "Alice"}, map[string]any{"age": 26})
 	if err != nil {
 		t.Fatalf("Failed to update records: %v", err)
 	}
 
-	results, err := get("users", map[string]interface{}{"name": "Alice"})
+	results, err := get("users", map[string]any{"name": "Alice"})
 	if err != nil {
 		t.Fatalf("Failed to get records: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestCount(t *testing.T) {
 	defer teardownBadgerDB()
 	setupBadgerDB(t)
 
-	records := []map[string]interface{}{
+	records := []map[string]any{
 		{"id": 1, "name": "Alice", "age": 25},
 		{"id": 2, "name": "Bob", "age": 30},
 	}
@@ -95,7 +95,7 @@ func TestCount(t *testing.T) {
 		t.Fatalf("Failed to upsert records: %v", err)
 	}
 
-	count, err := count("users", map[string]interface{}{})
+	count, err := count("users", map[string]any{})
 	if err != nil {
 		t.Fatalf("Failed to count records: %v", err)
 	}
@@ -109,7 +109,7 @@ func TestRemove(t *testing.T) {
 	defer teardownBadgerDB()
 	setupBadgerDB(t)
 
-	records := []map[string]interface{}{
+	records := []map[string]any{
 		{"id": 1, "name": "Alice", "age": 25},
 	}
 
@@ -118,12 +118,12 @@ func TestRemove(t *testing.T) {
 		t.Fatalf("Failed to upsert records: %v", err)
 	}
 
-	err = remove("users", map[string]interface{}{"name": "Alice"})
+	err = remove("users", map[string]any{"name": "Alice"})
 	if err != nil {
 		t.Fatalf("Failed to remove records: %v", err)
 	}
 
-	results, err := get("users", map[string]interface{}{"name": "Alice"})
+	results, err := get("users", map[string]any{"name": "Alice"})
 	if err != nil {
 		t.Fatalf("Failed to get records: %v", err)
 	}

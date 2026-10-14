@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"maps"
 	"os"
 
 	"github.com/dgraph-io/badger/v4"
@@ -46,7 +47,7 @@ func Upsert(dbname, collname, attr string, records []map[string]any) error {
 	return upsert(collname, records)
 }
 
-func upsert(collname string, records []map[string]interface{}) error {
+func upsert(collname string, records []map[string]any) error {
 	return db.Update(func(txn *badger.Txn) error {
 		for _, record := range records {
 			key := fmt.Sprintf("%s:%v", collname, record["id"])
@@ -97,8 +98,8 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 	}
 	return out
 }
-func get(collname string, spec map[string]interface{}) ([]map[string]interface{}, error) {
-	var results []map[string]interface{}
+func get(collname string, spec map[string]any) ([]map[string]any, error) {
+	var results []map[string]any
 	err := db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = true
@@ -109,7 +110,7 @@ func get(collname string, spec map[string]interface{}) ([]map[string]interface{}
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			err := item.Value(func(val []byte) error {
-				var record map[string]interface{}
+				var record map[string]any
 				err := json.Unmarshal(val, &record)
 				if err != nil {
 					return fmt.Errorf("failed to unmarshal record: %v", err)
@@ -147,7 +148,7 @@ func Update(dbname, collname string, spec, newdata map[string]any) error {
 	}
 	return nil
 }
-func update(collname string, spec map[string]interface{}, newdata map[string]interface{}) error {
+func update(collname string, spec map[string]any, newdata map[string]any) error {
 	return db.Update(func(txn *badger.Txn) error {
 		results, err := get(collname, spec)
 		if err != nil {
@@ -155,9 +156,7 @@ func update(collname string, spec map[string]interface{}, newdata map[string]int
 		}
 
 		for _, record := range results {
-			for k, v := range newdata {
-				record[k] = v
-			}
+			maps.Copy(record, newdata)
 			key := fmt.Sprintf("%s:%v", collname, record["id"])
 			val, err := json.Marshal(record)
 			if err != nil {
@@ -181,7 +180,7 @@ func Count(dbname, collname string, spec map[string]any) int {
 	return nres
 }
 
-func count(collname string, spec map[string]interface{}) (int, error) {
+func count(collname string, spec map[string]any) (int, error) {
 	results, err := get(collname, spec)
 	if err != nil {
 		return 0, fmt.Errorf("[golib.embed.count] get error: %w", err)
@@ -194,7 +193,7 @@ func Remove(dbname, collname string, spec map[string]any) error {
 	return remove(collname, spec)
 }
 
-func remove(collname string, spec map[string]interface{}) error {
+func remove(collname string, spec map[string]any) error {
 	return db.Update(func(txn *badger.Txn) error {
 		results, err := get(collname, spec)
 		if err != nil {
