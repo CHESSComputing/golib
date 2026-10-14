@@ -64,7 +64,7 @@ func ParseQuery(query string) (map[string]any, error) {
 		var vals []string
 		key := arr[0]
 		last := arr[len(arr)-1]
-		for i := 0; i < len(arr); i++ {
+		for i := range arr {
 			if len(arr) > i+1 {
 				vals = strings.Split(arr[i+1], " ")
 				if arr[i+1] == last {
