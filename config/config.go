@@ -460,6 +460,7 @@ type Services struct {
 	MetaDataURL           string `mapstructure:"MetaDataUrl"`
 	MLHubURL              string `mapstructure:"MLHubUrl"`
 	DataHubURL            string `mapstructure:"DataHubUrl"`
+	NexusViewerURL        string `mapstructure:"NexusViewerUrl"`
 	DataManagementURL     string `mapstructure:"DataManagementUrl"`
 	DataBookkeepingURL    string `mapstructure:"DataBookkeepingUrl"`
 	AuthzURL              string `mapstructure:"AuthzUrl"`
