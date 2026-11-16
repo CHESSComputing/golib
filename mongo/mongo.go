@@ -316,6 +316,7 @@ func GetProjection(dbname, collname string, spec map[string]any, projection map[
 		cur, err := c.Find(ctx, spec, opts)
 		if err != nil {
 			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+			return out
 		}
 		cur.All(ctx, &out)
 	} else {
@@ -323,6 +324,7 @@ func GetProjection(dbname, collname string, spec map[string]any, projection map[
 		cur, err := c.Find(ctx, spec, opts)
 		if err != nil {
 			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+			return out
 		}
 		cur.All(ctx, &out)
 	}
@@ -344,6 +346,7 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 		cur, err := c.Find(ctx, spec, opts)
 		if err != nil {
 			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+			return out
 		}
 		cur.All(ctx, &out)
 	} else {
@@ -351,6 +354,7 @@ func Get(dbname, collname string, spec map[string]any, idx, limit int) []map[str
 		cur, err := c.Find(ctx, spec, opts)
 		if err != nil {
 			log.Printf("ERROR: spec=%+v, error=%v", spec, err)
+			return out
 		}
 		cur.All(ctx, &out)
 	}
