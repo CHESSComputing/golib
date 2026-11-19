@@ -24,7 +24,7 @@ func (s *MetaRecord) JsonString() string {
 type ServiceQuery struct {
 	Query      string         `json:"query"`
 	Spec       map[string]any `json:"spec"`
-	Projection map[string]any `json:"projection"`
+	Projection map[string]int `json:"projection"`
 	SQL        string         `json:"sql"`
 	Idx        int            `json:"idx"`
 	Limit      int            `json:"limit"`
