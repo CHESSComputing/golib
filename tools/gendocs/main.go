@@ -32,6 +32,7 @@ import (
 	"go/types"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -65,9 +66,12 @@ type Endpoint struct {
 	Path    string
 	Handler string
 	Doc     string
-	File    string
+	File    string // file where the route is registered
 	Line    int
-	Params  []Param
+	// where the handler function is defined (0 if it could not be resolved)
+	HandlerFile string
+	HandlerLine int
+	Params      []Param
 	Bodies  []Body
 }
 
@@ -81,7 +85,12 @@ type structEntry struct {
 }
 
 var (
-	fset    = token.NewFileSet()
+	fset        = token.NewFileSet()
+	serviceName = "" // set from -service or the base name of -root
+	rootDir     = "" // value of -root
+	repoURL     = "" // e.g. https://github.com/CHESSComputing/ELogService
+	repoRef     = "" // commit SHA or branch used in links
+	repoPrefix  = "" // location of -root inside the git repo ("" unless monorepo)
 	funcs   = map[string][]funcEntry{}
 	structs = map[string]structEntry{}
 )
@@ -97,7 +106,22 @@ func main() {
 	root := flag.String("root", ".", "root directory of the repository")
 	out := flag.String("out", "docs/ENDPOINTS.md", "output markdown file")
 	title := flag.String("title", "API End-points", "document title")
+	svc := flag.String("service", "", "service name (default: base name of -root)")
+	repoFlag := flag.String("repo", "", "repository URL for source links (default: $GITHUB_REPOSITORY or git remote 'origin')")
+	refFlag := flag.String("ref", "", "git ref/commit used in links (default: $GITHUB_SHA or HEAD)")
 	flag.Parse()
+
+	rootDir = *root
+	setupRepo(*repoFlag, *refFlag, *root)
+
+	serviceName = *svc
+	if serviceName == "" {
+		if abs, err := filepath.Abs(*root); err == nil {
+			serviceName = filepath.Base(abs)
+		} else {
+			serviceName = filepath.Base(*root)
+		}
+	}
 
 	files := parseTree(*root)
 	collectDecls(files, *root)
@@ -194,16 +218,15 @@ func collectDecls(files []parsedFile, root string) {
 func findRoutes(pf parsedFile, root string) []Endpoint {
 	var eps []Endpoint
 	dir := filepath.Dir(pf.path)
-	service, _ := filepath.Rel(root, dir)
-	if service == "." || service == "" {
-		service = "(root)"
+	service := serviceName
+	if rel, err := filepath.Rel(root, dir); err == nil && rel != "." && rel != "" {
+		service = serviceName + "/" + filepath.ToSlash(rel) // sub-package inside the service
 	}
-	service = filepath.ToSlash(service)
 
 	add := func(method, path string, handler ast.Expr, pos token.Pos) {
 		ep := Endpoint{Service: service, Method: strings.ToUpper(method), Path: path}
 		p := fset.Position(pos)
-		ep.File, ep.Line = filepath.ToSlash(p.Filename), p.Line
+		ep.File, ep.Line = p.Filename, p.Line
 		analyzeHandler(&ep, handler, dir)
 		eps = append(eps, ep)
 	}
@@ -332,6 +355,8 @@ func analyzeHandler(ep *Endpoint, h ast.Expr, dir string) {
 	switch h := h.(type) {
 	case *ast.FuncLit:
 		ep.Handler = "(inline func)"
+		hp := fset.Position(h.Pos())
+		ep.HandlerFile, ep.HandlerLine = hp.Filename, hp.Line
 		body, ftype = h.Body, h.Type
 	case *ast.Ident:
 		ep.Handler = h.Name
@@ -486,6 +511,8 @@ func lookupFunc(name string, ep *Endpoint, dir string) (*ast.BlockStmt, *ast.Fun
 		}
 	}
 	ep.Doc = docText(pick.decl.Doc)
+	hp := fset.Position(pick.decl.Name.Pos())
+	ep.HandlerFile, ep.HandlerLine = hp.Filename, hp.Line
 	return pick.decl.Body, pick.decl.Type
 }
 
@@ -607,7 +634,7 @@ func render(title string, eps []Endpoint) string {
 	// summary table
 	b.WriteString("## Summary\n\n| Service | Method | Path | Handler |\n|---|---|---|---|\n")
 	for _, ep := range eps {
-		fmt.Fprintf(&b, "| %s | `%s` | `%s` | `%s` |\n", cell(ep.Service), ep.Method, cell(ep.Path), cell(ep.Handler))
+		fmt.Fprintf(&b, "| %s | `%s` | `%s` | %s |\n", cell(ep.Service), ep.Method, cell(ep.Path), cell(handlerMD(ep)))
 	}
 	b.WriteString("\n")
 
@@ -622,7 +649,7 @@ func render(title string, eps []Endpoint) string {
 		if ep.Doc != "" {
 			fmt.Fprintf(&b, "%s\n\n", ep.Doc)
 		}
-		fmt.Fprintf(&b, "- Handler: `%s`\n- Source: `%s:%d`\n\n", ep.Handler, ep.File, ep.Line)
+		fmt.Fprintf(&b, "- Handler: %s\n- Source: %s\n\n", handlerMD(ep), sourceMD(ep))
 
 		if len(ep.Params) > 0 {
 			b.WriteString("**Parameters**\n\n| Name | In |\n|---|---|\n")
@@ -649,4 +676,99 @@ func render(title string, eps []Endpoint) string {
 		}
 	}
 	return b.String()
+}
+
+// ---------- links to the repository ----------
+
+func gitOut(dir string, args ...string) string {
+	out, err := exec.Command("git", append([]string{"-C", dir}, args...)...).Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// normalizeRepoURL turns git@github.com:org/repo.git (and similar) into https://github.com/org/repo
+func normalizeRepoURL(u string) string {
+	u = strings.TrimSuffix(strings.TrimSpace(u), ".git")
+	switch {
+	case strings.HasPrefix(u, "git@"):
+		u = "https://" + strings.Replace(strings.TrimPrefix(u, "git@"), ":", "/", 1)
+	case strings.HasPrefix(u, "ssh://git@"):
+		u = "https://" + strings.TrimPrefix(u, "ssh://git@")
+	case strings.HasPrefix(u, "https://"):
+		if i := strings.Index(u, "@"); i > 0 { // drop credentials
+			u = "https://" + u[i+1:]
+		}
+	}
+	return strings.TrimSuffix(u, "/")
+}
+
+func setupRepo(repoFlag, refFlag, root string) {
+	// repository URL: flag > GitHub Actions env > git remote
+	switch {
+	case repoFlag != "":
+		repoURL = normalizeRepoURL(repoFlag)
+	case os.Getenv("GITHUB_REPOSITORY") != "":
+		server := os.Getenv("GITHUB_SERVER_URL")
+		if server == "" {
+			server = "https://github.com"
+		}
+		repoURL = normalizeRepoURL(server + "/" + os.Getenv("GITHUB_REPOSITORY"))
+	default:
+		if u := gitOut(root, "remote", "get-url", "origin"); u != "" {
+			repoURL = normalizeRepoURL(u)
+		}
+	}
+
+	// ref: flag > GitHub Actions env > current commit > main
+	switch {
+	case refFlag != "":
+		repoRef = refFlag
+	case os.Getenv("GITHUB_SHA") != "":
+		repoRef = os.Getenv("GITHUB_SHA")
+	default:
+		repoRef = gitOut(root, "rev-parse", "HEAD")
+	}
+	if repoRef == "" {
+		repoRef = "main"
+	}
+
+	// path of -root inside the repository (non-empty only for monorepos)
+	repoPrefix = filepath.ToSlash(gitOut(root, "rev-parse", "--show-prefix"))
+
+	if repoURL == "" {
+		fmt.Fprintln(os.Stderr, "gendocs: repository URL not found, links disabled (use -repo)")
+	}
+}
+
+// relPath returns file relative to -root, with forward slashes.
+func relPath(file string) string {
+	if rel, err := filepath.Rel(rootDir, file); err == nil {
+		return filepath.ToSlash(rel)
+	}
+	return filepath.ToSlash(file)
+}
+
+func linkFor(file string, line int) string {
+	if repoURL == "" || file == "" || line == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%s/blob/%s/%s%s#L%d", repoURL, repoRef, repoPrefix, relPath(file), line)
+}
+
+func handlerMD(ep Endpoint) string {
+	txt := "`" + ep.Handler + "`"
+	if u := linkFor(ep.HandlerFile, ep.HandlerLine); u != "" {
+		return "[" + txt + "](" + u + ")"
+	}
+	return txt
+}
+
+func sourceMD(ep Endpoint) string {
+	if u := linkFor(ep.File, ep.Line); u != "" {
+		return "[end-point](" + u + ")"
+	}
+	// no repository URL available: fall back to plain file:line
+	return fmt.Sprintf("`%s:%d`", relPath(ep.File), ep.Line)
 }
