@@ -68,6 +68,11 @@ func (h *HttpRequest) SetToken(token string) {
 
 // GetToken obtains token from OAuth server
 func (h *HttpRequest) GetToken() {
+	h.GetUserToken("")
+}
+
+// GetToken obtains token from OAuth server
+func (h *HttpRequest) GetUserToken(user string) {
 	// we check if we have token or if it is 10 seconds before now to allow to use it across services
 	if h.Token == "" || h.Expires.Before(time.Now().Add(-10*time.Second)) {
 		// make a call to Authz service to obtain access token
@@ -77,6 +82,9 @@ func (h *HttpRequest) GetToken() {
 			srvConfig.Config.Authz.ClientID,
 			srvConfig.Config.Authz.ClientSecret,
 			h.Scope)
+		if user != "" {
+			rurl = fmt.Sprintf("%s&user=%s", rurl, user)
+		}
 		resp, err := h.Get(rurl)
 		if err != nil {
 			log.Println("ERROR", err)
