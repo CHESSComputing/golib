@@ -228,6 +228,39 @@ func (w *WebServer) String() string {
 	return string(data)
 }
 
+// Backend represent configuration for CHESS backend service
+type Backend struct {
+	Endpoint string   `mapstructure:"endpoint"`
+	Url      string   `mapstructure:"url"`
+	Btrs     []string `mapstructure:"btrs"`
+}
+
+// AuthProxyServer stores auth proxy server configuration parameters
+type AuthProxyServer struct {
+	FoxdenUser       `mapstructure:"FoxdenUser"`
+	WebServer        `mapstructure:"WebServer"`
+	MainPageTemplate string `mapstructure:"MainPageTemplate"`
+
+	// OAuth records
+	OAuth []OAuthRecord `mapstructure:"OAuth"` // oauth configurations
+	// Backend records
+	Backends []Backend `mapstructure:"Backends"` // backends configurations
+
+	// captcha parts
+	CaptchaSecretKey string `mapstructure:"CaptchaSecretKey"` // re-captcha secret key
+	CaptchaPublicKey string `mapstructure:"CaptchaPublicKey"` // re-captcha public key
+	CaptchaVerifyUrl string `mapstructure:"CaptchaVerifyUrl"` // re-captcha verify url
+
+	// cookies parts
+	UserCookieExpires int64 `mapstructure:"UserCookieExpires"` // expiration of user cookie
+
+	// other options
+	TestMode        bool   `mapstructure:"TestMode"`    // test mode
+	CheckBtrs       bool   `mapstructure:"CheckBtrs"`   // enable check for CHESS btrs
+	CheckAdmins     bool   `mapstructure:"CheckAdmins"` // enable check for FOXDEN admins
+	DefaultEndPoint string `mapstructure:"DefaultEndPoint"`
+}
+
 // Frontend stores frontend configuration parameters
 type Frontend struct {
 	FoxdenUser `mapstructure:"FoxdenUser"`
@@ -488,6 +521,7 @@ type SrvConfig struct {
 	QL              `mapstructure:"QL"`
 	DID             `mapstructure:"DID"`
 	LDAP            `mapstructure:"LDAP"`
+	AuthProxyServer `mapstructure:"AuthProxyServer"`
 	Frontend        `mapstructure:"Frontend"`
 	Discovery       `mapstructure:"Discovery"`
 	MetaData        `mapstructure:"MetaData"`
